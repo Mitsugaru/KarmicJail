@@ -41,9 +41,25 @@ commands:
   jaillist:
     description: List jailed players.
     usage: |
-           /<command>
+           /<command> [page]
   jlist:
     description: List jailed players. Alias to jaillist.
+    usage: |
+           /<command> [page]
+  jailprev:
+    description: Previous page of list.
+    usage: |
+           /<command>
+  jprev:
+    description: Previous page of list. Alias to jailprev.
+    usage: |
+           /<command>
+  jailnext:
+    description: Next page of list.
+    usage: |
+           /<command>
+  jnext:
+    description: Next page of list. Alias to jailnext.
     usage: |
            /<command>
   jailversion:
