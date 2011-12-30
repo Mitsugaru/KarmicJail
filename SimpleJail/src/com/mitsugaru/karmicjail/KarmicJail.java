@@ -939,6 +939,15 @@ public class KarmicJail extends JavaPlugin {
 		{
 			page.put(sender.getName(), 0);
 		}
+		else
+		{
+			if (pageAdjust != 0)
+			{
+				int adj = page.get(sender.getName()).intValue()
+						+ pageAdjust;
+				page.put(sender.getName(), adj);
+			}
+		}
 		PrisonerInfo[] array = cache.values().toArray(new PrisonerInfo[0]);
 		boolean valid = true;
 		// Caluclate amount of pages
