@@ -11,6 +11,7 @@ package com.mitsugaru.karmicjail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -239,14 +240,33 @@ public class KarmicJail extends JavaPlugin {
 				|| commandLabel.equalsIgnoreCase("jversion"))
 		{
 			// Version
-			sender.sendMessage(ChatColor.BLUE + bar + "=====");
+			sender.sendMessage(ChatColor.BLUE + bar + "==========");
 			sender.sendMessage(ChatColor.GREEN + "KarmicJail v"
 					+ this.getDescription().getVersion());
 			sender.sendMessage(ChatColor.GREEN + "Coded by Mitsugaru");
 			sender.sendMessage(ChatColor.AQUA
 					+ "Fork of imjake9's SimpleJail project");
-			sender.sendMessage(ChatColor.BLUE + "===========" + ChatColor.GRAY
-					+ "Config" + ChatColor.BLUE + "===========");
+			sender.sendMessage(ChatColor.BLUE + "==============" + ChatColor.GRAY
+					+ "Config" + ChatColor.BLUE + "=============");
+			DecimalFormat twoDForm = new DecimalFormat("#.##");
+			sender.sendMessage(ChatColor.BLUE + "Jail: " + ChatColor.GRAY
+					+ jailLoc.getWorld().getName() + ChatColor.BLUE + ":("
+					+ ChatColor.GOLD
+					+ Double.valueOf(twoDForm.format(jailLoc.getX()))
+					+ ChatColor.BLUE + ","
+					+ Double.valueOf(twoDForm.format(jailLoc.getY()))
+					+ ChatColor.BLUE + ","
+					+ Double.valueOf(twoDForm.format(jailLoc.getZ()))
+					+ ChatColor.BLUE + ")");
+			sender.sendMessage(ChatColor.BLUE + "UnJail: " + ChatColor.GRAY
+					+ unjailLoc.getWorld().getName() + ChatColor.BLUE + ":("
+					+ ChatColor.GOLD
+					+ Double.valueOf(twoDForm.format(unjailLoc.getX()))
+					+ ChatColor.BLUE + ","
+					+ Double.valueOf(twoDForm.format(unjailLoc.getY()))
+					+ ChatColor.BLUE + ","
+					+ Double.valueOf(twoDForm.format(unjailLoc.getZ()))
+					+ ChatColor.BLUE + ")");
 			com = true;
 		}
 		else if (commandLabel.equalsIgnoreCase("jaillist")
@@ -659,21 +679,20 @@ public class KarmicJail extends JavaPlugin {
 						+ ChatColor.GOLD + this.getJailer(name) + ChatColor.RED
 						+ " for " + ChatColor.GRAY + reason);
 			int minutes = (int) ((this.getTempJailTime(player) / minutesToTicks));
-			if(player == null)
+			if (player == null)
 			{
 				sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
-					+ this.prettifyMinutes(minutes));
+						+ this.prettifyMinutes(minutes));
 			}
 			else
 			{
-				if(threads.containsKey(name))
+				if (threads.containsKey(name))
 				{
-					minutes = (int) (threads.get(name).remainingTime()/ minutesToTicks);
+					minutes = (int) (threads.get(name).remainingTime() / minutesToTicks);
 					sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
 							+ this.prettifyMinutes(minutes));
 				}
 			}
-
 
 		}
 		else
@@ -691,16 +710,16 @@ public class KarmicJail extends JavaPlugin {
 			int minutes = (int) ((this.getTempJailTime(player) / minutesToTicks));
 			sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
 					+ this.prettifyMinutes(minutes));
-			if(player == null)
+			if (player == null)
 			{
 				sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
-					+ this.prettifyMinutes(minutes));
+						+ this.prettifyMinutes(minutes));
 			}
 			else
 			{
-				if(threads.containsKey(name))
+				if (threads.containsKey(name))
 				{
-					minutes = (int) (threads.get(name).remainingTime()/ minutesToTicks);
+					minutes = (int) (threads.get(name).remainingTime() / minutesToTicks);
 					sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
 							+ this.prettifyMinutes(minutes));
 				}
@@ -903,21 +922,23 @@ public class KarmicJail extends JavaPlugin {
 			{
 				do
 				{
-					String name =  rs.getString("playername");
-					if(!cache.containsKey(name))
+					String name = rs.getString("playername");
+					if (!cache.containsKey(name))
 					{
 						cache.put(
 								name,
-							new PrisonerInfo(name, rs
-									.getString("jailer"), rs.getString("date"),
-									rs.getString("reason"), rs.getLong("time")));
+								new PrisonerInfo(name, rs.getString("jailer"),
+										rs.getString("date"), rs
+												.getString("reason"), rs
+												.getLong("time")));
 					}
 					else
 					{
-						if(threads.containsKey(name))
+						if (threads.containsKey(name))
 						{
-							//Update the time if necessary
-							cache.get(name).updateTime(threads.get(name).remainingTime());
+							// Update the time if necessary
+							cache.get(name).updateTime(
+									threads.get(name).remainingTime());
 						}
 					}
 				}
@@ -943,8 +964,7 @@ public class KarmicJail extends JavaPlugin {
 		{
 			if (pageAdjust != 0)
 			{
-				int adj = page.get(sender.getName()).intValue()
-						+ pageAdjust;
+				int adj = page.get(sender.getName()).intValue() + pageAdjust;
 				page.put(sender.getName(), adj);
 			}
 		}
@@ -992,7 +1012,7 @@ public class KarmicJail extends JavaPlugin {
 				{
 					StringBuilder sb = new StringBuilder();
 					Player player = this.getServer().getPlayer(array[i].name);
-					//Grab player and colorize name if they're online or not
+					// Grab player and colorize name if they're online or not
 					if (player == null)
 					{
 						sb.append(ChatColor.RED + array[i].name
@@ -1003,20 +1023,22 @@ public class KarmicJail extends JavaPlugin {
 						sb.append(ChatColor.GREEN + array[i].name
 								+ ChatColor.GRAY + " - ");
 					}
-					//Grab date
+					// Grab date
 					try
 					{
-						sb.append(ChatColor.GOLD + array[i].date.substring(4, 10)
-							+ ChatColor.GRAY + " - ");
+						sb.append(ChatColor.GOLD
+								+ array[i].date.substring(4, 10)
+								+ ChatColor.GRAY + " - ");
 					}
 					catch (StringIndexOutOfBoundsException e)
 					{
-						//Incorrect format stored, so just give the date as is
-						sb.append(ChatColor.GOLD + array[i].date + ChatColor.GRAY + " - ");
+						// Incorrect format stored, so just give the date as is
+						sb.append(ChatColor.GOLD + array[i].date
+								+ ChatColor.GRAY + " - ");
 					}
-					//Give jailer name
+					// Give jailer name
 					sb.append(ChatColor.AQUA + array[i].jailer);
-					//Grab time if applicable
+					// Grab time if applicable
 					if (array[i].time > 0)
 					{
 						sb.append(ChatColor.GRAY
@@ -1026,7 +1048,7 @@ public class KarmicJail extends JavaPlugin {
 								+ this.prettifyMinutes((int) Math
 										.floor((array[i].time / minutesToTicks) + 0.5f)));
 					}
-					//Grab reason if there was one given
+					// Grab reason if there was one given
 					if (!array[i].reason.equals(""))
 					{
 						sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY
@@ -1301,8 +1323,7 @@ public class KarmicJail extends JavaPlugin {
 			time = t;
 		}
 
-		public void updateTime(long t)
-		{
+		public void updateTime(long t) {
 			time = t;
 		}
 	}
