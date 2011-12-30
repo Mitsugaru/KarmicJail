@@ -983,6 +983,7 @@ public class KarmicJail extends JavaPlugin {
 				{
 					StringBuilder sb = new StringBuilder();
 					Player player = this.getServer().getPlayer(array[i].name);
+					//Grab player and colorize name if they're online or not
 					if (player == null)
 					{
 						sb.append(ChatColor.RED + array[i].name
@@ -993,9 +994,20 @@ public class KarmicJail extends JavaPlugin {
 						sb.append(ChatColor.GREEN + array[i].name
 								+ ChatColor.GRAY + " - ");
 					}
-					sb.append(ChatColor.GOLD + array[i].date.substring(4, 10)
+					//Grab date
+					try
+					{
+						sb.append(ChatColor.GOLD + array[i].date.substring(4, 10)
 							+ ChatColor.GRAY + " - ");
+					}
+					catch (StringIndexOutOfBoundsException e)
+					{
+						//Incorrect format stored, so just give the date as is
+						sb.append(ChatColor.GOLD + array[i].date + ChatColor.GRAY + " - ");
+					}
+					//Give jailer name
 					sb.append(ChatColor.AQUA + array[i].jailer);
+					//Grab time if applicable
 					if (array[i].time > 0)
 					{
 						sb.append(ChatColor.GRAY
@@ -1005,6 +1017,7 @@ public class KarmicJail extends JavaPlugin {
 								+ this.prettifyMinutes((int) Math
 										.floor((array[i].time / minutesToTicks) + 0.5f)));
 					}
+					//Grab reason if there was one given
 					if (!array[i].reason.equals(""))
 					{
 						sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY
