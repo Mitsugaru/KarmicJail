@@ -1,4 +1,13 @@
-package com.imjake9.simplejail;
+/**
+ * Jail plugin custom tailed for the needs of Mine-RP.
+ * Built upon the SimpleJail project, created by imjake9.
+ * https://github.com/imjake9/SimpleJail
+ *
+ * @author imjake9
+ * @author Mitsugaru
+ */
+
+package com.mitsugaru.karmicjail;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,19 +39,25 @@ import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class SimpleJail extends JavaPlugin {
+public class KarmicJail extends JavaPlugin {
 
-	public final Logger log = Logger.getLogger("Minecraft");
-	public static final String prefix = "[SimpleJail]";
+	public static final Logger log = Logger.getLogger("Minecraft");
+	public static final String prefix = "[KarmicJail]";
+	private static final String bar = "======================";
 	private static final long minutesToTicks = 1200;
 	public ConsoleCommandSender console;
 	private Location jailLoc;
 	private Location unjailLoc;
 	private String jailGroup;
-	private SimpleJailPlayerListener listener;
+	private Listener listener;
 	private Permission perm;
 	private SQLite database;
 	private Map<String, JailTask> threads = new HashMap<String, JailTask>();
+	private final Map<String, Integer> page = new HashMap<String, Integer>();
+	private Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
+	private long time;
+	private boolean debugTime;
+	private int limit = 8;
 
 	@Override
 	public void onDisable() {
@@ -84,7 +99,7 @@ public class SimpleJail extends JavaPlugin {
 		this.setupPermissions();
 
 		// Setup listner
-		listener = new SimpleJailPlayerListener(this);
+		listener = new Listener(this);
 		this.getServer()
 				.getPluginManager()
 				.registerEvent(Event.Type.PLAYER_RESPAWN, listener,
@@ -105,12 +120,19 @@ public class SimpleJail extends JavaPlugin {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd,
 			String commandLabel, String[] args) {
-
-		if (commandLabel.equalsIgnoreCase("jail"))
+		boolean com = false;
+		if (debugTime)
 		{
-			if (!perm.has(sender, "SimpleJail.jail"))
+			time = System.nanoTime();
+		}
+		if (commandLabel.equalsIgnoreCase("jail")
+				|| commandLabel.equalsIgnoreCase("j"))
+		{
+			if (!perm.has(sender, "KarmicJail.jail"))
 			{
-				return true;
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.jail");
+				com = true;
 			}
 
 			boolean timed = false;
@@ -126,7 +148,7 @@ public class SimpleJail extends JavaPlugin {
 					{
 						// Attempt to grab time
 						time = Integer.parseInt(args[i]);
-						if(time > 0)
+						if (time > 0)
 						{
 							timed = true;
 						}
@@ -156,52 +178,169 @@ public class SimpleJail extends JavaPlugin {
 			{
 				this.jailPlayer(sender, name, reason, time, timed);
 			}
-			return true;
+			com = true;
 		}
 		else if (commandLabel.equalsIgnoreCase("unjail") && args.length == 1)
 		{
-			if (!perm.has(sender, "SimpleJail.unjail"))
-				return true;
-			this.unjailPlayer(sender, args);
-			return true;
+			if (!perm.has(sender, "KarmicJail.unjail"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.unjail");
+			}
+			else
+			{
+				this.unjailPlayer(sender, args);
+			}
+			com = true;
 		}
 		else if (commandLabel.equalsIgnoreCase("setjail")
 				&& (args.length == 0 || args.length == 4))
 		{
-			if (!perm.has(sender, "SimpleJail.setjail"))
-				return true;
-			this.setJail(sender, args);
-			return true;
+			if (!perm.has(sender, "KarmicJail.setjail"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.setjail");
+			}
+			else
+			{
+				this.setJail(sender, args);
+			}
+			com = true;
 		}
 		else if (commandLabel.equalsIgnoreCase("setunjail")
 				&& (args.length == 0 || args.length == 4))
 		{
-			if (!perm.has(sender, "SimpleJail.setjail"))
-				return true;
-			this.setUnjail(sender, args);
-			return true;
+			if (!perm.has(sender, "KarmicJail.setjail"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.setjail");
+			}
+			else
+			{
+				this.setUnjail(sender, args);
+			}
+			com = true;
 		}
-		else if (commandLabel.equalsIgnoreCase("jailstatus")
-				&& args.length <= 1)
+		else if ((commandLabel.equalsIgnoreCase("jailstatus") || commandLabel
+				.equalsIgnoreCase("jstatus")) && args.length <= 1)
 		{
-			if (!perm.has(sender, "SimpleJail.jailstatus"))
-				return true;
-			this.jailTime(sender, args);
-			return true;
+			if (!perm.has(sender, "KarmicJail.jailstatus"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.jailstatus");
+			}
+			else
+			{
+				this.jailStatus(sender, args);
+			}
+			com = true;
+		}
+		else if (commandLabel.equalsIgnoreCase("jailversion")
+				|| commandLabel.equalsIgnoreCase("jversion"))
+		{
+			// Version
+			sender.sendMessage(ChatColor.BLUE + bar + "=====");
+			sender.sendMessage(ChatColor.GREEN + "KarmicJail v"
+					+ this.getDescription().getVersion());
+			sender.sendMessage(ChatColor.GREEN + "Coded by Mitsugaru");
+			sender.sendMessage(ChatColor.AQUA
+					+ "Fork of imjake9's SimpleJail project");
+			sender.sendMessage(ChatColor.BLUE + "===========" + ChatColor.GRAY
+					+ "Config" + ChatColor.BLUE + "===========");
+			com = true;
+		}
+		else if (commandLabel.equalsIgnoreCase("jaillist")
+				|| commandLabel.equalsIgnoreCase("jlist"))
+		{
+			if (!perm.has(sender, "KarmicJail.list"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.list");
+			}
+			else
+			{
+				// list jailed people
+				if (args.length > 0)
+				{
+					// If they provided a page number
+					try
+					{
+						// Attempt to parse argument for page number
+						int pageNum = Integer.parseInt(args[0]);
+						// Set current page to given number
+						page.put(sender.getName(), pageNum - 1);
+						// Show page if possible
+						this.listJailed(sender, 0);
+					}
+					catch (NumberFormatException e)
+					{
+						sender.sendMessage(ChatColor.YELLOW + prefix
+								+ " Invalid integer for page number");
+					}
+				}
+				else
+				{
+					// List with current page
+					this.listJailed(sender, 0);
+				}
+			}
+			com = true;
+		}
+		else if (commandLabel.equals("jprev"))
+		{
+			if (!perm.has(sender, "KarmicJail.list"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.list");
+			}
+			else
+			{
+				// List, with previous page
+				this.listJailed(sender, -1);
+			}
+			com = true;
+		}
+		// Next page of item pool
+		else if (commandLabel.equals("jnext"))
+		{
+			if (!perm.has(sender, "KarmicJail.list"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.list");
+			}
+			else
+			{
+				// List with next page
+				this.listJailed(sender, 1);
+			}
+			com = true;
 		}
 		else
 		{
 			if (!perm.has(sender, "SimpleJail.jail"))
-				return true;
+				com = true;
 			if (!perm.has(sender, "SimpleJail.unjail"))
-				return true;
+				com = true;
 			if (!perm.has(sender, "SimpleJail.setjail"))
-				return true;
+				com = true;
 			if (!perm.has(sender, "SimpleJail.jailstatus"))
-				return true;
-			return false;
+				com = true;
 		}
 
+		if (com)
+		{
+			if (debugTime)
+			{
+				this.debugTime(sender, time);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private void debugTime(CommandSender sender, long time) {
+		time = System.nanoTime() - time;
+		sender.sendMessage("[Debug]" + prefix + "Process time: " + time);
 	}
 
 	public void jailPlayer(CommandSender sender, String name, String reason,
@@ -254,11 +393,14 @@ public class SimpleJail extends JavaPlugin {
 						+ this.prettifyMinutes(minutes));
 			}
 		}
+		String date = new Date().toString();
 		database.standardQuery("UPDATE jailed SET jailer='" + sender.getName()
-				+ "',date='" + new Date().toString() + "',reason='" + reason
-				+ "' WHERE playername='"+name+"';");
+				+ "',date='" + date + "',reason='" + reason
+				+ "' WHERE playername='" + name + "';");
 		sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 				+ " sent to jail.");
+		cache.put(name, new PrisonerInfo(name, sender.getName(), date, reason,
+				duration));
 	}
 
 	private void savePlayerGroups(String name) {
@@ -301,8 +443,10 @@ public class SimpleJail extends JavaPlugin {
 		// Return previous groups
 		this.returnGroups(name);
 
-		//Clear other columns
-		database.standardQuery("UPDATE jailed SET time='',jailer='',date='',reason='' WHERE playername='"+name+"';");
+		// Clear other columns
+		database.standardQuery("UPDATE jailed SET time='',jailer='',date='',reason='' WHERE playername='"
+				+ name + "';");
+		cache.remove(name);
 		// Check if player is offline:
 		if (player == null)
 		{
@@ -316,8 +460,8 @@ public class SimpleJail extends JavaPlugin {
 		player.teleport(unjailLoc);
 		this.setPlayerStatus(JailStatus.FREED, name);
 
-		//Remove task
-		if(threads.containsKey(name))
+		// Remove task
+		if (threads.containsKey(name))
 		{
 			int id = threads.get(name).getId();
 			if (id != -1)
@@ -331,7 +475,8 @@ public class SimpleJail extends JavaPlugin {
 			sender.sendMessage(ChatColor.AQUA + player.getName()
 					+ " auto-unjailed.");
 		else
-			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA + " removed from jail.");
+			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
+					+ " removed from jail.");
 	}
 
 	public void returnGroups(String name) {
@@ -435,7 +580,7 @@ public class SimpleJail extends JavaPlugin {
 		sender.sendMessage(ChatColor.AQUA + "Unjail point saved.");
 	}
 
-	public void jailTime(CommandSender sender, String[] args) {
+	public void jailStatus(CommandSender sender, String[] args) {
 		if (!(sender instanceof Player) && args.length == 0)
 		{
 			sender.sendMessage(ChatColor.RED + "Must specify a player.");
@@ -469,14 +614,18 @@ public class SimpleJail extends JavaPlugin {
 				if (!reason.equals(""))
 				{
 					if (args.length == 0)
-						sender.sendMessage(ChatColor.RED + "Jailed on " + ChatColor.GREEN
-								+ this.getJailDate(name) + ChatColor.RED + " by "
-								+ ChatColor.GOLD + this.getJailer(name) + ChatColor.RED +" for " + ChatColor.GRAY + reason);
+						sender.sendMessage(ChatColor.RED + "Jailed on "
+								+ ChatColor.GREEN + this.getJailDate(name)
+								+ ChatColor.RED + " by " + ChatColor.GOLD
+								+ this.getJailer(name) + ChatColor.RED
+								+ " for " + ChatColor.GRAY + reason);
 					else
 						sender.sendMessage(ChatColor.AQUA + name
-								+ ChatColor.RED + " was jailed on " + ChatColor.GREEN
-								+ this.getJailDate(name) + ChatColor.RED + " by "
-								+ ChatColor.GOLD + this.getJailer(name)+ ChatColor.RED +" for " + ChatColor.GRAY + reason);
+								+ ChatColor.RED + " was jailed on "
+								+ ChatColor.GREEN + this.getJailDate(name)
+								+ ChatColor.RED + " by " + ChatColor.GOLD
+								+ this.getJailer(name) + ChatColor.RED
+								+ " for " + ChatColor.GRAY + reason);
 				}
 				else
 				{
@@ -498,24 +647,42 @@ public class SimpleJail extends JavaPlugin {
 		if (!reason.equals(""))
 		{
 			if (args.length == 0)
-				sender.sendMessage(ChatColor.RED + "Jailed on " + ChatColor.GREEN
-						+ this.getJailDate(name) + ChatColor.RED + " by "
-						+ ChatColor.GOLD + this.getJailer(name)+ ChatColor.RED +" for " + ChatColor.GRAY + reason);
+				sender.sendMessage(ChatColor.RED + "Jailed on "
+						+ ChatColor.GREEN + this.getJailDate(name)
+						+ ChatColor.RED + " by " + ChatColor.GOLD
+						+ this.getJailer(name) + ChatColor.RED + " for "
+						+ ChatColor.GRAY + reason);
 			else
 				sender.sendMessage(ChatColor.AQUA + name + ChatColor.RED
 						+ " is jailed on" + ChatColor.GREEN
 						+ this.getJailDate(name) + ChatColor.RED + " by "
-						+ ChatColor.GOLD + this.getJailer(name)+ ChatColor.RED +" for " + ChatColor.GRAY + reason);
+						+ ChatColor.GOLD + this.getJailer(name) + ChatColor.RED
+						+ " for " + ChatColor.GRAY + reason);
 			int minutes = (int) ((this.getTempJailTime(player) / minutesToTicks));
-			sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
+			if(player == null)
+			{
+				sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
 					+ this.prettifyMinutes(minutes));
+			}
+			else
+			{
+				if(threads.containsKey(name))
+				{
+					minutes = (int) (threads.get(name).remainingTime()/ minutesToTicks);
+					sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
+							+ this.prettifyMinutes(minutes));
+				}
+			}
+
+
 		}
 		else
 		{
 			if (args.length == 0)
-				sender.sendMessage(ChatColor.RED + "Jailed on " + ChatColor.GREEN
-						+ this.getJailDate(name) + ChatColor.RED + " by "
-						+ ChatColor.GOLD + this.getJailer(name));
+				sender.sendMessage(ChatColor.RED + "Jailed on "
+						+ ChatColor.GREEN + this.getJailDate(name)
+						+ ChatColor.RED + " by " + ChatColor.GOLD
+						+ this.getJailer(name));
 			else
 				sender.sendMessage(ChatColor.AQUA + name + ChatColor.RED
 						+ " is jailed on" + ChatColor.GREEN
@@ -524,6 +691,20 @@ public class SimpleJail extends JavaPlugin {
 			int minutes = (int) ((this.getTempJailTime(player) / minutesToTicks));
 			sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
 					+ this.prettifyMinutes(minutes));
+			if(player == null)
+			{
+				sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
+					+ this.prettifyMinutes(minutes));
+			}
+			else
+			{
+				if(threads.containsKey(name))
+				{
+					minutes = (int) (threads.get(name).remainingTime()/ minutesToTicks);
+					sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
+							+ this.prettifyMinutes(minutes));
+				}
+			}
 		}
 	}
 
@@ -564,10 +745,12 @@ public class SimpleJail extends JavaPlugin {
 						.get(0).getName())), config.getInt("unjail.x", 0),
 				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
 		jailGroup = config.getString("jailgroup", "Jailed");
+		debugTime = config.getBoolean("debugTime", false);
 
 	}
 
 	private void setupPermissions() {
+		// Make vault optional
 		RegisteredServiceProvider<Permission> permissionProvider = this
 				.getServer()
 				.getServicesManager()
@@ -633,8 +816,7 @@ public class SimpleJail extends JavaPlugin {
 		return date;
 	}
 
-	public boolean playerIsPendingJail(String player)
-	{
+	public boolean playerIsPendingJail(String player) {
 		boolean jailed = false;
 		try
 		{
@@ -644,7 +826,7 @@ public class SimpleJail extends JavaPlugin {
 			if (rs.next())
 			{
 				final String status = rs.getString("status");
-				if (status.equals(""+JailStatus.PENDINGJAIL))
+				if (status.equals("" + JailStatus.PENDINGJAIL))
 				{
 					jailed = true;
 				}
@@ -669,7 +851,7 @@ public class SimpleJail extends JavaPlugin {
 			if (rs.next())
 			{
 				final String status = rs.getString("status");
-				if (status.equals(""+JailStatus.JAILED))
+				if (status.equals("" + JailStatus.JAILED))
 				{
 					jailed = true;
 				}
@@ -707,6 +889,135 @@ public class SimpleJail extends JavaPlugin {
 			return true;
 		}
 		return false;
+	}
+
+	private void listJailed(CommandSender sender, int pageAdjust) {
+		// Update cache of jailed players
+		try
+		{
+			ResultSet rs = database
+					.select("SELECT * FROM jailed WHERE status='"
+							+ JailStatus.JAILED + "' OR status='"
+							+ JailStatus.PENDINGJAIL + "';");
+			if (rs.next())
+			{
+				do
+				{
+					String name =  rs.getString("playername");
+					if(!cache.containsKey(name))
+					{
+						cache.put(
+								name,
+							new PrisonerInfo(name, rs
+									.getString("jailer"), rs.getString("date"),
+									rs.getString("reason"), rs.getLong("time")));
+					}
+					else
+					{
+						if(threads.containsKey(name))
+						{
+							//Update the time if necessary
+							cache.get(name).updateTime(threads.get(name).remainingTime());
+						}
+					}
+				}
+				while (rs.next());
+			}
+			rs.close();
+		}
+		catch (SQLException e)
+		{
+			log.warning(prefix + " SQL Exception");
+			e.printStackTrace();
+		}
+		if (cache.isEmpty())
+		{
+			sender.sendMessage(ChatColor.RED + prefix + " No jailed players");
+			return;
+		}
+		if (!page.containsKey(sender.getName()))
+		{
+			page.put(sender.getName(), 0);
+		}
+		PrisonerInfo[] array = cache.values().toArray(new PrisonerInfo[0]);
+		boolean valid = true;
+		// Caluclate amount of pages
+		int num = array.length / 8;
+		double rem = (double) array.length % (double) limit;
+		if (rem != 0)
+		{
+			num++;
+		}
+		if (page.get(sender.getName()).intValue() < 0)
+		{
+			// They tried to use /ks prev when they're on page 0
+			sender.sendMessage(ChatColor.YELLOW + prefix
+					+ " Page does not exist");
+			// reset their current page back to 0
+			page.put(sender.getName(), 0);
+			valid = false;
+		}
+		else if ((page.get(sender.getName()).intValue()) * limit > array.length)
+		{
+			// They tried to use /ks next at the end of the list
+			sender.sendMessage(ChatColor.YELLOW + prefix
+					+ " Page does not exist");
+			// Revert to last page
+			page.put(sender.getName(), num - 1);
+			valid = false;
+		}
+		if (valid)
+		{
+			// Header with amount of pages
+			sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.GRAY
+					+ "Jailed" + ChatColor.BLUE + "===" + ChatColor.GRAY
+					+ "Page: " + ((page.get(sender.getName()).intValue()) + 1)
+					+ ChatColor.BLUE + " of " + ChatColor.GRAY + num
+					+ ChatColor.BLUE + "===");
+			// list
+			for (int i = ((page.get(sender.getName()).intValue()) * limit); i < ((page
+					.get(sender.getName()).intValue()) * limit) + limit; i++)
+			{
+				// Don't try to pull something beyond the bounds
+				if (i < array.length)
+				{
+					StringBuilder sb = new StringBuilder();
+					Player player = this.getServer().getPlayer(array[i].name);
+					if (player == null)
+					{
+						sb.append(ChatColor.RED + array[i].name
+								+ ChatColor.GRAY + " - ");
+					}
+					else
+					{
+						sb.append(ChatColor.GREEN + array[i].name
+								+ ChatColor.GRAY + " - ");
+					}
+					sb.append(ChatColor.GOLD + array[i].date.substring(4, 10)
+							+ ChatColor.GRAY + " - ");
+					sb.append(ChatColor.AQUA + array[i].jailer);
+					if (array[i].time > 0)
+					{
+						sb.append(ChatColor.GRAY
+								+ " - "
+								+ ChatColor.BLUE
+								+ ""
+								+ this.prettifyMinutes((int) Math
+										.floor((array[i].time / minutesToTicks) + 0.5f)));
+					}
+					if (!array[i].reason.equals(""))
+					{
+						sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY
+								+ array[i].reason);
+					}
+					sender.sendMessage(sb.toString());
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
 	}
 
 	public long getTempJailTime(Player player) {
@@ -774,15 +1085,15 @@ public class SimpleJail extends JavaPlugin {
 		}
 		if (found)
 		{
-			if (status.equals(""+JailStatus.JAILED))
+			if (status.equals("" + JailStatus.JAILED))
 			{
-				status =  "" +JailStatus.JAILED;
+				status = "" + JailStatus.JAILED;
 			}
-			else if (status.equals(""+JailStatus.PENDINGFREE))
+			else if (status.equals("" + JailStatus.PENDINGFREE))
 			{
-				status = ""+ JailStatus.PENDINGFREE;
+				status = "" + JailStatus.PENDINGFREE;
 			}
-			else if (status.equals(""+JailStatus.PENDINGJAIL))
+			else if (status.equals("" + JailStatus.PENDINGJAIL))
 			{
 				status = "" + JailStatus.PENDINGJAIL;
 			}
@@ -834,8 +1145,7 @@ public class SimpleJail extends JavaPlugin {
 		return h + "h" + m + "m";
 	}
 
-	public long getPlayerTime(String name)
-	{
+	public long getPlayerTime(String name) {
 		long time = 0;
 		try
 		{
@@ -916,8 +1226,7 @@ public class SimpleJail extends JavaPlugin {
 		}
 	}
 
-	public void addThread(String name)
-	{
+	public void addThread(String name) {
 		threads.put(name, new JailTask(this, name, this.getPlayerTime(name)));
 	}
 
@@ -957,4 +1266,23 @@ public class SimpleJail extends JavaPlugin {
 	public enum JailStatus {
 		JAILED, PENDINGJAIL, PENDINGFREE, FREED;
 	}
+
+	public class PrisonerInfo {
+		public String name, jailer, date, reason;
+		public long time;
+
+		public PrisonerInfo(String n, String j, String d, String r, long t) {
+			name = n;
+			jailer = j;
+			date = d;
+			reason = r;
+			time = t;
+		}
+
+		public void updateTime(long t)
+		{
+			time = t;
+		}
+	}
+
 }

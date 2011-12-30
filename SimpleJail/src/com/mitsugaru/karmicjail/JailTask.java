@@ -1,8 +1,8 @@
-package com.imjake9.simplejail;
+package com.mitsugaru.karmicjail;
 
 public class JailTask implements Runnable {
-	private SimpleJail sj;
-	private long start = System.nanoTime();
+	private KarmicJail sj;
+	private long start;
 	private long duration;
 	private String name;
 	private int id;
@@ -12,11 +12,12 @@ public class JailTask implements Runnable {
 		duration = 0;
 	}
 
-	public JailTask(SimpleJail plugin, String playerName, long time)
+	public JailTask(KarmicJail plugin, String playerName, long time)
 	{
 		sj = plugin;
 		name = playerName;
-		duration = time;
+		duration = (long) Math.floor(time + 0.5f);
+		start = System.nanoTime();
 		id = sj.getServer().getScheduler().scheduleSyncDelayedTask(sj, this, duration);
 	}
 
@@ -31,6 +32,11 @@ public class JailTask implements Runnable {
 		return name;
 	}
 
+	public long remainingTime()
+	{
+		return (duration - (long) Math.floor(((System.nanoTime() - start) * 0.000000001) + 0.5f));
+	}
+
 	public void stop()
 	{
 		if(id != -1)
@@ -39,7 +45,7 @@ public class JailTask implements Runnable {
 			sj.getServer().getScheduler().cancelTask(id);
 		}
 		long early = System.nanoTime() - start;
-		duration -= early;
+		duration -= (long) Math.floor((early * 0.000000001) + 0.5f);
 		sj.updatePlayerTime(name, duration);
 		sj.removeTask(name);
 	}

@@ -1,6 +1,14 @@
-package com.imjake9.simplejail;
+/**
+ * Player listener.
+ * Built upon the SimpleJail project, created by imjake9.
+ * https://github.com/imjake9/SimpleJail
+ *
+ * @author imjake9
+ * @author Mitsugaru
+ */
+package com.mitsugaru.karmicjail;
 
-import com.imjake9.simplejail.SimpleJail.JailStatus;
+import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -8,12 +16,12 @@ import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
-public class SimpleJailPlayerListener extends PlayerListener {
+public class Listener extends PlayerListener {
 	//Class variables
-    private SimpleJail plugin;
+    private KarmicJail plugin;
     private static final long minutesToTicks = 1200;
 
-    public SimpleJailPlayerListener(SimpleJail plugin) {
+    public Listener(KarmicJail plugin) {
         this.plugin = plugin;
     }
 
