@@ -175,6 +175,13 @@ public class KarmicJail extends JavaPlugin {
 					reason += args[i];
 				}
 			}
+			if(players.isEmpty())
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Missing paramters");
+				sender.sendMessage(ChatColor.RED
+						+ "/j <player> [player2] ... [time] [reason]");
+			}
 			for (String name : players)
 			{
 				this.jailPlayer(sender, name, reason, time, timed);
@@ -249,22 +256,22 @@ public class KarmicJail extends JavaPlugin {
 			sender.sendMessage(ChatColor.BLUE + "==============" + ChatColor.GRAY
 					+ "Config" + ChatColor.BLUE + "=============");
 			DecimalFormat twoDForm = new DecimalFormat("#.##");
-			sender.sendMessage(ChatColor.BLUE + "Jail: " + ChatColor.GRAY
+			sender.sendMessage(ChatColor.LIGHT_PURPLE + "Jail: " + ChatColor.GRAY
 					+ jailLoc.getWorld().getName() + ChatColor.BLUE + ":("
 					+ ChatColor.GOLD
 					+ Double.valueOf(twoDForm.format(jailLoc.getX()))
-					+ ChatColor.BLUE + ","
+					+ ChatColor.BLUE + ","+ ChatColor.GOLD
 					+ Double.valueOf(twoDForm.format(jailLoc.getY()))
-					+ ChatColor.BLUE + ","
+					+ ChatColor.BLUE + ","+ ChatColor.GOLD
 					+ Double.valueOf(twoDForm.format(jailLoc.getZ()))
 					+ ChatColor.BLUE + ")");
-			sender.sendMessage(ChatColor.BLUE + "UnJail: " + ChatColor.GRAY
+			sender.sendMessage(ChatColor.LIGHT_PURPLE + "UnJail: " + ChatColor.GRAY
 					+ unjailLoc.getWorld().getName() + ChatColor.BLUE + ":("
 					+ ChatColor.GOLD
 					+ Double.valueOf(twoDForm.format(unjailLoc.getX()))
-					+ ChatColor.BLUE + ","
+					+ ChatColor.BLUE + ","+ ChatColor.GOLD
 					+ Double.valueOf(twoDForm.format(unjailLoc.getY()))
-					+ ChatColor.BLUE + ","
+					+ ChatColor.BLUE + ","+ ChatColor.GOLD
 					+ Double.valueOf(twoDForm.format(unjailLoc.getZ()))
 					+ ChatColor.BLUE + ")");
 			com = true;
@@ -372,6 +379,15 @@ public class KarmicJail extends JavaPlugin {
 					+ "That player is already in jail!");
 			return;
 		}
+
+		if(!playerInDatabase(name))
+		{
+			sender.sendMessage(ChatColor.YELLOW
+					+ " Player has never been on server! Adding to database...");
+			//Player has never been on server, adding to list
+			addPlayerToDatabase(name);
+		}
+
 		// Save groups
 		this.savePlayerGroups(name);
 		// Remove all other groups
@@ -1239,6 +1255,30 @@ public class KarmicJail extends JavaPlugin {
 		{
 			threads.get(name).stop();
 		}
+	}
+
+	public boolean playerInDatabase(String name)
+	{
+		boolean has = false;
+		try
+		{
+			ResultSet rs = database
+					.select("SELECT COUNT(*) FROM jailed WHERE playername='"
+							+ name + "';");
+			if (rs.next())
+			{
+				if (rs.getInt(1) != 0)
+				{
+					has = true;
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			log.warning(prefix + " SQL Exception");
+			e.printStackTrace();
+		}
+		return has;
 	}
 
 	public void addPlayerToDatabase(String name) {
