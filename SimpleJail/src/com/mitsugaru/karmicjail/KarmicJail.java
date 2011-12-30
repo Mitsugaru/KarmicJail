@@ -58,7 +58,7 @@ public class KarmicJail extends JavaPlugin {
 	private Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
 	private long time;
 	private boolean debugTime;
-	private int limit = 8;
+	private int limit;
 
 	@Override
 	public void onDisable() {
@@ -172,8 +172,13 @@ public class KarmicJail extends JavaPlugin {
 				else
 				{
 					// attempt to grab reason if it exists
-					reason += args[i];
+					reason += args[i] + " ";
 				}
+			}
+			if(!reason.equals(""))
+			{
+				//Remove all trailing whitespace
+				reason = reason.replaceAll("\\s+$", "");
 			}
 			if(players.isEmpty())
 			{
@@ -455,17 +460,19 @@ public class KarmicJail extends JavaPlugin {
 			// Move to jail
 			player.teleport(jailLoc);
 			this.setPlayerStatus(JailStatus.JAILED, name);
-			if (!timed)
+			if (reason.equals(""))
 			{
 				player.sendMessage(ChatColor.RED + "Jailed by "
-						+ ChatColor.AQUA + sender.getName() + ChatColor.RED
-						+ " for: " + ChatColor.GRAY + reason);
+						+ ChatColor.AQUA + sender.getName() + ChatColor.RED);
 			}
 			else
 			{
 				player.sendMessage(ChatColor.RED + "Jailed by "
 						+ ChatColor.AQUA + sender.getName() + ChatColor.RED
-						+ " for: " + ChatColor.GRAY + reason);
+						+ " for: " + ChatColor.GRAY + this.colorizeText(reason));
+			}
+			if(timed)
+			{
 				player.sendMessage(ChatColor.AQUA + "Time in jail: "
 						+ this.prettifyMinutes(minutes));
 			}
@@ -695,14 +702,14 @@ public class KarmicJail extends JavaPlugin {
 								+ ChatColor.GREEN + this.getJailDate(name)
 								+ ChatColor.RED + " by " + ChatColor.GOLD
 								+ this.getJailer(name) + ChatColor.RED
-								+ " for " + ChatColor.GRAY + reason);
+								+ " for " + ChatColor.GRAY + this.colorizeText(reason));
 					else
 						sender.sendMessage(ChatColor.AQUA + name
 								+ ChatColor.RED + " was jailed on "
 								+ ChatColor.GREEN + this.getJailDate(name)
 								+ ChatColor.RED + " by " + ChatColor.GOLD
 								+ this.getJailer(name) + ChatColor.RED
-								+ " for " + ChatColor.GRAY + reason);
+								+ " for " + ChatColor.GRAY + this.colorizeText(reason));
 				}
 				else
 				{
@@ -728,13 +735,13 @@ public class KarmicJail extends JavaPlugin {
 						+ ChatColor.GREEN + this.getJailDate(name)
 						+ ChatColor.RED + " by " + ChatColor.GOLD
 						+ this.getJailer(name) + ChatColor.RED + " for "
-						+ ChatColor.GRAY + reason);
+						+ ChatColor.GRAY + this.colorizeText(reason));
 			else
 				sender.sendMessage(ChatColor.AQUA + name + ChatColor.RED
 						+ " is jailed on" + ChatColor.GREEN
 						+ this.getJailDate(name) + ChatColor.RED + " by "
 						+ ChatColor.GOLD + this.getJailer(name) + ChatColor.RED
-						+ " for " + ChatColor.GRAY + reason);
+						+ " for " + ChatColor.GRAY + this.colorizeText(reason));
 			int minutes = (int) ((this.getTempJailTime(player) / minutesToTicks));
 			if (player == null)
 			{
@@ -799,6 +806,7 @@ public class KarmicJail extends JavaPlugin {
 		defaults.put("unjail.x", 0);
 		defaults.put("unjail.y", 0);
 		defaults.put("unjail.z", 0);
+		defaults.put("entrylimit", 10);
 
 		// Insert defaults into config file if they're not present
 		for (final Entry<String, Object> e : defaults.entrySet())
@@ -822,7 +830,13 @@ public class KarmicJail extends JavaPlugin {
 				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
 		jailGroup = config.getString("jailgroup", "Jailed");
 		debugTime = config.getBoolean("debugTime", false);
-
+		limit = config.getInt("entrylimit", 10);
+		if(limit <= 0 || limit > 16)
+		{
+			KarmicJail.log.warning(prefix + " Entry limit is <= 0 || > 16. Reverting to default: 10");
+			limit = 10;
+			config.set("entrylimit", 10);
+		}
 	}
 
 	private void setupPermissions() {
@@ -1109,7 +1123,7 @@ public class KarmicJail extends JavaPlugin {
 					if (!array[i].reason.equals(""))
 					{
 						sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY
-								+ array[i].reason);
+								+ this.colorizeText(array[i].reason));
 					}
 					sender.sendMessage(sb.toString());
 				}
@@ -1388,6 +1402,19 @@ public class KarmicJail extends JavaPlugin {
 		}
 		return Name;
 	}
+
+	/**
+     * Colorizes a given string to Bukkit standards
+     * @param string
+     * @return String with appropriate Bukkit ChatColor in them
+     * @author Coryf88
+     */
+    public String colorizeText(String string) {
+        for (ChatColor color : ChatColor.values()) {
+            string = string.replace(String.format("&%x", color.getCode()), color.toString());
+        }
+        return string;
+    }
 
 	public enum JailStatus {
 		JAILED, PENDINGJAIL, PENDINGFREE, FREED;
