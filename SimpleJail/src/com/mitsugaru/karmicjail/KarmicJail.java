@@ -276,6 +276,47 @@ public class KarmicJail extends JavaPlugin {
 					+ ChatColor.BLUE + ")");
 			com = true;
 		}
+		else if (commandLabel.equalsIgnoreCase("jailhelp")
+				|| commandLabel.equalsIgnoreCase("jhelp"))
+		{
+			sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN
+					+ "KarmicJail" + ChatColor.BLUE + "=====");
+			if (perm.has(sender, "KarmicJail.jail"))
+			{
+				sender.sendMessage(ChatColor.GREEN + "/jail " + ChatColor.AQUA + "<player> " + ChatColor.LIGHT_PURPLE + "[player2]... [time] [reason]" + ChatColor.YELLOW
+						+ " : Jails player(s)");
+				sender.sendMessage(ChatColor.YELLOW + "Note - Names auto-complete if player is online. Alias: /j");
+			}
+			if (perm.has(sender, "KarmicJail.unjail"))
+			{
+				sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
+						+ " : Unjail player");
+			}
+			if (perm.has(sender, "KarmicJail.list"))
+			{
+				sender.sendMessage(ChatColor.GREEN + "/jaillist" + ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
+						+ " : List jailed players. Alias: /jlist");
+				sender.sendMessage(ChatColor.GREEN + "/jailprev" + ChatColor.YELLOW
+						+ " : Previous page. Alias: /jprev");
+				sender.sendMessage(ChatColor.GREEN + "/jailnext" + ChatColor.YELLOW
+						+ " : Next page. Alias: /jnext");
+			}
+			if (perm.has(sender, "KarmicJail.setjail"))
+			{
+				sender.sendMessage(ChatColor.GREEN + "/setjail" + ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]" + ChatColor.YELLOW
+						+ " : Set jail teleport to current pos or given pos");
+				sender.sendMessage(ChatColor.GREEN + "/setunjail" + ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]" + ChatColor.YELLOW
+						+ " : Set unjail teleport to current pos or given pos");
+			}
+			if (perm.has(sender, "KarmicJail.jailstatus"))
+			{
+				sender.sendMessage(ChatColor.GREEN + "/jailstatus" + ChatColor.LIGHT_PURPLE + " [player]" + ChatColor.YELLOW
+						+ " : Get jail status. Alias: /jstatus");
+			}
+			sender.sendMessage(ChatColor.GREEN + "/jailversion" + ChatColor.YELLOW
+					+ " : Plugin version and config info. Alias: /jversion");
+			com = true;
+		}
 		else if (commandLabel.equalsIgnoreCase("jaillist")
 				|| commandLabel.equalsIgnoreCase("jlist"))
 		{
@@ -344,13 +385,13 @@ public class KarmicJail extends JavaPlugin {
 		}
 		else
 		{
-			if (!perm.has(sender, "SimpleJail.jail"))
+			if (!perm.has(sender, "KarmicJail.jail"))
 				com = true;
-			if (!perm.has(sender, "SimpleJail.unjail"))
+			if (!perm.has(sender, "KarmicJail.unjail"))
 				com = true;
-			if (!perm.has(sender, "SimpleJail.setjail"))
+			if (!perm.has(sender, "KarmicJail.setjail"))
 				com = true;
-			if (!perm.has(sender, "SimpleJail.jailstatus"))
+			if (!perm.has(sender, "KarmicJail.jailstatus"))
 				com = true;
 		}
 

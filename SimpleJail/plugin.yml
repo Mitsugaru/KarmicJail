@@ -38,6 +38,14 @@ commands:
     usage: |
            /<command>
            /<command> <player>
+  jailhelp:
+    description: Jail help.
+    usage: |
+           /<command>
+  jhelp:
+    description: Jail help. Alias to jailhelp.
+    usage: |
+           /<command>
   jaillist:
     description: List jailed players.
     usage: |
