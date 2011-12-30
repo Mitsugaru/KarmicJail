@@ -1272,6 +1272,7 @@ public class KarmicJail extends JavaPlugin {
 					has = true;
 				}
 			}
+			rs.close();
 		}
 		catch (SQLException e)
 		{
