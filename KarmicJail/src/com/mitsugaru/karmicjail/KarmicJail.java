@@ -544,8 +544,12 @@ public class KarmicJail extends JavaPlugin {
 					+ reason + "' WHERE playername='" + name + "';");
 			sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 					+ " sent to jail.");
-			cache.put(name, new PrisonerInfo(name, sender.getName(), date,
-					reason, duration));
+			final PrisonerInfo pi = new PrisonerInfo(name, sender.getName(), date,
+					reason, duration);
+			cache.put(name, pi);
+			//Throw jail event
+			JailEvent event = new JailEvent("KarmicJailPlayerJailed", pi);
+			this.getServer().getPluginManager().callEvent(event);
 		}
 	}
 
