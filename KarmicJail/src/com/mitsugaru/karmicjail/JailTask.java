@@ -23,8 +23,7 @@ public class JailTask implements Runnable {
 
 	@Override
 	public void run() {
-		final String[] args = {name};
-		sj.unjailPlayer(sj.console, args);
+		sj.unjailPlayer(sj.console, name, true);
 	}
 
 	public String getName()

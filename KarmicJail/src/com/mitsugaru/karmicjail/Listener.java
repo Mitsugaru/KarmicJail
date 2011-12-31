@@ -18,7 +18,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class Listener extends PlayerListener {
 	//Class variables
-    private KarmicJail plugin;
+    private final KarmicJail plugin;
     private static final long minutesToTicks = 1200;
 
     public Listener(KarmicJail plugin) {
@@ -28,12 +28,11 @@ public class Listener extends PlayerListener {
     @Override
     public void onPlayerRespawn(PlayerRespawnEvent event) {
 
-        Player player = event.getPlayer();
+        final Player player = event.getPlayer();
 
         if(!plugin.playerIsJailed(player.getName())) return;
 
         event.setRespawnLocation(plugin.getJailLocation());
-
     }
 
     @Override
@@ -43,12 +42,12 @@ public class Listener extends PlayerListener {
     	plugin.addPlayerToDatabase(event.getPlayer().getName());
 
         final Player player = event.getPlayer();
-        String status = plugin.getPlayerStatus(player.getName());
+        final String status = plugin.getPlayerStatus(player.getName());
 
         // Check status
         if (status.equals(""+JailStatus.PENDINGJAIL)) {
             if (plugin.playerIsTempJailed(player.getName())) {
-                int minutes = (int) ((plugin.getTempJailTime(player) / minutesToTicks));
+                int minutes = (int) ((plugin.getPlayerTime(player.getName()) / minutesToTicks));
                 player.sendMessage(ChatColor.AQUA + "You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
                 plugin.addThread(player.getName());
             } else {
@@ -59,7 +58,7 @@ public class Listener extends PlayerListener {
 
         } else if (status.equals(""+JailStatus.PENDINGFREE)) {
             plugin.setPlayerStatus(JailStatus.FREED, player.getName());
-            plugin.teleport(player.getName());
+            plugin.teleportOut(player.getName());
             player.sendMessage(ChatColor.AQUA + "You have been removed from jail!");
         }
         else if(status.equals(""+JailStatus.JAILED) && plugin.playerIsTempJailed(player.getName()))
