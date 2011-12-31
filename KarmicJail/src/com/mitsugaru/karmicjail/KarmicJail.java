@@ -137,6 +137,7 @@ public class KarmicJail extends JavaPlugin {
 				boolean timed = false;
 				boolean done = false;
 				int time = 0;
+				StringBuilder sb = new StringBuilder();
 				String reason = "";
 				final Vector<String> players = new Vector<String>();
 				for (int i = 0; i < args.length; i++)
@@ -170,13 +171,13 @@ public class KarmicJail extends JavaPlugin {
 					else
 					{
 						// attempt to grab reason if it exists
-						reason += args[i] + " ";
+						sb.append(args[i] + " ");
 					}
 				}
-				if (!reason.equals(""))
+				if (!(sb.length() > 0))
 				{
 					// Remove all trailing whitespace
-					reason = reason.replaceAll("\\s+$", "");
+					reason = sb.toString().replaceAll("\\s+$", "");
 				}
 				if (players.isEmpty())
 				{
@@ -1208,12 +1209,12 @@ public class KarmicJail extends JavaPlugin {
 					// Grab time if applicable
 					if (array[i].time > 0)
 					{
+						double temp = Math.floor(((double)array[i].time / (double)minutesToTicks) + 0.5f);
 						sb.append(ChatColor.GRAY
 								+ " - "
 								+ ChatColor.BLUE
 								+ ""
-								+ this.prettifyMinutes((int) Math
-										.floor((array[i].time / minutesToTicks) + 0.5f)));
+								+ this.prettifyMinutes((int) temp));
 					}
 					// Grab reason if there was one given
 					if (!array[i].reason.equals(""))
@@ -1569,7 +1570,7 @@ public class KarmicJail extends JavaPlugin {
 		JAILED, PENDINGJAIL, PENDINGFREE, FREED;
 	}
 
-	public class PrisonerInfo {
+	public static class PrisonerInfo {
 		public String name, jailer, date, reason;
 		public long time;
 
