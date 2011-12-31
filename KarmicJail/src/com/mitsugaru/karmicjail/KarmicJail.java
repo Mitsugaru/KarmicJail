@@ -174,7 +174,7 @@ public class KarmicJail extends JavaPlugin {
 						sb.append(args[i] + " ");
 					}
 				}
-				if (!(sb.length() > 0))
+				if (sb.length() > 0)
 				{
 					// Remove all trailing whitespace
 					reason = sb.toString().replaceAll("\\s+$", "");
@@ -548,7 +548,7 @@ public class KarmicJail extends JavaPlugin {
 					reason, duration);
 			cache.put(name, pi);
 			//Throw jail event
-			JailEvent event = new JailEvent("KarmicJailPlayerJailed", pi);
+			JailEvent event = new JailEvent("JailEvent", pi);
 			this.getServer().getPluginManager().callEvent(event);
 		}
 	}

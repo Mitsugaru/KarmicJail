@@ -19,6 +19,7 @@ public class JailEvent extends Event implements Cancellable {
 		jailer = pi.jailer;
 		reason = pi.reason;
 		duration = pi.time;
+		cancel = false;
 	}
 
 	@Override
