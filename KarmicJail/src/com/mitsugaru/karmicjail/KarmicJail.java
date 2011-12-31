@@ -24,8 +24,6 @@ import java.util.logging.Logger;
 
 import lib.PatPeter.SQLibrary.SQLite;
 
-import net.milkbowl.vault.permission.Permission;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -37,7 +35,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class KarmicJail extends JavaPlugin {
@@ -51,7 +48,7 @@ public class KarmicJail extends JavaPlugin {
 	private Location unjailLoc;
 	private String jailGroup;
 	private Listener listener;
-	private Permission perm;
+	private PermCheck perm;
 	private SQLite database;
 	private final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
@@ -96,7 +93,7 @@ public class KarmicJail extends JavaPlugin {
 		}
 
 		// Get permissions plugin:
-		this.setupPermissions();
+		perm = new PermCheck(this);
 
 		// Setup listner
 		listener = new Listener(this);
@@ -908,26 +905,6 @@ public class KarmicJail extends JavaPlugin {
 					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);
-		}
-	}
-
-	/**
-	 * Method to grab permissions from Vault
-	 */
-	private void setupPermissions() {
-		// Make vault optional
-		RegisteredServiceProvider<Permission> permissionProvider = this
-				.getServer()
-				.getServicesManager()
-				.getRegistration(net.milkbowl.vault.permission.Permission.class);
-		if (permissionProvider != null)
-		{
-			perm = permissionProvider.getProvider();
-		}
-		else
-		{
-			log.info(prefix + " ERROR: Permissions plugin not detected.");
-			this.getServer().getPluginManager().disablePlugin(this);
 		}
 	}
 
