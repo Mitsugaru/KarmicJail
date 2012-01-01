@@ -89,7 +89,7 @@ public class KarmicJail extends JavaPlugin {
 		{
 			log.info(prefix + " Created jailed table");
 			// Jail table
-			database.createTable("CREATE TABLE `jailed` (`playername` varchar(32) NOT NULL, `status` TEXT, `time` REAL, `groups` TEXT, `jailer` varchar(32), `date` TEXT, `reason` TEXT);");
+			database.createTable("CREATE TABLE `jailed` (`playername` varchar(32) NOT NULL, `status` TEXT, `time` REAL, `groups` TEXT, `jailer` varchar(32), `date` TEXT, `reason` TEXT, UNIQUE (`playername`));");
 		}
 
 		// Get permissions plugin:
