@@ -39,14 +39,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class KarmicJail extends JavaPlugin {
 
-	public static final Logger log = Logger.getLogger("Minecraft");
-	public static final String prefix = "[KarmicJail]";
+	public final Logger log = Logger.getLogger("Minecraft");
+	public final String prefix = "[KarmicJail]";
 	private static final String bar = "======================";
 	private static final long minutesToTicks = 1200;
 	public ConsoleCommandSender console;
 	private Location jailLoc;
 	private Location unjailLoc;
-	private String jailGroup;
+	public String jailGroup;
 	private Listener listener;
 	private PermCheck perm;
 	private SQLite database;
@@ -59,7 +59,7 @@ public class KarmicJail extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		// Stop all running threads
-		KarmicJail.log.info(prefix + " Stopping all jail threads...");
+		this.log.info(prefix + " Stopping all jail threads...");
 		for (JailTask task : threads.values())
 		{
 			task.stop();
@@ -675,11 +675,38 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				String groups = rs.getString("groups");
-				String[] cut = groups.split("&");
-				for (String group : cut)
+				if(rs.wasNull())
 				{
-					String[] split = group.split("!");
-					perm.playerAddGroup(split[1], name, split[0]);
+					try
+					{
+						//set to default
+						perm.playerAddGroup(this.getServer().getWorlds().get(0), name, perm.getDefaultGroup());
+					}
+					catch(IndexOutOfBoundsException e)
+					{
+						this.log.warning(prefix + " Could not fix group for: " + name);
+					}
+				}
+				else if(groups.equals(""))
+				{
+					try
+					{
+						//set to default
+						perm.playerAddGroup(this.getServer().getWorlds().get(0), name, perm.getDefaultGroup());
+					}
+					catch(IndexOutOfBoundsException e)
+					{
+						this.log.warning(prefix + " Could not fix group for: " + name);
+					}
+				}
+				else
+				{
+					String[] cut = groups.split("&");
+					for (String group : cut)
+					{
+						String[] split = group.split("!");
+						perm.playerAddGroup(split[1], name, split[0]);
+					}
 				}
 			}
 			rs.close();
@@ -906,7 +933,7 @@ public class KarmicJail extends JavaPlugin {
 		//Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
-			KarmicJail.log.warning(prefix
+			this.log.warning(prefix
 					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);

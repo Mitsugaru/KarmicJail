@@ -2,12 +2,16 @@ package com.mitsugaru.karmicjail;
 
 import net.milkbowl.vault.permission.Permission;
 
+import org.anjocaido.groupmanager.GroupManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import de.bananaco.permissions.Permissions;
+
+import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
@@ -20,14 +24,17 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
  *
  */
 public class PermCheck {
+	private KarmicJail plugin;
 	private Permission perm;
 	private boolean hasVault;
+	private String pluginName;
 
 	/**
 	 * Constructor
 	 */
 	public PermCheck(KarmicJail kj)
 	{
+		plugin = kj;
 		if(kj.getServer().getPluginManager().getPlugin("Vault") != null)
 		{
 			hasVault = true;
@@ -38,6 +45,7 @@ public class PermCheck {
 			if (permissionProvider != null)
 			{
 				perm = permissionProvider.getProvider();
+				pluginName = perm.getName();
 			}
 		}
 		else
@@ -83,6 +91,54 @@ public class PermCheck {
 		}
 		//Else, they don't have permission
 		return false;
+	}
+
+	public String getDefaultGroup()
+	{
+		String def = "default";
+		if(hasVault)
+		{
+			if (pluginName.equals("PermissionsEx"))
+			{
+				for(PermissionGroup group : PermissionsEx.getPermissionManager().getGroups())
+				{
+					try
+					{
+						if(group.isDefault(this.plugin.getServer().getWorlds().get(0).toString()))
+						{
+							def = group.getName();
+						}
+					}
+					catch(IndexOutOfBoundsException e)
+					{
+						this.plugin.log.warning(this.plugin.prefix + " Cannot grab default group.");
+						return def;
+					}
+				}
+			}
+			else if (pluginName.equals("PermissionsBukkit"))
+			{
+				//Last I remember, PermissiosBukkit forces the default group to be named default
+				return def;
+			}
+			else if (pluginName.equals("bPermissions"))
+			{
+				try
+				{
+					def =  Permissions.getWorldPermissionsManager().getPermissionSet(this.plugin.getServer().getWorlds().get(0).toString()).getDefaultGroup();
+				}
+				catch(IndexOutOfBoundsException e)
+				{
+					this.plugin.log.warning(this.plugin.prefix + " Cannot grab default group.");
+					return def;
+				}
+			}
+			else if (pluginName.equals("GroupManager"))
+			{
+				def =  ((GroupManager) this.plugin.getServer().getPluginManager().getPlugin("GroupManager")).getWorldsHolder().getWorldData(this.plugin.getServer().getWorlds().get(0).toString()).getDefaultGroup().getName();
+			}
+		}
+		return def;
 	}
 
 	public void playerAddGroup(World world, String name, String group) {
