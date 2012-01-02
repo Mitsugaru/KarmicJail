@@ -675,11 +675,16 @@ public class KarmicJail extends JavaPlugin {
 	 */
 	private void savePlayerGroups(String name) {
 		StringBuilder sb = new StringBuilder();
+		boolean append = false;
 		for (String s : this.getGroups(name))
 		{
 			sb.append(s + "&");
+			append = true;
 		}
-		sb.deleteCharAt(sb.length() - 1);
+		if(append)
+		{
+			sb.deleteCharAt(sb.length() - 1);
+		}
 		this.database.standardQuery("UPDATE jailed SET groups='"
 				+ sb.toString() + "' WHERE playername='" + name + "';");
 	}
