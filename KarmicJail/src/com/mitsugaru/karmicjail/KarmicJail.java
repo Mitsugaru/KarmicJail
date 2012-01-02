@@ -333,9 +333,15 @@ public class KarmicJail extends JavaPlugin {
 				sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
 						+ " <player>" + ChatColor.YELLOW + " : Unjail player");
 			}
+			if (perm.has(sender, "KarmicJail.jail"))
+			{
+				sender.sendMessage(ChatColor.GREEN + "/jailtime" + ChatColor.AQUA
+						+ " <player>" + ChatColor.YELLOW
+						+ " : Toggle mute for a player. Alias: /jtime");
+			}
 			if (perm.has(sender, "KarmicJail.mute"))
 			{
-				sender.sendMessage(ChatColor.GREEN + "/mute" + ChatColor.AQUA
+				sender.sendMessage(ChatColor.GREEN + "/jailmute" + ChatColor.AQUA
 						+ " <player>" + ChatColor.YELLOW
 						+ " : Toggle mute for a player. Alias: /jmute");
 			}
@@ -879,20 +885,35 @@ public class KarmicJail extends JavaPlugin {
 			}
 			this.removeTask(name);
 		}
-		// Calculate time
-		long duration = 0;
-		duration = minutes * minutesToTicks;
-		this.updatePlayerTime(name, duration);
-		// Create thread to release player
-		threads.put(name, new JailTask(this, name, duration));
-		sender.sendMessage(ChatColor.AQUA + "Time set to " + ChatColor.GOLD
-				+ minutes + " for " + ChatColor.RED + name + ChatColor.AQUA
-				+ ".");
-		if (player != null)
+		//Jail indefinitely if 0 or negative
+		if(minutes <= 0)
 		{
-			player.sendMessage(ChatColor.AQUA + "Time set to " + ChatColor.GOLD
-					+ minutes + ChatColor.AQUA + ".");
+			this.updatePlayerTime(name, minutes);
+			sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
+					+ " is jailed forever.");
+			if (player != null)
+			{
+				player.sendMessage(ChatColor.AQUA + "Jailed forever.");
+			}
 		}
+		else
+		{
+			// Calculate time
+			long duration = 0;
+			duration = minutes * minutesToTicks;
+			this.updatePlayerTime(name, duration);
+			// Create thread to release player
+			threads.put(name, new JailTask(this, name, duration));
+			sender.sendMessage(ChatColor.AQUA + "Time set to " + ChatColor.GOLD
+					+ minutes + " for " + ChatColor.RED + name + ChatColor.AQUA
+					+ ".");
+			if (player != null)
+			{
+				player.sendMessage(ChatColor.AQUA + "Time set to " + ChatColor.GOLD
+						+ minutes + ChatColor.AQUA + ".");
+			}
+		}
+
 	}
 
 	/**
@@ -1143,7 +1164,7 @@ public class KarmicJail extends JavaPlugin {
 		if (ver < 0.2)
 		{
 			// Add enchantments column
-			query = "ALTER TABLE items ADD muted INTEGER;";
+			query = "ALTER TABLE jailed ADD muted INTEGER;";
 			this.getLiteDB().standardQuery(query);
 		}
 

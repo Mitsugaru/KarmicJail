@@ -73,13 +73,19 @@ commands:
   jailmute:
     description: Mute a player in jail.
     usage: |
-           /<command>
-           /<command> <player>
+           /<command> <player> [player2] ...
   jmute:
     description: Mute a player in jail. Alias to jailmute.
     usage: |
-           /<command>
-           /<command> <player>
+           /<command> <player> [player2] ...
+  jailtime:
+    description: Give a jailed player a timed release.
+    usage: |
+           /<command> <player> [player2] ... <time>
+  jtime:
+    description: Give a jailed player a timed release. Alias to jailtime.
+    usage: |
+           /<command> <player> [player2] ... <time>
   jailversion:
     description: Get plugin version and config info.
     usage: |
