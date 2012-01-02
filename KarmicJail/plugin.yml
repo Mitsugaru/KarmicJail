@@ -1,7 +1,7 @@
 name: KarmicJail
 main: com.mitsugaru.karmicjail.KarmicJail
 description: Jail plugin for Mine-RP
-version: 0.1
+version: 0.2
 author: Original - imjake9 ... Fork - Mitsugaru
 softdepend: [Vault]
 
@@ -70,6 +70,16 @@ commands:
     description: Next page of list. Alias to jailnext.
     usage: |
            /<command>
+  jailmute:
+    description: Mute a player in jail.
+    usage: |
+           /<command>
+           /<command> <player>
+  jmute:
+    description: Mute a player in jail. Alias to jailmute.
+    usage: |
+           /<command>
+           /<command> <player>
   jailversion:
     description: Get plugin version and config info.
     usage: |
@@ -92,6 +102,9 @@ permissions:
   KarmicJail.list:
     description: List players in jail
     default: op
+  KarmicJail.mute:
+    description: Mute players in jail
+    default: op
   KarmicJail.jailstatus:
     description: Gives access to the jailtime command.
     default: true
@@ -103,3 +116,4 @@ permissions:
       KarmicJail.setjail: true
       KarmicJail.jailstatus: true
       KarmicJail.list: true
+      KarmicJail.mute: true

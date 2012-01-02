@@ -11,6 +11,7 @@ package com.mitsugaru.karmicjail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -23,6 +24,20 @@ public class Listener extends PlayerListener {
 
     public Listener(KarmicJail plugin) {
         this.plugin = plugin;
+    }
+
+    @Override
+    public void onPlayerChat(PlayerChatEvent event)
+    {
+    	final Player player = event.getPlayer();
+        if(plugin.playerIsJailed(player.getName()))
+        {
+        	if(plugin.playerIsMuted(player.getName()))
+        	{
+        		event.setCancelled(true);
+        	}
+        }
+        plugin.log.info("Cancelled: " + event.isCancelled());
     }
 
     @Override

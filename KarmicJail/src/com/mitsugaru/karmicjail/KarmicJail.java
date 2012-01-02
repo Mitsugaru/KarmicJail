@@ -39,6 +39,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class KarmicJail extends JavaPlugin {
 
+	//TODO Edit time/reason after jailed
 	public final Logger log = Logger.getLogger("Minecraft");
 	public final String prefix = "[KarmicJail]";
 	private static final String bar = "======================";
@@ -75,13 +76,8 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	@Override
-	public void onEnable() {
-		// Get console:
-		console = this.getServer().getConsoleSender();
-
-		// Load configuration:
-		this.loadConfig();
-
+	public void onLoad()
+	{
 		// Grab database
 		database = new SQLite(log, prefix, "jail", this.getDataFolder()
 				.getAbsolutePath());
@@ -89,8 +85,18 @@ public class KarmicJail extends JavaPlugin {
 		{
 			log.info(prefix + " Created jailed table");
 			// Jail table
-			database.createTable("CREATE TABLE `jailed` (`playername` varchar(32) NOT NULL, `status` TEXT, `time` REAL, `groups` TEXT, `jailer` varchar(32), `date` TEXT, `reason` TEXT, UNIQUE (`playername`));");
+			database.createTable("CREATE TABLE `jailed` (`playername` varchar(32) NOT NULL, `status` TEXT, `time` REAL, `groups` TEXT, `jailer` varchar(32), `date` TEXT, `reason` TEXT, `muted` INTEGER, UNIQUE (`playername`));");
 		}
+	}
+
+	@Override
+	public void onEnable() {
+		// Get console:
+		console = this.getServer().getConsoleSender();
+
+		// Load configuration:
+		this.loadConfig();
+		this.checkUpdate();
 
 		// Get permissions plugin:
 		perm = new PermCheck(this);
@@ -109,6 +115,7 @@ public class KarmicJail extends JavaPlugin {
 				.getPluginManager()
 				.registerEvent(Event.Type.PLAYER_QUIT, listener,
 						Priority.Monitor, this);
+		this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_CHAT, listener, Priority.Lowest, this);
 
 		log.info(prefix + " " + this.getDescription().getName() + " v"
 				+ this.getDescription().getVersion() + " enabled.");
@@ -219,7 +226,7 @@ public class KarmicJail extends JavaPlugin {
 				{
 					sender.sendMessage(ChatColor.RED + "Missing paramters");
 					sender.sendMessage(ChatColor.RED
-							+ "/j <player> [player2] ... [time] [reason]");
+							+ "/unjail <player> [player2]");
 				}
 				for (String name : players)
 				{
@@ -323,6 +330,11 @@ public class KarmicJail extends JavaPlugin {
 				sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
 						+ " <player>" + ChatColor.YELLOW + " : Unjail player");
 			}
+			if (perm.has(sender, "KarmicJail.mute"))
+			{
+				sender.sendMessage(ChatColor.GREEN + "/mute" + ChatColor.AQUA
+						+ " <player>" + ChatColor.YELLOW + " : Toggle mute for a player. Alias: /jmute");
+			}
 			if (perm.has(sender, "KarmicJail.list"))
 			{
 				sender.sendMessage(ChatColor.GREEN + "/jaillist"
@@ -393,7 +405,7 @@ public class KarmicJail extends JavaPlugin {
 			}
 			com = true;
 		}
-		else if (commandLabel.equals("jprev"))
+		else if (commandLabel.equals("jailprev") || commandLabel.equals("jprev"))
 		{
 			if (!perm.has(sender, "KarmicJail.list"))
 			{
@@ -408,7 +420,7 @@ public class KarmicJail extends JavaPlugin {
 			com = true;
 		}
 		// Next page of item pool
-		else if (commandLabel.equals("jnext"))
+		else if (commandLabel.equals("jailnext") || commandLabel.equals("jnext"))
 		{
 			if (!perm.has(sender, "KarmicJail.list"))
 			{
@@ -419,6 +431,42 @@ public class KarmicJail extends JavaPlugin {
 			{
 				// List with next page
 				this.listJailed(sender, 1);
+			}
+			com = true;
+		}
+		else if(commandLabel.equals("jailmute") || commandLabel.equals("jmute"))
+		{
+			if (!perm.has(sender, "KarmicJail.mute"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.mute");
+			}
+			else
+			{
+				final Vector<String> players = new Vector<String>();
+				for (int i = 0; i < args.length; i++)
+				{
+					// Attempt to grab name and add to list
+					String name = this.expandName(args[i]);
+					if (name != null)
+					{
+						players.add(name);
+					}
+					else
+					{
+						players.add(args[i]);
+					}
+				}
+				if (players.isEmpty())
+				{
+					sender.sendMessage(ChatColor.RED + "Missing paramters");
+					sender.sendMessage(ChatColor.RED
+							+ "/jmute <player> [player2] ...");
+				}
+				for (String name : players)
+				{
+					this.mutePlayer(sender, name);
+				}
 			}
 			com = true;
 		}
@@ -541,7 +589,7 @@ public class KarmicJail extends JavaPlugin {
 			final String date = new Date().toString();
 			database.standardQuery("UPDATE jailed SET jailer='"
 					+ sender.getName() + "',date='" + date + "',reason='"
-					+ reason + "' WHERE playername='" + name + "';");
+					+ reason + "',muted='0' WHERE playername='" + name + "';");
 			sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 					+ " sent to jail.");
 			final PrisonerInfo pi = new PrisonerInfo(name, sender.getName(), date,
@@ -720,6 +768,26 @@ public class KarmicJail extends JavaPlugin {
 
 	public void unjailPlayer(CommandSender sender, String name) {
 		this.unjailPlayer(sender, name, false);
+	}
+
+	public void mutePlayer(CommandSender sender, String name)
+	{
+		// Check if player is in jail:
+		if (!playerIsJailed(name) && !playerIsPendingJail(name))
+		{
+			sender.sendMessage(ChatColor.RED + "That player is not in jail!");
+			return;
+		}
+		if(playerIsMuted(name))
+		{
+			database.standardQuery("UPDATE jailed SET muted='0' WHERE playername='" + name + "';");
+			sender.sendMessage(ChatColor.GOLD  + name + ChatColor.GREEN + " unmuted");
+		}
+		else
+		{
+			database.standardQuery("UPDATE jailed SET muted='1' WHERE playername='" + name + "';");
+			sender.sendMessage(ChatColor.GOLD  + name + ChatColor.RED + " muted");
+		}
 	}
 
 	/**
@@ -906,6 +974,7 @@ public class KarmicJail extends JavaPlugin {
 		defaults.put("unjail.y", 0);
 		defaults.put("unjail.z", 0);
 		defaults.put("entrylimit", 10);
+		defaults.put("version", this.getDescription().getVersion());
 
 		// Insert defaults into config file if they're not present
 		for (final Entry<String, Object> e : defaults.entrySet())
@@ -938,6 +1007,45 @@ public class KarmicJail extends JavaPlugin {
 			limit = 10;
 			config.set("entrylimit", 10);
 		}
+	}
+
+	/**
+	 * Check if updates are necessary
+	 */
+	private void checkUpdate()
+	{
+		// Check if need to update
+		ConfigurationSection config = this.getConfig();
+		if (Double.parseDouble(this.getDescription().getVersion()) > Double
+				.parseDouble(config.getString("version")))
+		{
+			// Update to latest version
+			this.log.info(
+					this.prefix + " Updating to v"
+							+ this.getDescription().getVersion());
+			this.update();
+		}
+	}
+
+	/**
+	 * This method is called to make the appropriate changes, most likely only
+	 * necessary for database schema modification, for a proper update.
+	 */
+	private void update() {
+		//Grab current version
+		double ver = Double.parseDouble(this.getConfig().getString("version"));
+		String query = "";
+		//Updates to alpha 0.08
+		if(ver < 0.2)
+		{
+			//Add enchantments column
+			query = "ALTER TABLE items ADD muted INTEGER;";
+			this.getLiteDB().standardQuery(query);
+		}
+
+		// Update version number in config.yml
+		this.getConfig().set("version", this.getDescription().getVersion());
+		this.saveConfig();
 	}
 
 	/**
@@ -1288,6 +1396,31 @@ public class KarmicJail extends JavaPlugin {
 			e.printStackTrace();
 		}
 		return reason;
+	}
+
+	public boolean playerIsMuted(String name)
+	{
+		boolean mute = false;
+		try
+		{
+			ResultSet rs = database
+					.select("SELECT * FROM jailed WHERE playername='" + name
+							+ "';");
+			if (rs.next())
+			{
+				if(rs.getInt("muted") == 1)
+				{
+					mute = true;
+				}
+			}
+			rs.close();
+		}
+		catch (SQLException e)
+		{
+			log.warning(prefix + " SQL Exception");
+			e.printStackTrace();
+		}
+		return mute;
 	}
 
 	/**
