@@ -37,7 +37,6 @@ public class Listener extends PlayerListener {
         		event.setCancelled(true);
         	}
         }
-        plugin.log.info("Cancelled: " + event.isCancelled());
     }
 
     @Override
