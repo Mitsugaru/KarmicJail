@@ -1211,6 +1211,10 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				jailer = rs.getString("jailer");
+				if(rs.wasNull())
+				{
+					jailer = "NOBODY";
+				}
 			}
 			rs.close();
 		}
@@ -1239,6 +1243,10 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				date = rs.getString("date");
+				if(rs.wasNull())
+				{
+					date = "";
+				}
 			}
 			rs.close();
 		}
@@ -1299,7 +1307,11 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				final String status = rs.getString("status");
-				if (status.equals("" + JailStatus.JAILED))
+				if(rs.wasNull())
+				{
+					log.severe(prefix + " MISSING STATUS FOR: " + player);
+				}
+				else if (status.equals("" + JailStatus.JAILED))
 				{
 					jailed = true;
 				}
@@ -1332,6 +1344,10 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				time = rs.getDouble("time");
+				if(rs.wasNull())
+				{
+					time = 0;
+				}
 			}
 			rs.close();
 		}
@@ -1524,7 +1540,12 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				reason = rs.getString("reason");
+				if(rs.wasNull())
+				{
+					reason = "";
+				}
 			}
+
 			rs.close();
 		}
 		catch (SQLException e)

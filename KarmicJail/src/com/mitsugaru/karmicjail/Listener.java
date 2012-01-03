@@ -27,7 +27,7 @@ public class Listener extends PlayerListener {
     }
 
     @Override
-    public void onPlayerChat(PlayerChatEvent event)
+    public void onPlayerChat(final PlayerChatEvent event)
     {
     	final Player player = event.getPlayer();
         if(plugin.playerIsJailed(player.getName()))
@@ -40,7 +40,7 @@ public class Listener extends PlayerListener {
     }
 
     @Override
-    public void onPlayerRespawn(PlayerRespawnEvent event) {
+    public void onPlayerRespawn(final PlayerRespawnEvent event) {
 
         final Player player = event.getPlayer();
 
@@ -50,7 +50,7 @@ public class Listener extends PlayerListener {
     }
 
     @Override
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerJoin(final PlayerJoinEvent event) {
 
     	//Attempt to add player to database
     	plugin.addPlayerToDatabase(event.getPlayer().getName());
@@ -82,7 +82,7 @@ public class Listener extends PlayerListener {
     }
 
 	@Override
-	public void onPlayerQuit(PlayerQuitEvent event)
+	public void onPlayerQuit(final PlayerQuitEvent event)
     {
     	final Player player = event.getPlayer();
     	if(!plugin.playerIsJailed(player.getName())) return;
