@@ -77,6 +77,14 @@ public class Listener extends PlayerListener {
         }
         else if(status.equals(""+JailStatus.JAILED) && plugin.playerIsTempJailed(player.getName()))
         {
+        	if (plugin.playerIsTempJailed(player.getName())) {
+                int minutes = (int) ((plugin.getPlayerTime(player.getName()) / minutesToTicks));
+                player.sendMessage(ChatColor.AQUA + "You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
+                plugin.addThread(player.getName());
+            } else {
+                player.sendMessage(ChatColor.AQUA + "You are jailed.");
+            }
+        	player.teleport(plugin.getJailLocation());
         	plugin.addThread(player.getName());
         }
     }
