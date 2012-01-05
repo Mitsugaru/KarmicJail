@@ -3,7 +3,7 @@ main: com.mitsugaru.karmicjail.KarmicJail
 description: Jail plugin for Mine-RP
 version: 0.2
 author: Original - imjake9 ... Fork - Mitsugaru
-softdepend: [Vault]
+depend: [Vault]
 
 commands:
   jail:
