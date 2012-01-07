@@ -144,60 +144,81 @@ public class KarmicJail extends JavaPlugin {
 			}
 			else
 			{
+				//TODO does not handle if a player has all numeric name
 				boolean timed = false;
 				boolean done = false;
 				int time = 0;
 				StringBuilder sb = new StringBuilder();
 				String reason = "";
 				final Vector<String> players = new Vector<String>();
-				for (int i = 0; i < args.length; i++)
+				try
 				{
-					if (!done)
+					String first = expandName(args[0]);
+					if(first == null)
 					{
-						try
+						//expand failed
+						first = args[0];
+					}
+					players.add(first);
+					for (int i = 1; i < args.length; i++)
+					{
+						if (!done)
 						{
-							// Attempt to grab time
-							time = Integer.parseInt(args[i]);
-							if (time > 0)
+							try
 							{
-								timed = true;
+								// Attempt to grab time
+								time = Integer.parseInt(args[i]);
+								// Attempt to grab player name if its all numbers
+								String numberName = expandName(""+time);
+								if(numberName == null)
+								{
+									if (time > 0)
+									{
+										timed = true;
+									}
+										done = true;
+								}
+								else
+								{
+									players.add(numberName);
+								}
 							}
-							done = true;
+							catch (NumberFormatException e)
+							{
+								// Attempt to grab name and add to list
+								String name = this.expandName(args[i]);
+								if (name != null)
+								{
+									players.add(name);
+								}
+								else
+								{
+									players.add(args[i]);
+								}
+							}
 						}
-						catch (NumberFormatException e)
+						else
 						{
-							// Attempt to grab name and add to list
-							String name = this.expandName(args[i]);
-							if (name != null)
-							{
-								players.add(name);
-							}
-							else
-							{
-								players.add(args[i]);
-							}
+							// attempt to grab reason if it exists
+							sb.append(args[i] + " ");
 						}
 					}
-					else
+					if (sb.length() > 0)
 					{
-						// attempt to grab reason if it exists
-						sb.append(args[i] + " ");
+						// Remove all trailing whitespace
+						reason = sb.toString().replaceAll("\\s+$", "");
+					}
+					for (String name : players)
+					{
+						this.jailPlayer(sender, name, reason, time, timed);
 					}
 				}
-				if (sb.length() > 0)
+				catch(ArrayIndexOutOfBoundsException e)
 				{
-					// Remove all trailing whitespace
-					reason = sb.toString().replaceAll("\\s+$", "");
-				}
-				if (players.isEmpty())
-				{
+					//no player name given, error
 					sender.sendMessage(ChatColor.RED + "Missing paramters");
 					sender.sendMessage(ChatColor.RED
 							+ "/j <player> [player2] ... [time] [reason]");
-				}
-				for (String name : players)
-				{
-					this.jailPlayer(sender, name, reason, time, timed);
 				}
 			}
 			com = true;
