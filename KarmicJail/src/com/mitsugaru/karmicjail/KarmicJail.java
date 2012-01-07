@@ -169,19 +169,11 @@ public class KarmicJail extends JavaPlugin {
 								// Attempt to grab time
 								time = Integer.parseInt(args[i]);
 								// Attempt to grab player name if its all numbers
-								String numberName = expandName(""+time);
-								if(numberName == null)
+								if (time > 0)
 								{
-									if (time > 0)
-									{
-										timed = true;
-									}
-										done = true;
+									timed = true;
 								}
-								else
-								{
-									players.add(numberName);
-								}
+								done = true;
 							}
 							catch (NumberFormatException e)
 							{
