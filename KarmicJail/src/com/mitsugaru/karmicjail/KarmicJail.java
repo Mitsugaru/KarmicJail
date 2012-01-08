@@ -687,7 +687,7 @@ public class KarmicJail extends JavaPlugin {
 			sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 					+ " sent to jail.");
 			final PrisonerInfo pi = new PrisonerInfo(name, sender.getName(),
-					date, reason, duration);
+					date, reason, duration, false);
 			cache.put(name, pi);
 			// Throw jail event
 			JailEvent event = new JailEvent("JailEvent", pi);
@@ -1307,7 +1307,7 @@ public class KarmicJail extends JavaPlugin {
 				date = rs.getString("date");
 				if (rs.wasNull())
 				{
-					date = "";
+					date = "NO DATE";
 				}
 			}
 			rs.close();
@@ -1361,6 +1361,7 @@ public class KarmicJail extends JavaPlugin {
 	 */
 	public boolean playerIsJailed(String player) {
 		boolean jailed = false;
+		boolean missing = false;
 		try
 		{
 			ResultSet rs = database
@@ -1372,6 +1373,7 @@ public class KarmicJail extends JavaPlugin {
 				if (rs.wasNull())
 				{
 					log.severe(prefix + " MISSING STATUS FOR: " + player);
+					missing = true;
 				}
 				else if (status.equals("" + JailStatus.JAILED))
 				{
@@ -1379,6 +1381,10 @@ public class KarmicJail extends JavaPlugin {
 				}
 			}
 			rs.close();
+			if (missing)
+			{
+				setPlayerStatus(JailStatus.FREED, player);
+			}
 		}
 		catch (SQLException e)
 		{
@@ -1398,6 +1404,7 @@ public class KarmicJail extends JavaPlugin {
 	 */
 	public boolean playerIsTempJailed(String player) {
 		double time = 0;
+		boolean missing = false;
 		try
 		{
 			ResultSet rs = database
@@ -1409,9 +1416,14 @@ public class KarmicJail extends JavaPlugin {
 				if (rs.wasNull())
 				{
 					time = 0;
+					missing = true;
 				}
 			}
 			rs.close();
+			if (missing)
+			{
+				setJailTime(console, player, 0);
+			}
 		}
 		catch (SQLException e)
 		{
@@ -1446,22 +1458,52 @@ public class KarmicJail extends JavaPlugin {
 				do
 				{
 					String name = rs.getString("playername");
-					if (!cache.containsKey(name))
+					if (!rs.wasNull())
 					{
-						cache.put(
-								name,
-								new PrisonerInfo(name, rs.getString("jailer"),
-										rs.getString("date"), rs
-												.getString("reason"), rs
-												.getLong("time")));
-					}
-					else
-					{
-						if (threads.containsKey(name))
+						if (!cache.containsKey(name))
 						{
-							// Update the time if necessary
-							cache.get(name).updateTime(
-									threads.get(name).remainingTime());
+							String jailer = rs.getString("jailer");
+							if(rs.wasNull())
+							{
+								jailer = "NOBODY";
+							}
+							String date = rs.getString("date");
+							if(rs.wasNull())
+							{
+								date = "NO DATE";
+							}
+							String reason = rs.getString("reason");
+							if(rs.wasNull())
+							{
+								reason = "";
+							}
+							long time = rs.getLong("time");
+							if(rs.wasNull())
+							{
+								time = 0;
+							}
+							int muteInt = rs.getInt("muted");
+							if(rs.wasNull())
+							{
+								muteInt = 0;
+							}
+							boolean muted = false;
+							if(muteInt == 1)
+							{
+								muted = true;
+							}
+							cache.put(
+									name,
+									new PrisonerInfo(name, jailer, date, reason, time, muted));
+						}
+						else
+						{
+							if (threads.containsKey(name))
+							{
+								// Update the time if necessary
+								cache.get(name).updateTime(
+										threads.get(name).remainingTime());
+							}
 						}
 					}
 				}
@@ -1575,6 +1617,11 @@ public class KarmicJail extends JavaPlugin {
 						sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY
 								+ this.colorizeText(array[i].reason));
 					}
+					//Grab if muted
+					if(array[i].mute)
+					{
+						sb.append(ChatColor.GRAY + " - " + ChatColor.DARK_RED + "MUTED");
+					}
 					sender.sendMessage(sb.toString());
 				}
 				else
@@ -1627,9 +1674,13 @@ public class KarmicJail extends JavaPlugin {
 							+ "';");
 			if (rs.next())
 			{
-				if (rs.getInt("muted") == 1)
+				int muteInt = rs.getInt("muted");
+				if(!rs.wasNull())
 				{
-					mute = true;
+					if (muteInt == 1)
+					{
+						mute = true;
+					}
 				}
 			}
 			rs.close();
@@ -1652,6 +1703,7 @@ public class KarmicJail extends JavaPlugin {
 	public String getPlayerStatus(String name) {
 		boolean found = false;
 		String status = "" + JailStatus.FREED;
+		boolean fix = false;
 		try
 		{
 			ResultSet rs = database
@@ -1659,11 +1711,19 @@ public class KarmicJail extends JavaPlugin {
 							+ "';");
 			if (rs.next())
 			{
-
 				found = true;
 				status = rs.getString("status");
+				if(rs.wasNull())
+				{
+					status = "" + JailStatus.FREED;
+					fix = true;
+				}
 			}
 			rs.close();
+			if(fix)
+			{
+				setPlayerStatus(JailStatus.FREED, name);
+			}
 		}
 		catch (SQLException e)
 		{
@@ -1770,6 +1830,10 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				time = rs.getLong("time");
+				if(rs.wasNull())
+				{
+					time = 0;
+				}
 			}
 			rs.close();
 		}
@@ -1853,9 +1917,13 @@ public class KarmicJail extends JavaPlugin {
 							+ name + "';");
 			if (rs.next())
 			{
-				if (rs.getInt(1) != 0)
+				final int count = rs.getInt(1);
+				if(!rs.wasNull())
 				{
-					has = true;
+					if (count > 0)
+					{
+						has = true;
+					}
 				}
 			}
 			rs.close();
@@ -1883,9 +1951,13 @@ public class KarmicJail extends JavaPlugin {
 							+ name + "';");
 			if (rs.next())
 			{
-				if (rs.getInt(1) != 0)
+				final int count = rs.getInt(1);
+				if (!rs.wasNull())
 				{
-					has = true;
+					if (count > 0)
+					{
+						has = true;
+					}
 				}
 			}
 			rs.close();
@@ -1969,13 +2041,15 @@ public class KarmicJail extends JavaPlugin {
 	public static class PrisonerInfo {
 		public String name, jailer, date, reason;
 		public long time;
+		public boolean mute;
 
-		public PrisonerInfo(String n, String j, String d, String r, long t) {
+		public PrisonerInfo(String n, String j, String d, String r, long t, boolean m) {
 			name = n;
 			jailer = j;
 			date = d;
 			reason = r;
 			time = t;
+			mute = m;
 		}
 
 		public void updateTime(long t) {
