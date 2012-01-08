@@ -40,14 +40,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 //TODO reason after being jailed
 
 public class KarmicJail extends JavaPlugin {
-	//Class Variables
+	// Class Variables
 	public final Logger log = Logger.getLogger("Minecraft");
 	public final String prefix = "[KarmicJail]";
 	private static final String bar = "======================";
 	private static final long minutesToTicks = 1200;
 	public ConsoleCommandSender console;
-	private Location jailLoc;
-	private Location unjailLoc;
+	private Location jailLoc, unjailLoc;
 	public String jailGroup;
 	private Listener listener;
 	private PermCheck perm;
@@ -55,7 +54,7 @@ public class KarmicJail extends JavaPlugin {
 	private final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-	private boolean debugTime;
+	private boolean debugTime, unjailTeleport;
 	private int limit;
 
 	@Override
@@ -144,7 +143,7 @@ public class KarmicJail extends JavaPlugin {
 			}
 			else
 			{
-				//TODO does not handle if a player has all numeric name
+				// TODO does not handle if a player has all numeric name
 				boolean timed = false;
 				boolean done = false;
 				int time = 0;
@@ -154,9 +153,9 @@ public class KarmicJail extends JavaPlugin {
 				try
 				{
 					String first = expandName(args[0]);
-					if(first == null)
+					if (first == null)
 					{
-						//expand failed
+						// expand failed
 						first = args[0];
 					}
 					players.add(first);
@@ -168,7 +167,8 @@ public class KarmicJail extends JavaPlugin {
 							{
 								// Attempt to grab time
 								time = Integer.parseInt(args[i]);
-								// Attempt to grab player name if its all numbers
+								// Attempt to grab player name if its all
+								// numbers
 								if (time > 0)
 								{
 									timed = true;
@@ -205,9 +205,9 @@ public class KarmicJail extends JavaPlugin {
 						this.jailPlayer(sender, name, reason, time, timed);
 					}
 				}
-				catch(ArrayIndexOutOfBoundsException e)
+				catch (ArrayIndexOutOfBoundsException e)
 				{
-					//no player name given, error
+					// no player name given, error
 					sender.sendMessage(ChatColor.RED + "Missing paramters");
 					sender.sendMessage(ChatColor.RED
 							+ "/j <player> [player2] ... [time] [reason]");
@@ -348,14 +348,14 @@ public class KarmicJail extends JavaPlugin {
 			}
 			if (perm.has(sender, "KarmicJail.jail"))
 			{
-				sender.sendMessage(ChatColor.GREEN + "/jailtime" + ChatColor.AQUA
-						+ " <player>" + ChatColor.YELLOW
+				sender.sendMessage(ChatColor.GREEN + "/jailtime"
+						+ ChatColor.AQUA + " <player>" + ChatColor.YELLOW
 						+ " : Toggle mute for a player. Alias: /jtime");
 			}
 			if (perm.has(sender, "KarmicJail.mute"))
 			{
-				sender.sendMessage(ChatColor.GREEN + "/jailmute" + ChatColor.AQUA
-						+ " <player>" + ChatColor.YELLOW
+				sender.sendMessage(ChatColor.GREEN + "/jailmute"
+						+ ChatColor.AQUA + " <player>" + ChatColor.YELLOW
 						+ " : Toggle mute for a player. Alias: /jmute");
 			}
 			if (perm.has(sender, "KarmicJail.list"))
@@ -547,6 +547,21 @@ public class KarmicJail extends JavaPlugin {
 			}
 			com = true;
 		}
+		else if (commandLabel.equals("jailreload")
+				|| commandLabel.equals("jreload"))
+		{
+			if (perm.has(sender, "KarmicJail.jail")
+					|| perm.has(sender, "KarmicJail.unjail")
+					|| perm.has(sender, "KarmicJail.setjail"))
+			{
+				reloadPluginConfig();
+			}
+			else
+			{
+				sender.sendMessage(ChatColor.RED + "Lack permission to reload");
+			}
+			com = true;
+		}
 		else
 		{
 			if (!perm.has(sender, "KarmicJail.jail"))
@@ -694,7 +709,7 @@ public class KarmicJail extends JavaPlugin {
 			sb.append(s + "&");
 			append = true;
 		}
-		if(append)
+		if (append)
 		{
 			sb.deleteCharAt(sb.length() - 1);
 		}
@@ -759,8 +774,12 @@ public class KarmicJail extends JavaPlugin {
 			return;
 		}
 
-		// Move player out of jail:
-		player.teleport(unjailLoc);
+		// Move player out of jail
+		if (unjailTeleport)
+		{
+			player.teleport(unjailLoc);
+		}
+		// Change status
 		this.setPlayerStatus(JailStatus.FREED, name);
 
 		// Remove task
@@ -903,8 +922,8 @@ public class KarmicJail extends JavaPlugin {
 			}
 			this.removeTask(name);
 		}
-		//Jail indefinitely if 0 or negative
-		if(minutes <= 0)
+		// Jail indefinitely if 0 or negative
+		if (minutes <= 0)
 		{
 			this.updatePlayerTime(name, minutes);
 			sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
@@ -927,8 +946,8 @@ public class KarmicJail extends JavaPlugin {
 					+ ".");
 			if (player != null)
 			{
-				player.sendMessage(ChatColor.AQUA + "Time set to " + ChatColor.GOLD
-						+ minutes + ChatColor.AQUA + ".");
+				player.sendMessage(ChatColor.AQUA + "Time set to "
+						+ ChatColor.GOLD + minutes + ChatColor.AQUA + ".");
 			}
 		}
 
@@ -1118,6 +1137,7 @@ public class KarmicJail extends JavaPlugin {
 		defaults.put("unjail.x", 0);
 		defaults.put("unjail.y", 0);
 		defaults.put("unjail.z", 0);
+		defaults.put("unjail.teleport", true);
 		defaults.put("entrylimit", 10);
 		defaults.put("version", this.getDescription().getVersion());
 
@@ -1144,6 +1164,35 @@ public class KarmicJail extends JavaPlugin {
 		jailGroup = config.getString("jailgroup", "Jailed");
 		debugTime = config.getBoolean("debugTime", false);
 		limit = config.getInt("entrylimit", 10);
+		unjailTeleport = config.getBoolean("unjail.teleport", true);
+		// Bounds check on the limit
+		if (limit <= 0 || limit > 16)
+		{
+			this.log.warning(prefix
+					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
+			limit = 10;
+			config.set("entrylimit", 10);
+		}
+	}
+
+	public void reloadPluginConfig() {
+		// Reload
+		reloadConfig();
+		// Grab config
+		ConfigurationSection config = this.getConfig();
+		// Load variables from config
+		jailLoc = new Location(this.getServer().getWorld(
+				config.getString("jail.world", this.getServer().getWorlds()
+						.get(0).getName())), config.getInt("jail.x", 0),
+				config.getInt("jail.y", 0), config.getInt("jail.z", 0));
+		unjailLoc = new Location(this.getServer().getWorld(
+				config.getString("unjail.world", this.getServer().getWorlds()
+						.get(0).getName())), config.getInt("unjail.x", 0),
+				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
+		jailGroup = config.getString("jailgroup", "Jailed");
+		debugTime = config.getBoolean("debugTime", false);
+		limit = config.getInt("entrylimit", 10);
+		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
@@ -1224,7 +1273,7 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				jailer = rs.getString("jailer");
-				if(rs.wasNull())
+				if (rs.wasNull())
 				{
 					jailer = "NOBODY";
 				}
@@ -1256,7 +1305,7 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				date = rs.getString("date");
-				if(rs.wasNull())
+				if (rs.wasNull())
 				{
 					date = "";
 				}
@@ -1320,7 +1369,7 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				final String status = rs.getString("status");
-				if(rs.wasNull())
+				if (rs.wasNull())
 				{
 					log.severe(prefix + " MISSING STATUS FOR: " + player);
 				}
@@ -1357,7 +1406,7 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				time = rs.getDouble("time");
-				if(rs.wasNull())
+				if (rs.wasNull())
 				{
 					time = 0;
 				}
@@ -1553,7 +1602,7 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				reason = rs.getString("reason");
-				if(rs.wasNull())
+				if (rs.wasNull())
 				{
 					reason = "";
 				}

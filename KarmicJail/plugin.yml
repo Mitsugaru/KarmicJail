@@ -1,7 +1,7 @@
 name: KarmicJail
 main: com.mitsugaru.karmicjail.KarmicJail
 description: Jail plugin for Mine-RP
-version: 0.22
+version: 0.23
 author: Original - imjake9 ... Fork - Mitsugaru
 depend: [Vault]
 
@@ -92,6 +92,14 @@ commands:
            /<command>
   jversion:
     description: Get plugin version and config info. Alias to jailversion.
+    usage: |
+           /<command>
+  jailreload:
+    description: Reload plugin config.
+    usage: |
+           /<command>
+  jreload:
+    description: Reload plugin config. Alias to jailreload.
     usage: |
            /<command>
 
