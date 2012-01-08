@@ -1464,6 +1464,16 @@ public class KarmicJail extends JavaPlugin {
 					String name = rs.getString("playername");
 					if (!rs.wasNull())
 					{
+						String jailer = rs.getString("jailer");
+						if (rs.wasNull())
+						{
+							jailer = "NOBODY";
+						}
+						String date = rs.getString("date");
+						if (rs.wasNull())
+						{
+							date = "NO DATE";
+						}
 						String reason = rs.getString("reason");
 						if (rs.wasNull())
 						{
