@@ -1700,7 +1700,6 @@ public class KarmicJail extends JavaPlugin {
 	public String getPlayerStatus(String name) {
 		boolean found = false;
 		String status = "" + JailStatus.FREED;
-		boolean fix = false;
 		try
 		{
 			ResultSet rs = database
