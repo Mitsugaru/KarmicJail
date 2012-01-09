@@ -576,7 +576,7 @@ public class KarmicJail extends JavaPlugin {
 			}
 			else
 			{
-				if (args.length > 1)
+				if (args.length > 0)
 				{
 					String name = expandName(args[0]);
 					final StringBuilder sb = new StringBuilder();
