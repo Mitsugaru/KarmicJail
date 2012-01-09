@@ -910,7 +910,6 @@ public class KarmicJail extends JavaPlugin {
 
 		// Grab player if on server
 		Player player = this.getServer().getPlayer(name);
-
 		// Remove task
 		if (threads.containsKey(name))
 		{
@@ -1089,8 +1088,8 @@ public class KarmicJail extends JavaPlugin {
 		else
 		{
 			sb.append(ChatColor.AQUA + name + ChatColor.RED + " was jailed on "
-					+ ChatColor.GREEN + this.getJailDate(name) + ChatColor.RED
-					+ " by " + ChatColor.GOLD + this.getJailer(name));
+					+ ChatColor.GREEN + date + ChatColor.RED
+					+ " by " + ChatColor.GOLD + jailer);
 		}
 		if (!reason.equals(""))
 		{
@@ -1462,7 +1461,8 @@ public class KarmicJail extends JavaPlugin {
 				do
 				{
 					String name = rs.getString("playername");
-					if (!rs.wasNull())
+					boolean has = !rs.wasNull();
+					if (has)
 					{
 						String jailer = rs.getString("jailer");
 						if (rs.wasNull())
@@ -1652,7 +1652,6 @@ public class KarmicJail extends JavaPlugin {
 					reason = "";
 				}
 			}
-
 			rs.close();
 		}
 		catch (SQLException e)
@@ -1714,14 +1713,18 @@ public class KarmicJail extends JavaPlugin {
 				if (rs.wasNull())
 				{
 					status = "" + JailStatus.FREED;
-					fix = true;
+				}
+				else
+				{
+					found = false;
 				}
 			}
-			rs.close();
-			if (fix)
+			else
 			{
-				setPlayerStatus(JailStatus.FREED, name);
+				found = false;
 			}
+			rs.close();
+
 		}
 		catch (SQLException e)
 		{
@@ -1742,6 +1745,10 @@ public class KarmicJail extends JavaPlugin {
 			{
 				status = "" + JailStatus.PENDINGJAIL;
 			}
+		}
+		else
+		{
+			setPlayerStatus(JailStatus.FREED, name);
 		}
 		return status;
 	}
