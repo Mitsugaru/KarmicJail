@@ -86,6 +86,14 @@ commands:
     description: Give a jailed player a timed release. Alias to jailtime.
     usage: |
            /<command> <player> [player2] ... <time>
+  jailreason:
+    description: Sets reason on a player.
+    usage: |
+           /<command> <player> [reason]
+  jreason:
+    description: Sets reason on a player. Alias to jailreason.
+    usage: |
+           /<command> <player> [reason]
   jailversion:
     description: Get plugin version and config info.
     usage: |
