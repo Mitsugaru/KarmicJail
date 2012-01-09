@@ -350,6 +350,11 @@ public class KarmicJail extends JavaPlugin {
 				sender.sendMessage(ChatColor.GREEN + "/jailtime"
 						+ ChatColor.AQUA + " <player>" + ChatColor.YELLOW
 						+ " : Toggle mute for a player. Alias: /jtime");
+				sender.sendMessage(ChatColor.GREEN + "/jailreason"
+						+ ChatColor.AQUA + " <player> "
+						+ ChatColor.LIGHT_PURPLE + "[reason]"
+						+ ChatColor.YELLOW
+						+ " : Sets jail reason for player. Alias: /jreason");
 			}
 			if (perm.has(sender, "KarmicJail.mute"))
 			{
@@ -561,6 +566,42 @@ public class KarmicJail extends JavaPlugin {
 			}
 			com = true;
 		}
+		else if (commandLabel.equals("jailreason")
+				|| commandLabel.equals("jreason"))
+		{
+			if (!perm.has(sender, "KarmicJail.jail"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.jail");
+			}
+			else
+			{
+				if (args.length > 1)
+				{
+					String name = expandName(args[0]);
+					final StringBuilder sb = new StringBuilder();
+					for(int i = 1; i < args.length; i++)
+					{
+						sb.append(args[i] + " ");
+					}
+					String reason = "";
+					if (sb.length() > 0)
+					{
+						// Remove all trailing whitespace
+						reason = sb.toString().replaceAll("\\s+$", "");
+					}
+					setPlayerReason(name, reason);
+					sender.sendMessage(ChatColor.GREEN + prefix + " Set reason for " + ChatColor.AQUA + name + ChatColor.GREEN + " to: " + ChatColor.GRAY + reason);
+				}
+				else
+				{
+					sender.sendMessage(ChatColor.RED + "Missing name");
+					sender.sendMessage(ChatColor.RED
+							+ "/jtime <player> [player2] ... <time>");
+				}
+			}
+			com = true;
+		}
 		else
 		{
 			if (!perm.has(sender, "KarmicJail.jail"))
@@ -582,6 +623,12 @@ public class KarmicJail extends JavaPlugin {
 			return true;
 		}
 		return false;
+	}
+
+	private void setPlayerReason(String name,
+			String reason) {
+		this.database.standardQuery("UPDATE jailed SET reason='" + reason
+				+ "' WHERE playername='" + name + "';");
 	}
 
 	/**
@@ -671,7 +718,7 @@ public class KarmicJail extends JavaPlugin {
 				if (timed)
 				{
 					player.sendMessage(ChatColor.AQUA + "Time in jail: "
-							+ this.prettifyMinutes(minutes));
+							+ ChatColor.GOLD + this.prettifyMinutes(minutes));
 				}
 			}
 			else
@@ -937,11 +984,14 @@ public class KarmicJail extends JavaPlugin {
 			long duration = 0;
 			duration = minutes * minutesToTicks;
 			this.updatePlayerTime(name, duration);
-			// Create thread to release player
-			threads.put(name, new JailTask(this, name, duration));
+			if (player != null)
+			{
+				// Create thread to release player
+				threads.put(name, new JailTask(this, name, duration));
+			}
 			sender.sendMessage(ChatColor.AQUA + "Time set to " + ChatColor.GOLD
-					+ minutes + " for " + ChatColor.RED + name + ChatColor.AQUA
-					+ ".");
+					+ minutes + ChatColor.AQUA + " for " + ChatColor.RED + name
+					+ ChatColor.AQUA + ".");
 			if (player != null)
 			{
 				player.sendMessage(ChatColor.AQUA + "Time set to "
@@ -1088,8 +1138,8 @@ public class KarmicJail extends JavaPlugin {
 		else
 		{
 			sb.append(ChatColor.AQUA + name + ChatColor.RED + " was jailed on "
-					+ ChatColor.GREEN + date + ChatColor.RED
-					+ " by " + ChatColor.GOLD + jailer);
+					+ ChatColor.GREEN + date + ChatColor.RED + " by "
+					+ ChatColor.GOLD + jailer);
 		}
 		if (!reason.equals(""))
 		{
@@ -1107,7 +1157,7 @@ public class KarmicJail extends JavaPlugin {
 			if (player == null)
 			{
 				sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
-						+ this.prettifyMinutes(minutes));
+						+ ChatColor.GOLD + this.prettifyMinutes(minutes));
 			}
 			else
 			{
@@ -1497,10 +1547,10 @@ public class KarmicJail extends JavaPlugin {
 						cache.put(name, new PrisonerInfo(name, jailer, date,
 								reason, time, muted));
 						// Update the time if necessary
-						if(threads.containsKey(name))
+						if (threads.containsKey(name))
 						{
 							cache.get(name).updateTime(
-								threads.get(name).remainingTime());
+									threads.get(name).remainingTime());
 						}
 					}
 				}
