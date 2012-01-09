@@ -53,7 +53,7 @@ public class KarmicJail extends JavaPlugin {
 	private final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-	private boolean debugTime, unjailTeleport;
+	private boolean debugTime, unjailTeleport, useDefaultGroup;
 	private int limit;
 
 	@Override
@@ -889,17 +889,20 @@ public class KarmicJail extends JavaPlugin {
 				}
 				else if (groups.equals(""))
 				{
-					try
+					if(useDefaultGroup)
 					{
-						// set to default
-						perm.playerAddGroup(
-								this.getServer().getWorlds().get(0), name,
-								perm.getDefaultGroup());
-					}
-					catch (IndexOutOfBoundsException e)
-					{
-						this.log.warning(prefix + " Could not fix group for: "
-								+ name);
+						try
+						{
+							// set to default
+							perm.playerAddGroup(
+									this.getServer().getWorlds().get(0), name,
+									perm.getDefaultGroup());
+						}
+						catch (IndexOutOfBoundsException e)
+						{
+							this.log.warning(prefix + " Could not fix group for: "
+									+ name);
+						}
 					}
 				}
 				else
@@ -1192,6 +1195,7 @@ public class KarmicJail extends JavaPlugin {
 		defaults.put("unjail.z", 0);
 		defaults.put("unjail.teleport", true);
 		defaults.put("entrylimit", 10);
+		defaults.put("addToDefaultGroup", true);
 		defaults.put("version", this.getDescription().getVersion());
 
 		// Insert defaults into config file if they're not present
@@ -1217,6 +1221,7 @@ public class KarmicJail extends JavaPlugin {
 		jailGroup = config.getString("jailgroup", "Jailed");
 		debugTime = config.getBoolean("debugTime", false);
 		limit = config.getInt("entrylimit", 10);
+		useDefaultGroup = config.getBoolean("addToDefaultGroup",true);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
