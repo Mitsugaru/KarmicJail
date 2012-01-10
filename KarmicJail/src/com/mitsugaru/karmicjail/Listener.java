@@ -59,33 +59,25 @@ public class Listener extends PlayerListener {
         final String status = plugin.getPlayerStatus(player.getName());
 
         // Check status
-        if (status.equals(""+JailStatus.PENDINGJAIL)) {
+        if (status.equals(""+JailStatus.PENDINGJAIL) || status.equals(""+JailStatus.JAILED)) {
             if (plugin.playerIsTempJailed(player.getName())) {
-                int minutes = (int) ((plugin.getPlayerTime(player.getName()) / minutesToTicks));
+            	final long time = plugin.getPlayerTime(player.getName());
+                final int minutes = (int) ((time / minutesToTicks));
                 player.sendMessage(ChatColor.AQUA + "You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
-                plugin.addThread(player.getName());
+                plugin.addThread(player.getName(), time);
             } else {
                 player.sendMessage(ChatColor.AQUA + "You are jailed.");
             }
             player.teleport(plugin.getJailLocation());
-            plugin.setPlayerStatus(JailStatus.JAILED, player.getName());
+            if(status.equals(""+JailStatus.PENDINGJAIL))
+            {
+            	plugin.setPlayerStatus(JailStatus.JAILED, player.getName());
+            }
 
         } else if (status.equals(""+JailStatus.PENDINGFREE)) {
             plugin.setPlayerStatus(JailStatus.FREED, player.getName());
             plugin.teleportOut(player.getName());
-            player.sendMessage(ChatColor.AQUA + "You have been removed from jail!");
-        }
-        else if(status.equals(""+JailStatus.JAILED) && plugin.playerIsTempJailed(player.getName()))
-        {
-        	if (plugin.playerIsTempJailed(player.getName())) {
-                int minutes = (int) ((plugin.getPlayerTime(player.getName()) / minutesToTicks));
-                player.sendMessage(ChatColor.AQUA + "You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
-                plugin.addThread(player.getName());
-            } else {
-                player.sendMessage(ChatColor.AQUA + "You are jailed.");
-            }
-        	player.teleport(plugin.getJailLocation());
-        	plugin.addThread(player.getName());
+            player.sendMessage(ChatColor.AQUA + "You have been removed from jail.");
         }
     }
 

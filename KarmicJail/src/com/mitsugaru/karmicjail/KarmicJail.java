@@ -53,7 +53,7 @@ public class KarmicJail extends JavaPlugin {
 	private final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-	private boolean debugTime, unjailTeleport, useDefaultGroup;
+	private boolean debugTime, unjailTeleport;
 	private int limit;
 
 	@Override
@@ -580,7 +580,7 @@ public class KarmicJail extends JavaPlugin {
 				{
 					String name = expandName(args[0]);
 					final StringBuilder sb = new StringBuilder();
-					for(int i = 1; i < args.length; i++)
+					for (int i = 1; i < args.length; i++)
 					{
 						sb.append(args[i] + " ");
 					}
@@ -591,7 +591,10 @@ public class KarmicJail extends JavaPlugin {
 						reason = sb.toString().replaceAll("\\s+$", "");
 					}
 					setPlayerReason(name, reason);
-					sender.sendMessage(ChatColor.GREEN + prefix + " Set reason for " + ChatColor.AQUA + name + ChatColor.GREEN + " to: " + ChatColor.GRAY + reason);
+					sender.sendMessage(ChatColor.GREEN + prefix
+							+ " Set reason for " + ChatColor.AQUA + name
+							+ ChatColor.GREEN + " to: " + ChatColor.GRAY
+							+ reason);
 				}
 				else
 				{
@@ -625,8 +628,7 @@ public class KarmicJail extends JavaPlugin {
 		return false;
 	}
 
-	private void setPlayerReason(String name,
-			String reason) {
+	private void setPlayerReason(String name, String reason) {
 		this.database.standardQuery("UPDATE jailed SET reason='" + reason
 				+ "' WHERE playername='" + name + "';");
 	}
@@ -872,48 +874,22 @@ public class KarmicJail extends JavaPlugin {
 			if (rs.next())
 			{
 				String groups = rs.getString("groups");
-				if (rs.wasNull())
-				{
-					try
+				if (!rs.wasNull() && !groups.equals(""))
+
+					if (groups.contains("&"))
 					{
-						// set to default
-						perm.playerAddGroup(
-								this.getServer().getWorlds().get(0), name,
-								perm.getDefaultGroup());
-					}
-					catch (IndexOutOfBoundsException e)
-					{
-						this.log.warning(prefix + " Could not fix group for: "
-								+ name);
-					}
-				}
-				else if (groups.equals(""))
-				{
-					if(useDefaultGroup)
-					{
-						try
+						String[] cut = groups.split("&");
+						for (String group : cut)
 						{
-							// set to default
-							perm.playerAddGroup(
-									this.getServer().getWorlds().get(0), name,
-									perm.getDefaultGroup());
-						}
-						catch (IndexOutOfBoundsException e)
-						{
-							this.log.warning(prefix + " Could not fix group for: "
-									+ name);
+							String[] split = group.split("!");
+							perm.playerAddGroup(split[1], name, split[0]);
 						}
 					}
-				}
-				else
-				{
-					String[] cut = groups.split("&");
-					for (String group : cut)
+					else
 					{
-						String[] split = group.split("!");
+						String[] split = groups.split("!");
 						perm.playerAddGroup(split[1], name, split[0]);
 					}
-				}
 			}
 			rs.close();
 		}
@@ -1195,7 +1171,6 @@ public class KarmicJail extends JavaPlugin {
 		defaults.put("unjail.z", 0);
 		defaults.put("unjail.teleport", true);
 		defaults.put("entrylimit", 10);
-		defaults.put("addToDefaultGroup", true);
 		defaults.put("version", this.getDescription().getVersion());
 
 		// Insert defaults into config file if they're not present
@@ -1221,7 +1196,6 @@ public class KarmicJail extends JavaPlugin {
 		jailGroup = config.getString("jailgroup", "Jailed");
 		debugTime = config.getBoolean("debugTime", false);
 		limit = config.getInt("entrylimit", 10);
-		useDefaultGroup = config.getBoolean("addToDefaultGroup",true);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
@@ -1481,6 +1455,8 @@ public class KarmicJail extends JavaPlugin {
 			if (missing)
 			{
 				setJailTime(console, player, 0);
+				log.warning(prefix + " " + player
+						+ "'s Time was missing. Reset to 0.");
 			}
 		}
 		catch (SQLException e)
@@ -1753,7 +1729,7 @@ public class KarmicJail extends JavaPlugin {
 	 * @return String of the player's JailStatus
 	 */
 	public String getPlayerStatus(String name) {
-		boolean found = false;
+		boolean found = true;
 		String status = "" + JailStatus.FREED;
 		try
 		{
@@ -1762,14 +1738,10 @@ public class KarmicJail extends JavaPlugin {
 							+ "';");
 			if (rs.next())
 			{
-				found = true;
 				status = rs.getString("status");
 				if (rs.wasNull())
 				{
 					status = "" + JailStatus.FREED;
-				}
-				else
-				{
 					found = false;
 				}
 			}
@@ -1852,24 +1824,24 @@ public class KarmicJail extends JavaPlugin {
 	 * @return String of readable minutes
 	 */
 	public String prettifyMinutes(int minutes) {
-		if (minutes == 0)
+		if (minutes < 1)
 		{
-			return "less than a minute";
+			return "about less than a minute";
 		}
 		if (minutes == 1)
-			return "one minute";
+			return "about one minute";
 		if (minutes < 60)
-			return minutes + " minutes";
+			return "about " + minutes + " minutes";
 		if (minutes % 60 == 0)
 		{
 			if (minutes / 60 == 1)
-				return "one hour";
+				return "about one hour";
 			else
-				return (minutes / 60) + " hours";
+				return "about " + (minutes / 60) + " hours";
 		}
 		int m = minutes % 60;
 		int h = (minutes - m) / 60;
-		return h + "h" + m + "m";
+		return "about " + h + "h" + m + "m";
 	}
 
 	/**
@@ -2023,8 +1995,8 @@ public class KarmicJail extends JavaPlugin {
 			if (!has)
 			{
 				// Add to database
-				database.standardQuery("INSERT INTO jailed (playername,status,time) VALUES('"
-						+ name + "','" + JailStatus.FREED + "','0');");
+				database.standardQuery("INSERT INTO jailed (playername,status,time) VALUES ('"
+						+ name + "', '" + JailStatus.FREED + "', '0');");
 			}
 		}
 		catch (SQLException e)
@@ -2035,13 +2007,13 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	/**
-	 * Creates a new thread for a player to get auto-relaesed
+	 * Creates a new thread for a player to get auto-released
 	 *
 	 * @param name
 	 *            of player
 	 */
-	public void addThread(String name) {
-		threads.put(name, new JailTask(this, name, this.getPlayerTime(name)));
+	public void addThread(String name, long time) {
+		threads.put(name, new JailTask(this, name, time));
 	}
 
 	/**

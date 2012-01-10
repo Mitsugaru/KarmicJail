@@ -148,16 +148,8 @@ public class SQLite extends DatabaseHandler {
 			 *   with the database.
 			 */
 			statement = connection.createStatement();
-
-			switch (this.getStatement(query)) {
-				case SELECT:
-					result = statement.executeQuery(query);
-					return result;
-
-				default:
-					statement.executeQuery(query);
-					return result;
-			}
+			result = statement.executeQuery(query);
+			return result;
 		} catch (SQLException ex) {
 			if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked")) {
 				return retryResult(query);

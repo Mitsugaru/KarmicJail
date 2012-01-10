@@ -33,7 +33,7 @@ public class JailTask implements Runnable {
 
 	public long remainingTime()
 	{
-		return (duration - (long) Math.floor(((System.nanoTime() - start) * 0.000000001) + 0.5f));
+		return (duration - (long) (Math.floor(((System.nanoTime() - start) * 0.000000001) + 0.5f)) * 20);
 	}
 
 	public void stop()
@@ -43,8 +43,8 @@ public class JailTask implements Runnable {
 			//Stop thread
 			sj.getServer().getScheduler().cancelTask(id);
 		}
-		long early = System.nanoTime() - start;
-		duration -= (long) Math.floor((early * 0.000000001) + 0.5f);
+		final long early = System.nanoTime() - start;
+		duration -= (long) (Math.floor((early * 0.000000001) + 0.5f) * 20);
 		sj.updatePlayerTime(name, duration);
 		sj.removeTask(name);
 	}
