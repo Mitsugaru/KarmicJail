@@ -141,13 +141,6 @@ public class PermCheck {
 		return def;
 	}
 
-	public void playerAddGroup(World world, String name, String group) {
-		if(hasVault)
-		{
-			perm.playerAddGroup(world, name, group);
-		}
-	}
-
 	public String[] getPlayerGroups(World w, String name) {
 		String[] groups = new String[0];
 		if(hasVault)
@@ -160,14 +153,46 @@ public class PermCheck {
 	public void playerRemoveGroup(World w, String name, String group) {
 		if(hasVault)
 		{
-			perm.playerRemoveGroup(w, name, group);
+			if(pluginName.equals("PermissionsBukkit"))
+			{
+				//TODO handle correctly
+				final boolean check = perm.playerRemoveGroup(w, name, group);
+				if(!check)
+				{
+					plugin.log.warning("Could not remove group '" + group + "' from '" + name + "'... Permissions error.");
+				}
+			}
+			else
+			{
+				final boolean check = perm.playerRemoveGroup(w, name, group);
+				if(!check)
+				{
+					plugin.log.warning("Could not remove group '" + group + "' of world '" + w.getName() + "' from '" + name + "'... Permissions error.");
+				}
+			}
 		}
 	}
 
 	public void playerAddGroup(String world, String name, String group) {
 		if(hasVault)
 		{
-			perm.playerAddGroup(world, name, group);
+			if(pluginName.equals("PermissionsBukkit"))
+			{
+				//TODO handle correctly
+				final boolean check = perm.playerAddGroup(world, name, group);
+				if(!check)
+				{
+					plugin.log.warning("Could not add group '" + group + "' to '" + name + "' = Permissions error.");
+				}
+			}
+			else
+			{
+				final boolean check = perm.playerAddGroup(world, name, group);
+				if(!check)
+				{
+					plugin.log.warning("Could not add group '" + group + "' of world '" + world + "' to '" + name + "' = Permissions error.");
+				}
+			}
 		}
 	}
 }

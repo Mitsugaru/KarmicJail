@@ -684,7 +684,7 @@ public class KarmicJail extends JavaPlugin {
 			// Remove all groups
 			this.removePlayerGroups(name);
 			// Add to jail group
-			perm.playerAddGroup(jailLoc.getWorld(), name, jailGroup);
+			perm.playerAddGroup(jailLoc.getWorld().getName(), name, jailGroup);
 
 			// Grab duration
 			long duration = 0;

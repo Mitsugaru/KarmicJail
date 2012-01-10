@@ -79,6 +79,7 @@ public class Listener extends PlayerListener {
             plugin.teleportOut(player.getName());
             player.sendMessage(ChatColor.AQUA + "You have been removed from jail.");
         }
+        //TODO if they are free, and if they contain the group Jailed, remove it.
     }
 
 	@Override
