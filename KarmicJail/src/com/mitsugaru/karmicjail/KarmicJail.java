@@ -37,6 +37,9 @@ import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.platymuus.bukkit.permissions.Group;
+import com.platymuus.bukkit.permissions.PermissionsPlugin;
+
 //TODO reason after being jailed
 public class KarmicJail extends JavaPlugin {
 	// Class Variables
@@ -772,12 +775,23 @@ public class KarmicJail extends JavaPlugin {
 	 *            of player
 	 */
 	private void removePlayerGroups(String name) {
-		for (World w : this.getServer().getWorlds())
+		if(perm.getName().equals("PermissionsBukkit"))
 		{
-			String[] groups = perm.getPlayerGroups(w, name);
-			for (String group : groups)
+			final PermissionsPlugin permission = (PermissionsPlugin) this.getServer().getPluginManager().getPlugin("PermissionsBukkit");
+			for(Group group : permission.getGroups(name))
 			{
-				perm.playerRemoveGroup(w, name, group);
+				perm.playerRemoveGroup(this.getServer().getWorlds().get(0), name, group.getName());
+			}
+		}
+		else
+		{
+			for (World w : this.getServer().getWorlds())
+			{
+				String[] groups = perm.getPlayerGroups(w, name);
+				for (String group : groups)
+				{
+					perm.playerRemoveGroup(w, name, group);
+				}
 			}
 		}
 	}
@@ -1801,15 +1815,27 @@ public class KarmicJail extends JavaPlugin {
 	 */
 	public List<String> getGroups(String player) {
 		List<String> list = new ArrayList<String>();
-		for (World w : this.getServer().getWorlds())
+		if(perm.getName().equals("PermissionsBukkit"))
 		{
-			String[] groups = perm.getPlayerGroups(w, player);
-			for (String group : groups)
+			final PermissionsPlugin permission = (PermissionsPlugin) this.getServer().getPluginManager().getPlugin("PermissionsBukkit");
+			for(Group group : permission.getGroups(player))
 			{
-				String s = group + "!" + w.getName();
-				if (!list.contains(s))
+				final String s = group.getName() + "!" + this.getServer().getWorlds().get(0).getName();
+				list.add(s);
+			}
+		}
+		else
+		{
+			for (World w : this.getServer().getWorlds())
+			{
+				String[] groups = perm.getPlayerGroups(w, player);
+				for (String group : groups)
 				{
-					list.add(s);
+					String s = group + "!" + w.getName();
+					if (!list.contains(s))
+					{
+						list.add(s);
+					}
 				}
 			}
 		}

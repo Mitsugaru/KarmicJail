@@ -155,8 +155,9 @@ public class PermCheck {
 		{
 			if(pluginName.equals("PermissionsBukkit"))
 			{
-				//TODO handle correctly
-				final boolean check = perm.playerRemoveGroup(w, name, group);
+				//Handle PermissionsBukkit
+				final String cmd = "permissions player removegroup " + name + " " + group;
+				final boolean check = plugin.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
 				if(!check)
 				{
 					plugin.log.warning("Could not remove group '" + group + "' from '" + name + "'... Permissions error.");
@@ -178,8 +179,9 @@ public class PermCheck {
 		{
 			if(pluginName.equals("PermissionsBukkit"))
 			{
-				//TODO handle correctly
-				final boolean check = perm.playerAddGroup(world, name, group);
+				//Handle PermissionsBukkit
+				final String cmd = "permissions player addgroup " + name + " " + group;
+				final boolean check = plugin.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
 				if(!check)
 				{
 					plugin.log.warning("Could not add group '" + group + "' to '" + name + "' = Permissions error.");
@@ -194,5 +196,10 @@ public class PermCheck {
 				}
 			}
 		}
+	}
+
+	public String getName()
+	{
+		return perm.getName();
 	}
 }
