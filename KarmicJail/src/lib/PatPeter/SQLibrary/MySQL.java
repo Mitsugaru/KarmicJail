@@ -187,7 +187,12 @@ public class MySQL extends DatabaseHandler {
 			 * allowed to be null. Either the check is redundant or
 			 * the previous dereference is erroneous.
 			 */
-			if (query.equals("") || query == null) {
+			if(query == null)
+			{
+				this.writeError("SQL query null", true);
+				return false;
+			}
+			else if (query.equals("")) {
 				this.writeError("SQL query empty: createTable(" + query + ")", true);
 				return false;
 			}
@@ -205,6 +210,8 @@ public class MySQL extends DatabaseHandler {
 			 */
 			statement = connection.createStatement();
 		    statement.execute(query);
+		    statement.close();
+		    connection.close();
 		    return true;
 		} catch (SQLException e) {
 			this.writeError(e.getMessage(), true);
@@ -235,11 +242,14 @@ public class MySQL extends DatabaseHandler {
 		    Statement statement = connection.createStatement();
 
 		    ResultSet result = statement.executeQuery("SELECT * FROM " + table);
-
-		    if (result == null)
-		    	return false;
+		    boolean exists = false;
 		    if (result != null)
-		    	return true;
+		    {
+		    	exists = true;
+		    }
+		    result.close();
+		    statement.close();
+		    return exists;
 		} catch (SQLException e) {
 			if (e.getMessage().contains("exist")) {
 				return false;
