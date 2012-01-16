@@ -107,7 +107,7 @@ public class KarmicJail extends JavaPlugin {
 		this.getServer()
 				.getPluginManager()
 				.registerEvent(Event.Type.PLAYER_RESPAWN, listener,
-						Priority.High, this);
+						Priority.Highest, this);
 		this.getServer()
 				.getPluginManager()
 				.registerEvent(Event.Type.PLAYER_JOIN, listener,
@@ -145,7 +145,7 @@ public class KarmicJail extends JavaPlugin {
 			}
 			else
 			{
-				// TODO does not handle if a player has all numeric name
+				//All numeric player name must be the first name
 				boolean timed = false;
 				boolean done = false;
 				int time = 0;
