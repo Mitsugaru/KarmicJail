@@ -175,18 +175,6 @@ public class MySQL extends DatabaseHandler {
 	public boolean createTable(String query) {
 		Statement statement = null;
 		try {
-			this.connection = this.open();
-			//WARN RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE
-			/*
-			 * A value is checked here to see whether it is null,
-			 * but this value can't be null because it was previously
-			 * dereferenced and if it were null a null pointer
-			 * exception would have occurred at the earlier
-			 * dereference. Essentially, this code and the previous
-			 * dereference disagree as to whether this value is
-			 * allowed to be null. Either the check is redundant or
-			 * the previous dereference is erroneous.
-			 */
 			if(query == null)
 			{
 				this.writeError("SQL query null", true);
@@ -196,18 +184,7 @@ public class MySQL extends DatabaseHandler {
 				this.writeError("SQL query empty: createTable(" + query + ")", true);
 				return false;
 			}
-			//WARN ODR_OPEN_DATABASE_RESOURCE
-			/*
-			 * The method creates a database resource
-			 * (such as a database connection or row set),
-			 * does not assign it to any fields, pass it to other
-			 * methods, or return it, and does not appear to close
-			 * the object on all paths out of the method.
-			 * Failure to close database resources on all paths out
-			 * of a method may result in poor performance, and could
-			 *  cause the application to have problems communicating
-			 *   with the database.
-			 */
+			this.connection = this.open();
 			statement = connection.createStatement();
 		    statement.execute(query);
 		    statement.close();
@@ -226,19 +203,6 @@ public class MySQL extends DatabaseHandler {
 	public boolean checkTable(String table) {
 		try {
 			Connection connection = open();
-			//this.connection = this.open();
-			//WARN ODR_OPEN_DATABASE_RESOURCE
-			/*
-			 * The method creates a database resource
-			 * (such as a database connection or row set),
-			 * does not assign it to any fields, pass it to other
-			 * methods, or return it, and does not appear to close
-			 * the object on all paths out of the method.
-			 * Failure to close database resources on all paths out
-			 * of a method may result in poor performance, and could
-			 *  cause the application to have problems communicating
-			 *   with the database.
-			 */
 		    Statement statement = connection.createStatement();
 
 		    ResultSet result = statement.executeQuery("SELECT * FROM " + table);
@@ -249,6 +213,7 @@ public class MySQL extends DatabaseHandler {
 		    }
 		    result.close();
 		    statement.close();
+		    connection.close();
 		    return exists;
 		} catch (SQLException e) {
 			if (e.getMessage().contains("exist")) {
