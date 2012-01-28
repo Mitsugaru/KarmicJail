@@ -5,7 +5,7 @@
  * Date Created: 2011-08-26 19:08
  * @author PatPeter
  */
-package lib.PatPeter.SQLibrary;
+package lib.Mitsugaru.SQLibrary;
 
 /*
  * MySQL
@@ -26,7 +26,7 @@ import java.sql.Statement;
 import java.util.logging.Logger;
 //import com.sun.rowset.JdbcRowSetImpl;
 
-public class MySQL extends DatabaseHandler {
+public class MySQL extends Database {
 	private String hostname = "localhost";
 	private String portnmbr = "3306";
 	private String username = "minecraft";

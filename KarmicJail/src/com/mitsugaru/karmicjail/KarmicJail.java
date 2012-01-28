@@ -22,7 +22,7 @@ import java.util.Vector;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import lib.PatPeter.SQLibrary.SQLite;
+import lib.Mitsugaru.SQLibrary.SQLite;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
