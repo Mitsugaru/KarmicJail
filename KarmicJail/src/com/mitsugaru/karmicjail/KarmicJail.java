@@ -145,7 +145,7 @@ public class KarmicJail extends JavaPlugin {
 			}
 			else
 			{
-				//All numeric player name must be the first name
+				// All numeric player name must be the first name
 				boolean timed = false;
 				boolean done = false;
 				int time = 0;
@@ -281,8 +281,10 @@ public class KarmicJail extends JavaPlugin {
 			}
 			com = true;
 		}
-		else if ((commandLabel.equalsIgnoreCase("jailstatus") || commandLabel
-				.equalsIgnoreCase("jstatus")) && args.length <= 1)
+		else if ((commandLabel.equalsIgnoreCase("jailstatus")
+				|| commandLabel.equalsIgnoreCase("jstatus")
+				|| commandLabel.equalsIgnoreCase("jailcheck") || commandLabel
+					.equalsIgnoreCase("jcheck")) && args.length <= 1)
 		{
 			if (!perm.has(sender, "KarmicJail.jailstatus"))
 			{
@@ -775,12 +777,15 @@ public class KarmicJail extends JavaPlugin {
 	 *            of player
 	 */
 	private void removePlayerGroups(String name) {
-		if(perm.getName().equals("PermissionsBukkit"))
+		if (perm.getName().equals("PermissionsBukkit"))
 		{
-			final PermissionsPlugin permission = (PermissionsPlugin) this.getServer().getPluginManager().getPlugin("PermissionsBukkit");
-			for(Group group : permission.getGroups(name))
+			final PermissionsPlugin permission = (PermissionsPlugin) this
+					.getServer().getPluginManager()
+					.getPlugin("PermissionsBukkit");
+			for (Group group : permission.getGroups(name))
 			{
-				perm.playerRemoveGroup(this.getServer().getWorlds().get(0), name, group.getName());
+				perm.playerRemoveGroup(this.getServer().getWorlds().get(0),
+						name, group.getName());
 			}
 		}
 		else
@@ -1815,12 +1820,15 @@ public class KarmicJail extends JavaPlugin {
 	 */
 	public List<String> getGroups(String player) {
 		List<String> list = new ArrayList<String>();
-		if(perm.getName().equals("PermissionsBukkit"))
+		if (perm.getName().equals("PermissionsBukkit"))
 		{
-			final PermissionsPlugin permission = (PermissionsPlugin) this.getServer().getPluginManager().getPlugin("PermissionsBukkit");
-			for(Group group : permission.getGroups(player))
+			final PermissionsPlugin permission = (PermissionsPlugin) this
+					.getServer().getPluginManager()
+					.getPlugin("PermissionsBukkit");
+			for (Group group : permission.getGroups(player))
 			{
-				final String s = group.getName() + "!" + this.getServer().getWorlds().get(0).getName();
+				final String s = group.getName() + "!"
+						+ this.getServer().getWorlds().get(0).getName();
 				list.add(s);
 			}
 		}

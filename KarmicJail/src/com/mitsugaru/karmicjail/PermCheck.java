@@ -13,6 +13,7 @@ import de.bananaco.permissions.Permissions;
 
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
+import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 /**
@@ -118,7 +119,7 @@ public class PermCheck {
 			}
 			else if (pluginName.equals("PermissionsBukkit"))
 			{
-				//Last I remember, PermissiosBukkit forces the default group to be named default
+				//Last I remember, PermissionsBukkit forces the default group to be named default
 				return def;
 			}
 			else if (pluginName.equals("bPermissions"))
@@ -163,6 +164,13 @@ public class PermCheck {
 					plugin.log.warning("Could not remove group '" + group + "' from '" + name + "'... Permissions error.");
 				}
 			}
+			else if(pluginName.equals("PermissionsEX"))
+			{
+				final PermissionManager pm = PermissionsEx.getPermissionManager();
+				final PermissionUser user = pm.getUser(name);
+				final PermissionGroup permGroup = PermissionsEx.getPermissionManager().getGroup(group);
+				user.removeGroup(permGroup, w.getName());
+			}
 			else
 			{
 				final boolean check = perm.playerRemoveGroup(w, name, group);
@@ -186,6 +194,13 @@ public class PermCheck {
 				{
 					plugin.log.warning("Could not add group '" + group + "' to '" + name + "' = Permissions error.");
 				}
+			}
+			else if(pluginName.equals("PermissionsEX"))
+			{
+				final PermissionManager pm = PermissionsEx.getPermissionManager();
+				final PermissionUser user = pm.getUser(name);
+				final PermissionGroup permGroup = PermissionsEx.getPermissionManager().getGroup(group);
+				user.addGroup(permGroup);
 			}
 			else
 			{
