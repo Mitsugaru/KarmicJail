@@ -37,6 +37,14 @@ public class Config {
 		defaults.put("unjail.z", 0);
 		defaults.put("unjail.teleport", true);
 		defaults.put("entrylimit", 10);
+		defaults.put("mysql.use", false);
+		defaults.put("mysql.host", "localhost");
+		defaults.put("mysql.port", 3306);
+		defaults.put("mysql.database", "minecraft");
+		defaults.put("mysql.user", "username");
+		defaults.put("mysql.password", "pass");
+		defaults.put("mysql.tablePrefix", "kj_");
+		defaults.put("mysql.import", false);
 		defaults.put("version", plugin.getDescription().getVersion());
 
 		// Insert defaults into config file if they're not present
@@ -49,6 +57,14 @@ public class Config {
 		plugin.saveConfig();
 
 		// Load variables from config
+		useMySQL = config.getBoolean("mysql.use", false);
+		host = config.getString("mysql.host", "localhost");
+		port = config.getString("mysql.port", "3306");
+		database = config.getString("mysql.database", "minecraft");
+		user = config.getString("mysql.user", "user");
+		password = config.getString("mysql.password", "password");
+		tablePrefix = config.getString("mysql.prefix", "ks_");
+		importSQL = config.getBoolean("mysql.import", false);
 		jailLoc = new Location(plugin.getServer().getWorld(
 				config.getString("jail.world", plugin.getServer().getWorlds()
 						.get(0).getName())), config.getInt("jail.x", 0),
