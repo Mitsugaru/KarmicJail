@@ -1798,7 +1798,7 @@ public class KarmicJail extends JavaPlugin {
 		}
 	}
 
-	public DBHandler getLiteDB() {
+	public DBHandler getDatabaseHandler() {
 		return database;
 	}
 

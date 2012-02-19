@@ -142,9 +142,23 @@ public class Config {
 		{
 			// Add enchantments column
 			query = "ALTER TABLE jailed ADD muted INTEGER;";
-			plugin.getLiteDB().standardQuery(query);
+			plugin.getDatabaseHandler().standardQuery(query);
 		}
-
+		//Updates for new tables
+		if(ver < 0.3)
+		{
+			//Drop newly created tables
+			plugin.getLogger().info(
+					KarmicJail.prefix
+							+ " Dropping empty tables.");
+			plugin.getDatabaseHandler().standardQuery("DROP TABLE " + tablePrefix + "jailed;");
+			// Update tables to have prefix
+			plugin.getLogger().info(
+					KarmicJail.prefix
+							+ " Renaming jailed table to '" + tablePrefix +"jailed'.");
+			query = "ALTER TABLE jailed RENAME TO " + tablePrefix + "jailed;";
+			plugin.getDatabaseHandler().standardQuery(query);
+		}
 		// Update version number in config.yml
 		plugin.getConfig().set("version", plugin.getDescription().getVersion());
 		plugin.saveConfig();
