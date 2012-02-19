@@ -112,7 +112,7 @@ public class PermCheck {
 					}
 					catch(IndexOutOfBoundsException e)
 					{
-						this.plugin.log.warning(this.plugin.prefix + " Cannot grab default group.");
+						this.plugin.log.warning(KarmicJail.prefix + " Cannot grab default group.");
 						return def;
 					}
 				}
@@ -130,7 +130,7 @@ public class PermCheck {
 				}
 				catch(IndexOutOfBoundsException e)
 				{
-					this.plugin.log.warning(this.plugin.prefix + " Cannot grab default group.");
+					this.plugin.log.warning(KarmicJail.prefix + " Cannot grab default group.");
 					return def;
 				}
 			}

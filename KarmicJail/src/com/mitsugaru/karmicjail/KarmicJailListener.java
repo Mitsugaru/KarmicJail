@@ -11,22 +11,24 @@ package com.mitsugaru.karmicjail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
-public class Listener extends PlayerListener {
+public class KarmicJailListener implements Listener {
 	//Class variables
     private final KarmicJail plugin;
     private static final long minutesToTicks = 1200;
 
-    public Listener(KarmicJail plugin) {
+    public KarmicJailListener(KarmicJail plugin) {
         this.plugin = plugin;
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(final PlayerChatEvent event)
     {
     	final Player player = event.getPlayer();
@@ -39,7 +41,7 @@ public class Listener extends PlayerListener {
         }
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerRespawn(final PlayerRespawnEvent event) {
 
         final Player player = event.getPlayer();
@@ -49,7 +51,7 @@ public class Listener extends PlayerListener {
         event.setRespawnLocation(plugin.getJailLocation());
     }
 
-    @Override
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(final PlayerJoinEvent event) {
 
     	//Attempt to add player to database
@@ -82,7 +84,7 @@ public class Listener extends PlayerListener {
         //TODO if they are free, and if they contain the group Jailed, remove it.
     }
 
-	@Override
+    @EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(final PlayerQuitEvent event)
     {
     	final Player player = event.getPlayer();

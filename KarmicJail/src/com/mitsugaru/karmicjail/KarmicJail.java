@@ -19,10 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
-
-import lib.Mitsugaru.SQLibrary.SQLite;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -30,11 +27,7 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.platymuus.bukkit.permissions.Group;
@@ -44,15 +37,14 @@ import com.platymuus.bukkit.permissions.PermissionsPlugin;
 public class KarmicJail extends JavaPlugin {
 	// Class Variables
 	public final Logger log = Logger.getLogger("Minecraft");
-	public final String prefix = "[KarmicJail]";
+	public static final String prefix = "[KarmicJail]";
 	private static final String bar = "======================";
 	private static final long minutesToTicks = 1200;
+	private Config config;
 	public ConsoleCommandSender console;
-	private Location jailLoc, unjailLoc;
-	public String jailGroup;
-	private Listener listener;
+	private KarmicJailListener listener;
 	private PermCheck perm;
-	private SQLite database;
+	private DBHandler database;
 	private final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
@@ -79,47 +71,27 @@ public class KarmicJail extends JavaPlugin {
 
 	@Override
 	public void onLoad() {
+		// Grab config
+		config = new Config(this);
 		// Grab database
-		database = new SQLite(log, prefix, "jail", this.getDataFolder()
-				.getAbsolutePath());
-		if (!database.checkTable("jailed"))
-		{
-			log.info(prefix + " Created jailed table");
-			// Jail table
-			database.createTable("CREATE TABLE `jailed` (`playername` varchar(32) NOT NULL, `status` TEXT, `time` REAL, `groups` TEXT, `jailer` varchar(32), `date` TEXT, `reason` TEXT, `muted` INTEGER, UNIQUE (`playername`));");
-		}
+		database = new DBHandler(this, config);
+		
 	}
 
 	@Override
 	public void onEnable() {
 		// Get console:
 		console = this.getServer().getConsoleSender();
-
-		// Load configuration:
-		this.loadConfig();
-		this.checkUpdate();
+		
+		//Check if any updates are necessary
+		config.checkUpdate();
 
 		// Get permissions plugin:
 		perm = new PermCheck(this);
 
 		// Setup listner
-		listener = new Listener(this);
-		this.getServer()
-				.getPluginManager()
-				.registerEvent(Event.Type.PLAYER_RESPAWN, listener,
-						Priority.Highest, this);
-		this.getServer()
-				.getPluginManager()
-				.registerEvent(Event.Type.PLAYER_JOIN, listener,
-						Priority.Normal, this);
-		this.getServer()
-				.getPluginManager()
-				.registerEvent(Event.Type.PLAYER_QUIT, listener,
-						Priority.Monitor, this);
-		this.getServer()
-				.getPluginManager()
-				.registerEvent(Event.Type.PLAYER_CHAT, listener,
-						Priority.Lowest, this);
+		listener = new KarmicJailListener(this);
+		this.getServer().getPluginManager().registerEvents(listener, this);
 
 		log.info(prefix + " " + this.getDescription().getName() + " v"
 				+ this.getDescription().getVersion() + " enabled.");
@@ -312,22 +284,22 @@ public class KarmicJail extends JavaPlugin {
 					+ "=============");
 			DecimalFormat twoDForm = new DecimalFormat("#.##");
 			sender.sendMessage(ChatColor.LIGHT_PURPLE + "Jail: "
-					+ ChatColor.GRAY + jailLoc.getWorld().getName()
+					+ ChatColor.GRAY + config.jailLoc.getWorld().getName()
 					+ ChatColor.BLUE + ":(" + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(jailLoc.getX()))
+					+ Double.valueOf(twoDForm.format(config.jailLoc.getX()))
 					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(jailLoc.getY()))
+					+ Double.valueOf(twoDForm.format(config.jailLoc.getY()))
 					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(jailLoc.getZ()))
+					+ Double.valueOf(twoDForm.format(config.jailLoc.getZ()))
 					+ ChatColor.BLUE + ")");
 			sender.sendMessage(ChatColor.LIGHT_PURPLE + "UnJail: "
-					+ ChatColor.GRAY + unjailLoc.getWorld().getName()
+					+ ChatColor.GRAY + config.unjailLoc.getWorld().getName()
 					+ ChatColor.BLUE + ":(" + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(unjailLoc.getX()))
+					+ Double.valueOf(twoDForm.format(config.unjailLoc.getX()))
 					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(unjailLoc.getY()))
+					+ Double.valueOf(twoDForm.format(config.unjailLoc.getY()))
 					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(unjailLoc.getZ()))
+					+ Double.valueOf(twoDForm.format(config.unjailLoc.getZ()))
 					+ ChatColor.BLUE + ")");
 			com = true;
 		}
@@ -563,7 +535,7 @@ public class KarmicJail extends JavaPlugin {
 					|| perm.has(sender, "KarmicJail.unjail")
 					|| perm.has(sender, "KarmicJail.setjail"))
 			{
-				reloadPluginConfig();
+				config.reload();
 			}
 			else
 			{
@@ -689,7 +661,7 @@ public class KarmicJail extends JavaPlugin {
 			// Remove all groups
 			this.removePlayerGroups(name);
 			// Add to jail group
-			perm.playerAddGroup(jailLoc.getWorld().getName(), name, jailGroup);
+			perm.playerAddGroup(config.jailLoc.getWorld().getName(), name, config.jailGroup);
 
 			// Grab duration
 			long duration = 0;
@@ -706,7 +678,7 @@ public class KarmicJail extends JavaPlugin {
 			if (player != null)
 			{
 				// Move to jail
-				player.teleport(jailLoc);
+				player.teleport(config.jailLoc);
 				// Set status to jailed
 				this.setPlayerStatus(JailStatus.JAILED, name);
 				// Notify player
@@ -824,7 +796,7 @@ public class KarmicJail extends JavaPlugin {
 		// Grab player if on server
 		Player player = this.getServer().getPlayer(name);
 		// Remove jail group
-		perm.playerRemoveGroup(jailLoc.getWorld(), name, jailGroup);
+		perm.playerRemoveGroup(config.jailLoc.getWorld(), name, config.jailGroup);
 		// Return previous groups
 		this.returnGroups(name);
 
@@ -844,7 +816,7 @@ public class KarmicJail extends JavaPlugin {
 		// Move player out of jail
 		if (unjailTeleport)
 		{
-			player.teleport(unjailLoc);
+			player.teleport(config.unjailLoc);
 		}
 		// Change status
 		this.setPlayerStatus(JailStatus.FREED, name);
@@ -1016,7 +988,7 @@ public class KarmicJail extends JavaPlugin {
 		if (args.length == 0)
 		{
 			Player player = (Player) sender;
-			jailLoc = player.getLocation();
+			config.jailLoc = player.getLocation();
 		}
 		else
 		{
@@ -1027,16 +999,15 @@ public class KarmicJail extends JavaPlugin {
 				sender.sendMessage(ChatColor.RED + "Invalid coordinate.");
 				return;
 			}
-			jailLoc = new Location(this.getServer().getWorld(args[3]),
+			config.jailLoc = new Location(this.getServer().getWorld(args[3]),
 					Integer.parseInt(args[0]), Integer.parseInt(args[1]),
 					Integer.parseInt(args[2]));
 		}
 
-		YamlConfiguration config = (YamlConfiguration) this.getConfig();
-		config.set("jail.x", (int) jailLoc.getX());
-		config.set("jail.y", (int) jailLoc.getY());
-		config.set("jail.z", (int) jailLoc.getZ());
-		config.set("jail.world", jailLoc.getWorld().getName());
+		config.set("jail.x", (int) config.jailLoc.getX());
+		config.set("jail.y", (int) config.jailLoc.getY());
+		config.set("jail.z", (int) config.jailLoc.getZ());
+		config.set("jail.world", config.jailLoc.getWorld().getName());
 
 		this.saveConfig();
 
@@ -1060,7 +1031,7 @@ public class KarmicJail extends JavaPlugin {
 		if (args.length == 0)
 		{
 			Player player = (Player) sender;
-			unjailLoc = player.getLocation();
+			config.unjailLoc = player.getLocation();
 		}
 		else
 		{
@@ -1071,16 +1042,15 @@ public class KarmicJail extends JavaPlugin {
 				sender.sendMessage(ChatColor.RED + "Invalid coordinate.");
 				return;
 			}
-			unjailLoc = new Location(this.getServer().getWorld(args[3]),
+			config.unjailLoc = new Location(this.getServer().getWorld(args[3]),
 					Integer.parseInt(args[0]), Integer.parseInt(args[1]),
 					Integer.parseInt(args[2]));
 		}
 
-		YamlConfiguration config = (YamlConfiguration) this.getConfig();
-		config.set("unjail.x", (int) unjailLoc.getX());
-		config.set("unjail.y", (int) unjailLoc.getY());
-		config.set("unjail.z", (int) unjailLoc.getZ());
-		config.set("unjail.world", unjailLoc.getWorld().getName());
+		config.set("unjail.x", (int) config.unjailLoc.getX());
+		config.set("unjail.y", (int) config.unjailLoc.getY());
+		config.set("unjail.z", (int) config.unjailLoc.getZ());
+		config.set("unjail.world", config.unjailLoc.getWorld().getName());
 
 		this.saveConfig();
 
@@ -1171,132 +1141,11 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	/**
-	 * Loads config from yaml file
-	 */
-	public void loadConfig() {
-		// Init config files:
-		ConfigurationSection config = this.getConfig();
-		final Map<String, Object> defaults = new HashMap<String, Object>();
-		defaults.put("jailgroup", "Jailed");
-		defaults.put("jail.world", this.getServer().getWorlds().get(0)
-				.getName());
-		defaults.put("jail.x", 0);
-		defaults.put("jail.y", 0);
-		defaults.put("jail.z", 0);
-		defaults.put("unjail.world", this.getServer().getWorlds().get(0)
-				.getName());
-		defaults.put("unjail.x", 0);
-		defaults.put("unjail.y", 0);
-		defaults.put("unjail.z", 0);
-		defaults.put("unjail.teleport", true);
-		defaults.put("entrylimit", 10);
-		defaults.put("version", this.getDescription().getVersion());
-
-		// Insert defaults into config file if they're not present
-		for (final Entry<String, Object> e : defaults.entrySet())
-		{
-			if (!config.contains(e.getKey()))
-			{
-				config.set(e.getKey(), e.getValue());
-			}
-		}
-		// Save config
-		this.saveConfig();
-
-		// Load variables from config
-		jailLoc = new Location(this.getServer().getWorld(
-				config.getString("jail.world", this.getServer().getWorlds()
-						.get(0).getName())), config.getInt("jail.x", 0),
-				config.getInt("jail.y", 0), config.getInt("jail.z", 0));
-		unjailLoc = new Location(this.getServer().getWorld(
-				config.getString("unjail.world", this.getServer().getWorlds()
-						.get(0).getName())), config.getInt("unjail.x", 0),
-				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
-		jailGroup = config.getString("jailgroup", "Jailed");
-		debugTime = config.getBoolean("debugTime", false);
-		limit = config.getInt("entrylimit", 10);
-		unjailTeleport = config.getBoolean("unjail.teleport", true);
-		// Bounds check on the limit
-		if (limit <= 0 || limit > 16)
-		{
-			this.log.warning(prefix
-					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
-			limit = 10;
-			config.set("entrylimit", 10);
-		}
-	}
-
-	public void reloadPluginConfig() {
-		// Reload
-		reloadConfig();
-		// Grab config
-		ConfigurationSection config = this.getConfig();
-		// Load variables from config
-		jailLoc = new Location(this.getServer().getWorld(
-				config.getString("jail.world", this.getServer().getWorlds()
-						.get(0).getName())), config.getInt("jail.x", 0),
-				config.getInt("jail.y", 0), config.getInt("jail.z", 0));
-		unjailLoc = new Location(this.getServer().getWorld(
-				config.getString("unjail.world", this.getServer().getWorlds()
-						.get(0).getName())), config.getInt("unjail.x", 0),
-				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
-		jailGroup = config.getString("jailgroup", "Jailed");
-		debugTime = config.getBoolean("debugTime", false);
-		limit = config.getInt("entrylimit", 10);
-		unjailTeleport = config.getBoolean("unjail.teleport", true);
-		// Bounds check on the limit
-		if (limit <= 0 || limit > 16)
-		{
-			this.log.warning(prefix
-					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
-			limit = 10;
-			config.set("entrylimit", 10);
-		}
-	}
-
-	/**
-	 * Check if updates are necessary
-	 */
-	private void checkUpdate() {
-		// Check if need to update
-		ConfigurationSection config = this.getConfig();
-		if (Double.parseDouble(this.getDescription().getVersion()) > Double
-				.parseDouble(config.getString("version")))
-		{
-			// Update to latest version
-			this.log.info(this.prefix + " Updating to v"
-					+ this.getDescription().getVersion());
-			this.update();
-		}
-	}
-
-	/**
-	 * This method is called to make the appropriate changes, most likely only
-	 * necessary for database schema modification, for a proper update.
-	 */
-	private void update() {
-		// Grab current version
-		double ver = Double.parseDouble(this.getConfig().getString("version"));
-		String query = "";
-		// Updates to alpha 0.08
-		if (ver < 0.2)
-		{
-			// Add enchantments column
-			query = "ALTER TABLE jailed ADD muted INTEGER;";
-			this.getLiteDB().standardQuery(query);
-		}
-
-		// Update version number in config.yml
-		this.getConfig().set("version", this.getDescription().getVersion());
-		this.saveConfig();
-	}
-
-	/**
 	 *
 	 * @return location of jail
 	 */
 	public Location getJailLocation() {
-		return jailLoc;
+		return config.jailLoc;
 	}
 
 	/**
@@ -1304,7 +1153,7 @@ public class KarmicJail extends JavaPlugin {
 	 * @return location of unjail
 	 */
 	public Location getUnjailLocation() {
-		return unjailLoc;
+		return config.unjailLoc;
 	}
 
 	/**
@@ -1945,11 +1794,11 @@ public class KarmicJail extends JavaPlugin {
 		Player player = this.getServer().getPlayer(name);
 		if (player != null)
 		{
-			player.teleport(unjailLoc);
+			player.teleport(config.unjailLoc);
 		}
 	}
 
-	public SQLite getLiteDB() {
+	public DBHandler getLiteDB() {
 		return database;
 	}
 
@@ -2093,7 +1942,7 @@ public class KarmicJail extends JavaPlugin {
 	public String colorizeText(String string) {
 		for (ChatColor color : ChatColor.values())
 		{
-			string = string.replace(String.format("&%x", color.getCode()),
+			string = string.replace(String.format("&%x", color.getChar()),
 					color.toString());
 		}
 		return string;

@@ -9,11 +9,10 @@ public class JailEvent extends Event implements Cancellable {
 	private boolean cancel;
 	public String name, date,jailer,reason;
 	public long duration;
-	private static final long serialVersionUID = -960223087071729770L;
 
 	public JailEvent(String event, PrisonerInfo pi)
 	{
-		super(event);
+		super();
 		name = pi.name;
 		date = pi.date;
 		jailer = pi.jailer;
