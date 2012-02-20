@@ -42,7 +42,6 @@ public class KarmicJail extends JavaPlugin {
 	private static final long minutesToTicks = 1200;
 	private Config config;
 	public ConsoleCommandSender console;
-	private KarmicJailListener listener;
 	private PermCheck perm;
 	private DBHandler database;
 	private final Map<String, JailTask> threads = new HashMap<String, JailTask>();
@@ -55,13 +54,11 @@ public class KarmicJail extends JavaPlugin {
 	public void onDisable() {
 		// Stop all running threads
 		this.log.info(prefix + " Stopping all jail threads...");
-		for (JailTask task : threads.values())
-		{
+		for (JailTask task : threads.values()) {
 			task.stop();
 		}
 		// Disconnect from sql database
-		if (database.checkConnection())
-		{
+		if (database.checkConnection()) {
 			// Close connection
 			database.close();
 		}
@@ -70,28 +67,24 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	@Override
-	public void onLoad() {
+	public void onEnable() {
+		// Get console:
+		console = this.getServer().getConsoleSender();
+
 		// Grab config
 		config = new Config(this);
 		// Grab database
 		database = new DBHandler(this, config);
-		
-	}
 
-	@Override
-	public void onEnable() {
-		// Get console:
-		console = this.getServer().getConsoleSender();
-		
-		//Check if any updates are necessary
+		// Check if any updates are necessary
 		config.checkUpdate();
 
 		// Get permissions plugin:
 		perm = new PermCheck(this);
 
-		// Setup listner
-		listener = new KarmicJailListener(this);
-		this.getServer().getPluginManager().registerEvents(listener, this);
+		// Setup listener
+		this.getServer().getPluginManager()
+				.registerEvents(new KarmicJailListener(this), this);
 
 		log.info(prefix + " " + this.getDescription().getName() + " v"
 				+ this.getDescription().getVersion() + " enabled.");
@@ -102,21 +95,16 @@ public class KarmicJail extends JavaPlugin {
 			String commandLabel, String[] args) {
 		boolean com = false;
 		long dTime = 0;
-		if (debugTime)
-		{
+		if (debugTime) {
 			dTime = System.nanoTime();
 		}
 		if (commandLabel.equalsIgnoreCase("jail")
-				|| commandLabel.equalsIgnoreCase("j"))
-		{
-			if (!perm.has(sender, "KarmicJail.jail"))
-			{
+				|| commandLabel.equalsIgnoreCase("j")) {
+			if (!perm.has(sender, "KarmicJail.jail")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.jail");
 				com = true;
-			}
-			else
-			{
+			} else {
 				// All numeric player name must be the first name
 				boolean timed = false;
 				boolean done = false;
@@ -124,63 +112,46 @@ public class KarmicJail extends JavaPlugin {
 				StringBuilder sb = new StringBuilder();
 				String reason = "";
 				final Vector<String> players = new Vector<String>();
-				try
-				{
+				try {
 					String first = expandName(args[0]);
-					if (first == null)
-					{
+					if (first == null) {
 						// expand failed
 						first = args[0];
 					}
 					players.add(first);
-					for (int i = 1; i < args.length; i++)
-					{
-						if (!done)
-						{
-							try
-							{
+					for (int i = 1; i < args.length; i++) {
+						if (!done) {
+							try {
 								// Attempt to grab time
 								time = Integer.parseInt(args[i]);
 								// Attempt to grab player name if its all
 								// numbers
-								if (time > 0)
-								{
+								if (time > 0) {
 									timed = true;
 								}
 								done = true;
-							}
-							catch (NumberFormatException e)
-							{
+							} catch (NumberFormatException e) {
 								// Attempt to grab name and add to list
 								String name = this.expandName(args[i]);
-								if (name != null)
-								{
+								if (name != null) {
 									players.add(name);
-								}
-								else
-								{
+								} else {
 									players.add(args[i]);
 								}
 							}
-						}
-						else
-						{
+						} else {
 							// attempt to grab reason if it exists
 							sb.append(args[i] + " ");
 						}
 					}
-					if (sb.length() > 0)
-					{
+					if (sb.length() > 0) {
 						// Remove all trailing whitespace
 						reason = sb.toString().replaceAll("\\s+$", "");
 					}
-					for (String name : players)
-					{
+					for (String name : players) {
 						this.jailPlayer(sender, name, reason, time, timed);
 					}
-				}
-				catch (ArrayIndexOutOfBoundsException e)
-				{
+				} catch (ArrayIndexOutOfBoundsException e) {
 					// no player name given, error
 					sender.sendMessage(ChatColor.RED + "Missing paramters");
 					sender.sendMessage(ChatColor.RED
@@ -188,90 +159,62 @@ public class KarmicJail extends JavaPlugin {
 				}
 			}
 			com = true;
-		}
-		else if (commandLabel.equalsIgnoreCase("unjail"))
-		{
-			if (!perm.has(sender, "KarmicJail.unjail"))
-			{
+		} else if (commandLabel.equalsIgnoreCase("unjail")) {
+			if (!perm.has(sender, "KarmicJail.unjail")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.unjail");
-			}
-			else
-			{
+			} else {
 				final Vector<String> players = new Vector<String>();
-				for (int i = 0; i < args.length; i++)
-				{
+				for (int i = 0; i < args.length; i++) {
 					// Attempt to grab name and add to list
 					String name = this.expandName(args[i]);
-					if (name != null)
-					{
+					if (name != null) {
 						players.add(name);
-					}
-					else
-					{
+					} else {
 						players.add(args[i]);
 					}
 				}
-				if (players.isEmpty())
-				{
+				if (players.isEmpty()) {
 					sender.sendMessage(ChatColor.RED + "Missing paramters");
 					sender.sendMessage(ChatColor.RED
 							+ "/unjail <player> [player2]");
 				}
-				for (String name : players)
-				{
+				for (String name : players) {
 					this.unjailPlayer(sender, name);
 				}
 			}
 			com = true;
-		}
-		else if (commandLabel.equalsIgnoreCase("setjail")
-				&& (args.length == 0 || args.length == 4))
-		{
-			if (!perm.has(sender, "KarmicJail.setjail"))
-			{
+		} else if (commandLabel.equalsIgnoreCase("setjail")
+				&& (args.length == 0 || args.length == 4)) {
+			if (!perm.has(sender, "KarmicJail.setjail")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.setjail");
-			}
-			else
-			{
+			} else {
 				this.setJail(sender, args);
 			}
 			com = true;
-		}
-		else if (commandLabel.equalsIgnoreCase("setunjail")
-				&& (args.length == 0 || args.length == 4))
-		{
-			if (!perm.has(sender, "KarmicJail.setjail"))
-			{
+		} else if (commandLabel.equalsIgnoreCase("setunjail")
+				&& (args.length == 0 || args.length == 4)) {
+			if (!perm.has(sender, "KarmicJail.setjail")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.setjail");
-			}
-			else
-			{
+			} else {
 				this.setUnjail(sender, args);
 			}
 			com = true;
-		}
-		else if ((commandLabel.equalsIgnoreCase("jailstatus")
+		} else if ((commandLabel.equalsIgnoreCase("jailstatus")
 				|| commandLabel.equalsIgnoreCase("jstatus")
 				|| commandLabel.equalsIgnoreCase("jailcheck") || commandLabel
-					.equalsIgnoreCase("jcheck")) && args.length <= 1)
-		{
-			if (!perm.has(sender, "KarmicJail.jailstatus"))
-			{
+					.equalsIgnoreCase("jcheck")) && args.length <= 1) {
+			if (!perm.has(sender, "KarmicJail.jailstatus")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.jailstatus");
-			}
-			else
-			{
+			} else {
 				this.jailStatus(sender, args);
 			}
 			com = true;
-		}
-		else if (commandLabel.equalsIgnoreCase("jailversion")
-				|| commandLabel.equalsIgnoreCase("jversion"))
-		{
+		} else if (commandLabel.equalsIgnoreCase("jailversion")
+				|| commandLabel.equalsIgnoreCase("jversion")) {
 			// Version
 			sender.sendMessage(ChatColor.BLUE + bar + "==========");
 			sender.sendMessage(ChatColor.GREEN + "KarmicJail v"
@@ -302,14 +245,11 @@ public class KarmicJail extends JavaPlugin {
 					+ Double.valueOf(twoDForm.format(config.unjailLoc.getZ()))
 					+ ChatColor.BLUE + ")");
 			com = true;
-		}
-		else if (commandLabel.equalsIgnoreCase("jailhelp")
-				|| commandLabel.equalsIgnoreCase("jhelp"))
-		{
+		} else if (commandLabel.equalsIgnoreCase("jailhelp")
+				|| commandLabel.equalsIgnoreCase("jhelp")) {
 			sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN
 					+ "KarmicJail" + ChatColor.BLUE + "=====");
-			if (perm.has(sender, "KarmicJail.jail"))
-			{
+			if (perm.has(sender, "KarmicJail.jail")) {
 				sender.sendMessage(ChatColor.GREEN + "/jail " + ChatColor.AQUA
 						+ "<player> " + ChatColor.LIGHT_PURPLE
 						+ "[player2]... [time] [reason]" + ChatColor.YELLOW
@@ -317,13 +257,11 @@ public class KarmicJail extends JavaPlugin {
 				sender.sendMessage(ChatColor.YELLOW
 						+ "Note - Names auto-complete if player is online. Alias: /j");
 			}
-			if (perm.has(sender, "KarmicJail.unjail"))
-			{
+			if (perm.has(sender, "KarmicJail.unjail")) {
 				sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
 						+ " <player>" + ChatColor.YELLOW + " : Unjail player");
 			}
-			if (perm.has(sender, "KarmicJail.jail"))
-			{
+			if (perm.has(sender, "KarmicJail.jail")) {
 				sender.sendMessage(ChatColor.GREEN + "/jailtime"
 						+ ChatColor.AQUA + " <player>" + ChatColor.YELLOW
 						+ " : Toggle mute for a player. Alias: /jtime");
@@ -333,14 +271,12 @@ public class KarmicJail extends JavaPlugin {
 						+ ChatColor.YELLOW
 						+ " : Sets jail reason for player. Alias: /jreason");
 			}
-			if (perm.has(sender, "KarmicJail.mute"))
-			{
+			if (perm.has(sender, "KarmicJail.mute")) {
 				sender.sendMessage(ChatColor.GREEN + "/jailmute"
 						+ ChatColor.AQUA + " <player>" + ChatColor.YELLOW
 						+ " : Toggle mute for a player. Alias: /jmute");
 			}
-			if (perm.has(sender, "KarmicJail.list"))
-			{
+			if (perm.has(sender, "KarmicJail.list")) {
 				sender.sendMessage(ChatColor.GREEN + "/jaillist"
 						+ ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
 						+ " : List jailed players. Alias: /jlist");
@@ -349,8 +285,7 @@ public class KarmicJail extends JavaPlugin {
 				sender.sendMessage(ChatColor.GREEN + "/jailnext"
 						+ ChatColor.YELLOW + " : Next page. Alias: /jnext");
 			}
-			if (perm.has(sender, "KarmicJail.setjail"))
-			{
+			if (perm.has(sender, "KarmicJail.setjail")) {
 				sender.sendMessage(ChatColor.GREEN + "/setjail"
 						+ ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]"
 						+ ChatColor.YELLOW
@@ -360,8 +295,7 @@ public class KarmicJail extends JavaPlugin {
 						+ ChatColor.YELLOW
 						+ " : Set unjail teleport to current pos or given pos");
 			}
-			if (perm.has(sender, "KarmicJail.jailstatus"))
-			{
+			if (perm.has(sender, "KarmicJail.jailstatus")) {
 				sender.sendMessage(ChatColor.GREEN + "/jailstatus"
 						+ ChatColor.LIGHT_PURPLE + " [player]"
 						+ ChatColor.YELLOW
@@ -371,54 +305,38 @@ public class KarmicJail extends JavaPlugin {
 					+ ChatColor.YELLOW
 					+ " : Plugin version and config info. Alias: /jversion");
 			com = true;
-		}
-		else if (commandLabel.equalsIgnoreCase("jaillist")
-				|| commandLabel.equalsIgnoreCase("jlist"))
-		{
-			if (!perm.has(sender, "KarmicJail.list"))
-			{
+		} else if (commandLabel.equalsIgnoreCase("jaillist")
+				|| commandLabel.equalsIgnoreCase("jlist")) {
+			if (!perm.has(sender, "KarmicJail.list")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.list");
-			}
-			else
-			{
+			} else {
 				// list jailed people
-				if (args.length > 0)
-				{
+				if (args.length > 0) {
 					// If they provided a page number
-					try
-					{
+					try {
 						// Attempt to parse argument for page number
 						int pageNum = Integer.parseInt(args[0]);
 						// Set current page to given number
 						page.put(sender.getName(), pageNum - 1);
 						// Show page if possible
 						this.listJailed(sender, 0);
-					}
-					catch (NumberFormatException e)
-					{
+					} catch (NumberFormatException e) {
 						sender.sendMessage(ChatColor.YELLOW + prefix
 								+ " Invalid integer for page number");
 					}
-				}
-				else
-				{
+				} else {
 					// List with current page
 					this.listJailed(sender, 0);
 				}
 			}
 			com = true;
-		}
-		else if (commandLabel.equals("jailprev")
-				|| commandLabel.equals("jprev"))
-		{
-			if (!perm.has(sender, "KarmicJail.list"))
-			{
+		} else if (commandLabel.equals("jailprev")
+				|| commandLabel.equals("jprev")) {
+			if (!perm.has(sender, "KarmicJail.list")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.list");
-			}
-			else
-			{
+			} else {
 				// List, with previous page
 				this.listJailed(sender, -1);
 			}
@@ -426,144 +344,101 @@ public class KarmicJail extends JavaPlugin {
 		}
 		// Next page of item pool
 		else if (commandLabel.equals("jailnext")
-				|| commandLabel.equals("jnext"))
-		{
-			if (!perm.has(sender, "KarmicJail.list"))
-			{
+				|| commandLabel.equals("jnext")) {
+			if (!perm.has(sender, "KarmicJail.list")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.list");
-			}
-			else
-			{
+			} else {
 				// List with next page
 				this.listJailed(sender, 1);
 			}
 			com = true;
-		}
-		else if (commandLabel.equals("jailmute")
-				|| commandLabel.equals("jmute"))
-		{
-			if (!perm.has(sender, "KarmicJail.mute"))
-			{
+		} else if (commandLabel.equals("jailmute")
+				|| commandLabel.equals("jmute")) {
+			if (!perm.has(sender, "KarmicJail.mute")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.mute");
-			}
-			else
-			{
+			} else {
 				final Vector<String> players = new Vector<String>();
-				for (int i = 0; i < args.length; i++)
-				{
+				for (int i = 0; i < args.length; i++) {
 					// Attempt to grab name and add to list
 					String name = this.expandName(args[i]);
-					if (name != null)
-					{
+					if (name != null) {
 						players.add(name);
-					}
-					else
-					{
+					} else {
 						players.add(args[i]);
 					}
 				}
-				if (players.isEmpty())
-				{
+				if (players.isEmpty()) {
 					sender.sendMessage(ChatColor.RED + "Missing paramters");
 					sender.sendMessage(ChatColor.RED
 							+ "/jmute <player> [player2] ...");
 				}
-				for (String name : players)
-				{
+				for (String name : players) {
 					this.mutePlayer(sender, name);
 				}
 			}
 			com = true;
-		}
-		else if (commandLabel.equals("jailtime")
-				|| commandLabel.equals("jtime"))
-		{
-			if (!perm.has(sender, "KarmicJail.jail"))
-			{
+		} else if (commandLabel.equals("jailtime")
+				|| commandLabel.equals("jtime")) {
+			if (!perm.has(sender, "KarmicJail.jail")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.jail");
-			}
-			else
-			{
+			} else {
 				boolean done = false;
 				int time = 0;
 				final Vector<String> players = new Vector<String>();
-				for (int i = 0; i < args.length; i++)
-				{
-					if (!done)
-					{
-						try
-						{
+				for (int i = 0; i < args.length; i++) {
+					if (!done) {
+						try {
 							// Attempt to grab time
 							time = Integer.parseInt(args[i]);
 							done = true;
-						}
-						catch (NumberFormatException e)
-						{
+						} catch (NumberFormatException e) {
 							// Attempt to grab name and add to list
 							String name = this.expandName(args[i]);
-							if (name != null)
-							{
+							if (name != null) {
 								players.add(name);
-							}
-							else
-							{
+							} else {
 								players.add(args[i]);
 							}
 						}
 					}
 				}
-				if (players.isEmpty())
-				{
+				if (players.isEmpty()) {
 					sender.sendMessage(ChatColor.RED + "Missing paramters");
 					sender.sendMessage(ChatColor.RED
 							+ "/jtime <player> [player2] ... <time>");
 				}
-				for (String name : players)
-				{
+				for (String name : players) {
 					this.setJailTime(sender, name, time);
 				}
 			}
 			com = true;
-		}
-		else if (commandLabel.equals("jailreload")
-				|| commandLabel.equals("jreload"))
-		{
+		} else if (commandLabel.equals("jailreload")
+				|| commandLabel.equals("jreload")) {
 			if (perm.has(sender, "KarmicJail.jail")
 					|| perm.has(sender, "KarmicJail.unjail")
-					|| perm.has(sender, "KarmicJail.setjail"))
-			{
+					|| perm.has(sender, "KarmicJail.setjail")) {
 				config.reload();
-			}
-			else
-			{
+			} else {
 				sender.sendMessage(ChatColor.RED + "Lack permission to reload");
 			}
 			com = true;
-		}
-		else if (commandLabel.equals("jailreason")
-				|| commandLabel.equals("jreason"))
-		{
-			if (!perm.has(sender, "KarmicJail.jail"))
-			{
+		} else if (commandLabel.equals("jailreason")
+				|| commandLabel.equals("jreason")) {
+			if (!perm.has(sender, "KarmicJail.jail")) {
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.jail");
-			}
-			else
-			{
-				if (args.length > 0)
-				{
+			} else {
+				if (args.length > 0) {
 					String name = expandName(args[0]);
 					final StringBuilder sb = new StringBuilder();
-					for (int i = 1; i < args.length; i++)
-					{
+					for (int i = 1; i < args.length; i++) {
 						sb.append(args[i] + " ");
 					}
 					String reason = "";
-					if (sb.length() > 0)
-					{
+					if (sb.length() > 0) {
 						// Remove all trailing whitespace
 						reason = sb.toString().replaceAll("\\s+$", "");
 					}
@@ -572,18 +447,14 @@ public class KarmicJail extends JavaPlugin {
 							+ " Set reason for " + ChatColor.AQUA + name
 							+ ChatColor.GREEN + " to: " + ChatColor.GRAY
 							+ reason);
-				}
-				else
-				{
+				} else {
 					sender.sendMessage(ChatColor.RED + "Missing name");
 					sender.sendMessage(ChatColor.RED
 							+ "/jtime <player> [player2] ... <time>");
 				}
 			}
 			com = true;
-		}
-		else
-		{
+		} else {
 			if (!perm.has(sender, "KarmicJail.jail"))
 				com = true;
 			if (!perm.has(sender, "KarmicJail.unjail"))
@@ -594,10 +465,8 @@ public class KarmicJail extends JavaPlugin {
 				com = true;
 		}
 
-		if (com)
-		{
-			if (debugTime)
-			{
+		if (com) {
+			if (debugTime) {
 				this.debugTime(sender, dTime);
 			}
 			return true;
@@ -612,7 +481,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Method that messages how long a command took to complete
-	 *
+	 * 
 	 * @param sender
 	 *            of command
 	 * @param time
@@ -625,7 +494,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Jails a player
-	 *
+	 * 
 	 * @param sender
 	 *            of command
 	 * @param name
@@ -639,17 +508,13 @@ public class KarmicJail extends JavaPlugin {
 	public void jailPlayer(CommandSender sender, String name, String reason,
 			int minutes, boolean timed) {
 		// Check if player is already jailed:
-		if (playerIsJailed(name) || playerIsPendingJail(name))
-		{
+		if (playerIsJailed(name) || playerIsPendingJail(name)) {
 			sender.sendMessage(ChatColor.RED
 					+ "That player is already in jail!");
-		}
-		else
-		{
+		} else {
 
 			// Check if player is in database
-			if (!playerInDatabase(name))
-			{
+			if (!playerInDatabase(name)) {
 				sender.sendMessage(ChatColor.YELLOW
 						+ " Player has never been on server! Adding to database...");
 				// Player has never been on server, adding to list
@@ -661,12 +526,12 @@ public class KarmicJail extends JavaPlugin {
 			// Remove all groups
 			this.removePlayerGroups(name);
 			// Add to jail group
-			perm.playerAddGroup(config.jailLoc.getWorld().getName(), name, config.jailGroup);
+			perm.playerAddGroup(config.jailLoc.getWorld().getName(), name,
+					config.jailGroup);
 
 			// Grab duration
 			long duration = 0;
-			if (timed)
-			{
+			if (timed) {
 				duration = minutes * minutesToTicks;
 				this.updatePlayerTime(name, duration);
 				// Create thread to release player
@@ -675,33 +540,26 @@ public class KarmicJail extends JavaPlugin {
 
 			// Grab player from server if they are online
 			final Player player = this.getServer().getPlayer(name);
-			if (player != null)
-			{
+			if (player != null) {
 				// Move to jail
 				player.teleport(config.jailLoc);
 				// Set status to jailed
 				this.setPlayerStatus(JailStatus.JAILED, name);
 				// Notify player
-				if (reason.equals(""))
-				{
+				if (reason.equals("")) {
 					player.sendMessage(ChatColor.RED + "Jailed by "
 							+ ChatColor.AQUA + sender.getName() + ChatColor.RED);
-				}
-				else
-				{
+				} else {
 					player.sendMessage(ChatColor.RED + "Jailed by "
 							+ ChatColor.AQUA + sender.getName() + ChatColor.RED
 							+ " for: " + ChatColor.GRAY
 							+ this.colorizeText(reason));
 				}
-				if (timed)
-				{
+				if (timed) {
 					player.sendMessage(ChatColor.AQUA + "Time in jail: "
 							+ ChatColor.GOLD + this.prettifyMinutes(minutes));
 				}
-			}
-			else
-			{
+			} else {
 				// Set player status to pending
 				this.setPlayerStatus(JailStatus.PENDINGJAIL, name);
 			}
@@ -722,20 +580,18 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Saves the player's groups into database
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 */
 	private void savePlayerGroups(String name) {
 		StringBuilder sb = new StringBuilder();
 		boolean append = false;
-		for (String s : this.getGroups(name))
-		{
+		for (String s : this.getGroups(name)) {
 			sb.append(s + "&");
 			append = true;
 		}
-		if (append)
-		{
+		if (append) {
 			sb.deleteCharAt(sb.length() - 1);
 		}
 		this.database.standardQuery("UPDATE jailed SET groups='"
@@ -744,29 +600,23 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Removes all groups of a player
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 */
 	private void removePlayerGroups(String name) {
-		if (perm.getName().equals("PermissionsBukkit"))
-		{
+		if (perm.getName().equals("PermissionsBukkit")) {
 			final PermissionsPlugin permission = (PermissionsPlugin) this
 					.getServer().getPluginManager()
 					.getPlugin("PermissionsBukkit");
-			for (Group group : permission.getGroups(name))
-			{
+			for (Group group : permission.getGroups(name)) {
 				perm.playerRemoveGroup(this.getServer().getWorlds().get(0),
 						name, group.getName());
 			}
-		}
-		else
-		{
-			for (World w : this.getServer().getWorlds())
-			{
+		} else {
+			for (World w : this.getServer().getWorlds()) {
 				String[] groups = perm.getPlayerGroups(w, name);
-				for (String group : groups)
-				{
+				for (String group : groups) {
 					perm.playerRemoveGroup(w, name, group);
 				}
 			}
@@ -775,7 +625,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Unjails a player
-	 *
+	 * 
 	 * @param sender
 	 *            of command
 	 * @param name
@@ -787,8 +637,7 @@ public class KarmicJail extends JavaPlugin {
 			boolean fromTempJail) {
 
 		// Check if player is in jail:
-		if (!playerIsJailed(name) && !playerIsPendingJail(name))
-		{
+		if (!playerIsJailed(name) && !playerIsPendingJail(name)) {
 			sender.sendMessage(ChatColor.RED + "That player is not in jail!");
 			return;
 		}
@@ -796,7 +645,8 @@ public class KarmicJail extends JavaPlugin {
 		// Grab player if on server
 		Player player = this.getServer().getPlayer(name);
 		// Remove jail group
-		perm.playerRemoveGroup(config.jailLoc.getWorld(), name, config.jailGroup);
+		perm.playerRemoveGroup(config.jailLoc.getWorld(), name,
+				config.jailGroup);
 		// Return previous groups
 		this.returnGroups(name);
 
@@ -805,8 +655,7 @@ public class KarmicJail extends JavaPlugin {
 				+ name + "';");
 		cache.remove(name);
 		// Check if player is offline:
-		if (player == null)
-		{
+		if (player == null) {
 			this.setPlayerStatus(JailStatus.PENDINGFREE, name);
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
 					+ " will be released from jail on login.");
@@ -814,78 +663,64 @@ public class KarmicJail extends JavaPlugin {
 		}
 
 		// Move player out of jail
-		if (unjailTeleport)
-		{
+		if (unjailTeleport) {
 			player.teleport(config.unjailLoc);
 		}
 		// Change status
 		this.setPlayerStatus(JailStatus.FREED, name);
 
 		// Remove task
-		if (threads.containsKey(name))
-		{
+		if (threads.containsKey(name)) {
 			int id = threads.get(name).getId();
-			if (id != -1)
-			{
+			if (id != -1) {
 				this.getServer().getScheduler().cancelTask(id);
 			}
 			this.removeTask(name);
 		}
 		player.sendMessage(ChatColor.AQUA + "You have been released from jail!");
-		if (fromTempJail)
-		{
+		if (fromTempJail) {
 			// Also notify jailer if they're online
 			Player jailer = this.getServer().getPlayer(this.getJailer(name));
-			if (jailer != null)
-			{
+			if (jailer != null) {
 				jailer.sendMessage(ChatColor.GOLD + player.getName()
 						+ ChatColor.AQUA + " auto-unjailed.");
 			}
 			// Notify console
 			sender.sendMessage(ChatColor.GOLD + player.getName()
 					+ ChatColor.AQUA + " auto-unjailed.");
-		}
-		else
+		} else
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
 					+ " removed from jail.");
 	}
 
 	/**
 	 * Restores the players groups from database storage
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 */
 	public void returnGroups(String name) {
-		try
-		{
+		try {
 			ResultSet rs = this.database
 					.select("SELECT * FROM jailed WHERE playername='" + name
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				String groups = rs.getString("groups");
 				if (!rs.wasNull() && !groups.equals(""))
 
-					if (groups.contains("&"))
-					{
+					if (groups.contains("&")) {
 						String[] cut = groups.split("&");
-						for (String group : cut)
-						{
+						for (String group : cut) {
 							String[] split = group.split("!");
 							perm.playerAddGroup(split[1], name, split[0]);
 						}
-					}
-					else
-					{
+					} else {
 						String[] split = groups.split("!");
 						perm.playerAddGroup(split[1], name, split[0]);
 					}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -897,20 +732,16 @@ public class KarmicJail extends JavaPlugin {
 
 	public void mutePlayer(CommandSender sender, String name) {
 		// Check if player is in jail:
-		if (!playerIsJailed(name) && !playerIsPendingJail(name))
-		{
+		if (!playerIsJailed(name) && !playerIsPendingJail(name)) {
 			sender.sendMessage(ChatColor.RED + "That player is not in jail!");
 			return;
 		}
-		if (playerIsMuted(name))
-		{
+		if (playerIsMuted(name)) {
 			database.standardQuery("UPDATE jailed SET muted='0' WHERE playername='"
 					+ name + "';");
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.GREEN
 					+ " unmuted");
-		}
-		else
-		{
+		} else {
 			database.standardQuery("UPDATE jailed SET muted='1' WHERE playername='"
 					+ name + "';");
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.RED + " muted");
@@ -919,8 +750,7 @@ public class KarmicJail extends JavaPlugin {
 
 	public void setJailTime(CommandSender sender, String name, int minutes) {
 		// Check if player is in jail:
-		if (!playerIsJailed(name) && !playerIsPendingJail(name))
-		{
+		if (!playerIsJailed(name) && !playerIsPendingJail(name)) {
 			sender.sendMessage(ChatColor.RED + "That player is not in jail!");
 			return;
 		}
@@ -928,42 +758,34 @@ public class KarmicJail extends JavaPlugin {
 		// Grab player if on server
 		Player player = this.getServer().getPlayer(name);
 		// Remove task
-		if (threads.containsKey(name))
-		{
+		if (threads.containsKey(name)) {
 			int id = threads.get(name).getId();
-			if (id != -1)
-			{
+			if (id != -1) {
 				this.getServer().getScheduler().cancelTask(id);
 			}
 			this.removeTask(name);
 		}
 		// Jail indefinitely if 0 or negative
-		if (minutes <= 0)
-		{
+		if (minutes <= 0) {
 			this.updatePlayerTime(name, minutes);
 			sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 					+ " is jailed forever.");
-			if (player != null)
-			{
+			if (player != null) {
 				player.sendMessage(ChatColor.AQUA + "Jailed forever.");
 			}
-		}
-		else
-		{
+		} else {
 			// Calculate time
 			long duration = 0;
 			duration = minutes * minutesToTicks;
 			this.updatePlayerTime(name, duration);
-			if (player != null)
-			{
+			if (player != null) {
 				// Create thread to release player
 				threads.put(name, new JailTask(this, name, duration));
 			}
 			sender.sendMessage(ChatColor.AQUA + "Time set to " + ChatColor.GOLD
 					+ minutes + ChatColor.AQUA + " for " + ChatColor.RED + name
 					+ ChatColor.AQUA + ".");
-			if (player != null)
-			{
+			if (player != null) {
 				player.sendMessage(ChatColor.AQUA + "Time set to "
 						+ ChatColor.GOLD + minutes + ChatColor.AQUA + ".");
 			}
@@ -973,29 +795,24 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Sets the jail location
-	 *
+	 * 
 	 * @param sender
 	 *            of command
 	 * @param arguments
 	 *            of command
 	 */
 	public void setJail(CommandSender sender, String[] args) {
-		if (!(sender instanceof Player) && args.length != 4)
-		{
+		if (!(sender instanceof Player) && args.length != 4) {
 			sender.sendMessage(ChatColor.RED + "Only players can use that.");
 			return;
 		}
-		if (args.length == 0)
-		{
+		if (args.length == 0) {
 			Player player = (Player) sender;
 			config.jailLoc = player.getLocation();
-		}
-		else
-		{
+		} else {
 			if (!(new Scanner(args[0]).hasNextInt())
 					|| !(new Scanner(args[1]).hasNextInt())
-					|| !(new Scanner(args[2]).hasNextInt()))
-			{
+					|| !(new Scanner(args[2]).hasNextInt())) {
 				sender.sendMessage(ChatColor.RED + "Invalid coordinate.");
 				return;
 			}
@@ -1016,29 +833,24 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Sets the unjail location
-	 *
+	 * 
 	 * @param sender
 	 *            of command
 	 * @param arguments
 	 *            of command
 	 */
 	public void setUnjail(CommandSender sender, String[] args) {
-		if (!(sender instanceof Player) && args.length != 4)
-		{
+		if (!(sender instanceof Player) && args.length != 4) {
 			sender.sendMessage(ChatColor.RED + "Only players can use that.");
 			return;
 		}
-		if (args.length == 0)
-		{
+		if (args.length == 0) {
 			Player player = (Player) sender;
 			config.unjailLoc = player.getLocation();
-		}
-		else
-		{
+		} else {
 			if (!(new Scanner(args[0]).hasNextInt())
 					|| !(new Scanner(args[1]).hasNextInt())
-					|| !(new Scanner(args[2]).hasNextInt()))
-			{
+					|| !(new Scanner(args[2]).hasNextInt())) {
 				sender.sendMessage(ChatColor.RED + "Invalid coordinate.");
 				return;
 			}
@@ -1059,32 +871,27 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Gets the status of a player
-	 *
+	 * 
 	 * @param sender
 	 *            of command
 	 * @param arguments
 	 *            of command
 	 */
 	public void jailStatus(CommandSender sender, String[] args) {
-		if (!(sender instanceof Player) && args.length == 0)
-		{
+		if (!(sender instanceof Player) && args.length == 0) {
 			sender.sendMessage(ChatColor.RED + "Must specify a player.");
 			return;
 		}
 		final Player player = (args.length == 0) ? (Player) sender : this
 				.getServer().getPlayer(args[0]);
 		String name = "";
-		if (player == null)
-		{
+		if (player == null) {
 			name = args[0];
-		}
-		else
-		{
+		} else {
 			name = player.getName();
 		}
 
-		if (!this.playerIsJailed(name) && !this.playerIsPendingJail(name))
-		{
+		if (!this.playerIsJailed(name) && !this.playerIsPendingJail(name)) {
 			if (args.length == 0)
 				sender.sendMessage(ChatColor.RED + "You are not jailed.");
 			else
@@ -1098,40 +905,30 @@ public class KarmicJail extends JavaPlugin {
 		final String jailer = this.getJailer(name);
 		final String reason = this.getJailReason(name);
 		final boolean muted = this.playerIsMuted(name);
-		if (args.length == 0)
-		{
+		if (args.length == 0) {
 			sb.append(ChatColor.RED + "Jailed on " + ChatColor.GREEN + date
 					+ ChatColor.RED + " by " + ChatColor.GOLD + jailer);
-		}
-		else
-		{
+		} else {
 			sb.append(ChatColor.AQUA + name + ChatColor.RED + " was jailed on "
 					+ ChatColor.GREEN + date + ChatColor.RED + " by "
 					+ ChatColor.GOLD + jailer);
 		}
-		if (!reason.equals(""))
-		{
+		if (!reason.equals("")) {
 			sb.append(ChatColor.RED + " for " + ChatColor.GRAY
 					+ this.colorizeText(reason));
 		}
-		if (muted)
-		{
+		if (muted) {
 			sb.append(ChatColor.GRAY + " - " + ChatColor.DARK_RED + "MUTED");
 		}
 		sender.sendMessage(sb.toString());
-		if (this.playerIsTempJailed(name))
-		{
+		if (this.playerIsTempJailed(name)) {
 			int minutes = (int) ((this.getPlayerTime(name) / minutesToTicks));
-			if (player == null)
-			{
+			if (player == null) {
 				sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
 						+ ChatColor.GOLD + this.prettifyMinutes(minutes));
-			}
-			else
-			{
+			} else {
 				// Player is online, check the thread for their remaining time
-				if (threads.containsKey(name))
-				{
+				if (threads.containsKey(name)) {
 					minutes = (int) (threads.get(name).remainingTime() / minutesToTicks);
 					sender.sendMessage(ChatColor.AQUA + "Remaining jail time: "
 							+ this.prettifyMinutes(minutes));
@@ -1141,7 +938,7 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	/**
-	 *
+	 * 
 	 * @return location of jail
 	 */
 	public Location getJailLocation() {
@@ -1149,7 +946,7 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	/**
-	 *
+	 * 
 	 * @return location of unjail
 	 */
 	public Location getUnjailLocation() {
@@ -1158,30 +955,25 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Gets name of the jailer
-	 *
+	 * 
 	 * @param name
 	 *            of person in jail
 	 * @return name of jailer
 	 */
 	private String getJailer(String name) {
 		String jailer = "NOBODY";
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + name
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				jailer = rs.getString("jailer");
-				if (rs.wasNull())
-				{
+				if (rs.wasNull()) {
 					jailer = "NOBODY";
 				}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1190,30 +982,25 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Grabs date of when player was originally jailed
-	 *
+	 * 
 	 * @param name
 	 *            of person jailed
 	 * @return String of the date when player was jailed
 	 */
 	private String getJailDate(String name) {
 		String date = "";
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + name
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				date = rs.getString("date");
-				if (rs.wasNull())
-				{
+				if (rs.wasNull()) {
 					date = "NO DATE";
 				}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1222,30 +1009,25 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Checks if the player was jailed while offline
-	 *
+	 * 
 	 * @param Name
 	 *            of player
 	 * @return True if pending jailed, else false
 	 */
 	public boolean playerIsPendingJail(String player) {
 		boolean jailed = false;
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + player
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				final String status = rs.getString("status");
-				if (status.equals("" + JailStatus.PENDINGJAIL))
-				{
+				if (status.equals("" + JailStatus.PENDINGJAIL)) {
 					jailed = true;
 				}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1254,7 +1036,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Checks if the player is in jail
-	 *
+	 * 
 	 * @param Name
 	 *            of player
 	 * @return true if jailed, else false
@@ -1262,32 +1044,24 @@ public class KarmicJail extends JavaPlugin {
 	public boolean playerIsJailed(String player) {
 		boolean jailed = false;
 		boolean missing = false;
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + player
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				final String status = rs.getString("status");
-				if (rs.wasNull())
-				{
+				if (rs.wasNull()) {
 					log.severe(prefix + " MISSING STATUS FOR: " + player);
 					missing = true;
-				}
-				else if (status.equals("" + JailStatus.JAILED))
-				{
+				} else if (status.equals("" + JailStatus.JAILED)) {
 					jailed = true;
 				}
 			}
 			rs.close();
-			if (missing)
-			{
+			if (missing) {
 				setPlayerStatus(JailStatus.FREED, player);
 			}
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1297,7 +1071,7 @@ public class KarmicJail extends JavaPlugin {
 	/**
 	 * Checks to see if the player has a time associated with their jail
 	 * sentence
-	 *
+	 * 
 	 * @param Name
 	 *            of player
 	 * @return true if player has a valid time, else false
@@ -1305,35 +1079,28 @@ public class KarmicJail extends JavaPlugin {
 	public boolean playerIsTempJailed(String player) {
 		double time = 0;
 		boolean missing = false;
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + player
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				time = rs.getDouble("time");
-				if (rs.wasNull())
-				{
+				if (rs.wasNull()) {
 					time = 0;
 					missing = true;
 				}
 			}
 			rs.close();
-			if (missing)
-			{
+			if (missing) {
 				setJailTime(console, player, 0);
 				log.warning(prefix + " " + player
 						+ "'s Time was missing. Reset to 0.");
 			}
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
-		if (time > 0)
-		{
+		if (time > 0) {
 			return true;
 		}
 		return false;
@@ -1341,7 +1108,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Lists the players in jail
-	 *
+	 * 
 	 * @param sender
 	 *            of command
 	 * @param Page
@@ -1349,82 +1116,63 @@ public class KarmicJail extends JavaPlugin {
 	 */
 	private void listJailed(CommandSender sender, int pageAdjust) {
 		// Update cache of jailed players
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE status='"
 							+ JailStatus.JAILED + "' OR status='"
 							+ JailStatus.PENDINGJAIL + "';");
-			if (rs.next())
-			{
-				do
-				{
+			if (rs.next()) {
+				do {
 					String name = rs.getString("playername");
 					boolean has = !rs.wasNull();
-					if (has)
-					{
+					if (has) {
 						String jailer = rs.getString("jailer");
-						if (rs.wasNull())
-						{
+						if (rs.wasNull()) {
 							jailer = "NOBODY";
 						}
 						String date = rs.getString("date");
-						if (rs.wasNull())
-						{
+						if (rs.wasNull()) {
 							date = "NO DATE";
 						}
 						String reason = rs.getString("reason");
-						if (rs.wasNull())
-						{
+						if (rs.wasNull()) {
 							reason = "";
 						}
 						long time = rs.getLong("time");
-						if (rs.wasNull())
-						{
+						if (rs.wasNull()) {
 							time = 0;
 						}
 						int muteInt = rs.getInt("muted");
-						if (rs.wasNull())
-						{
+						if (rs.wasNull()) {
 							muteInt = 0;
 						}
 						boolean muted = false;
-						if (muteInt == 1)
-						{
+						if (muteInt == 1) {
 							muted = true;
 						}
 						cache.put(name, new PrisonerInfo(name, jailer, date,
 								reason, time, muted));
 						// Update the time if necessary
-						if (threads.containsKey(name))
-						{
+						if (threads.containsKey(name)) {
 							cache.get(name).updateTime(
 									threads.get(name).remainingTime());
 						}
 					}
-				}
-				while (rs.next());
+				} while (rs.next());
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
-		if (cache.isEmpty())
-		{
+		if (cache.isEmpty()) {
 			sender.sendMessage(ChatColor.RED + prefix + " No jailed players");
 			return;
 		}
-		if (!page.containsKey(sender.getName()))
-		{
+		if (!page.containsKey(sender.getName())) {
 			page.put(sender.getName(), 0);
-		}
-		else
-		{
-			if (pageAdjust != 0)
-			{
+		} else {
+			if (pageAdjust != 0) {
 				int adj = page.get(sender.getName()).intValue() + pageAdjust;
 				page.put(sender.getName(), adj);
 			}
@@ -1434,21 +1182,17 @@ public class KarmicJail extends JavaPlugin {
 		// Caluclate amount of pages
 		int num = array.length / 8;
 		double rem = (double) array.length % (double) limit;
-		if (rem != 0)
-		{
+		if (rem != 0) {
 			num++;
 		}
-		if (page.get(sender.getName()).intValue() < 0)
-		{
+		if (page.get(sender.getName()).intValue() < 0) {
 			// They tried to use /ks prev when they're on page 0
 			sender.sendMessage(ChatColor.YELLOW + prefix
 					+ " Page does not exist");
 			// reset their current page back to 0
 			page.put(sender.getName(), 0);
 			valid = false;
-		}
-		else if ((page.get(sender.getName()).intValue()) * limit > array.length)
-		{
+		} else if ((page.get(sender.getName()).intValue()) * limit > array.length) {
 			// They tried to use /ks next at the end of the list
 			sender.sendMessage(ChatColor.YELLOW + prefix
 					+ " Page does not exist");
@@ -1456,8 +1200,7 @@ public class KarmicJail extends JavaPlugin {
 			page.put(sender.getName(), num - 1);
 			valid = false;
 		}
-		if (valid)
-		{
+		if (valid) {
 			// Header with amount of pages
 			sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.GRAY
 					+ "Jailed" + ChatColor.BLUE + "===" + ChatColor.GRAY
@@ -1466,33 +1209,25 @@ public class KarmicJail extends JavaPlugin {
 					+ ChatColor.BLUE + "===");
 			// list
 			for (int i = ((page.get(sender.getName()).intValue()) * limit); i < ((page
-					.get(sender.getName()).intValue()) * limit) + limit; i++)
-			{
+					.get(sender.getName()).intValue()) * limit) + limit; i++) {
 				// Don't try to pull something beyond the bounds
-				if (i < array.length)
-				{
+				if (i < array.length) {
 					StringBuilder sb = new StringBuilder();
 					Player player = this.getServer().getPlayer(array[i].name);
 					// Grab player and colorize name if they're online or not
-					if (player == null)
-					{
+					if (player == null) {
 						sb.append(ChatColor.RED + array[i].name
 								+ ChatColor.GRAY + " - ");
-					}
-					else
-					{
+					} else {
 						sb.append(ChatColor.GREEN + array[i].name
 								+ ChatColor.GRAY + " - ");
 					}
 					// Grab date
-					try
-					{
+					try {
 						sb.append(ChatColor.GOLD
 								+ array[i].date.substring(4, 10)
 								+ ChatColor.GRAY + " - ");
-					}
-					catch (StringIndexOutOfBoundsException e)
-					{
+					} catch (StringIndexOutOfBoundsException e) {
 						// Incorrect format stored, so just give the date as is
 						sb.append(ChatColor.GOLD + array[i].date
 								+ ChatColor.GRAY + " - ");
@@ -1500,29 +1235,24 @@ public class KarmicJail extends JavaPlugin {
 					// Give jailer name
 					sb.append(ChatColor.AQUA + array[i].jailer);
 					// Grab time if applicable
-					if (array[i].time > 0)
-					{
+					if (array[i].time > 0) {
 						double temp = Math
 								.floor(((double) array[i].time / (double) minutesToTicks) + 0.5f);
 						sb.append(ChatColor.GRAY + " - " + ChatColor.BLUE + ""
 								+ this.prettifyMinutes((int) temp));
 					}
 					// Grab reason if there was one given
-					if (!array[i].reason.equals(""))
-					{
+					if (!array[i].reason.equals("")) {
 						sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY
 								+ this.colorizeText(array[i].reason));
 					}
 					// Grab if muted
-					if (array[i].mute)
-					{
+					if (array[i].mute) {
 						sb.append(ChatColor.GRAY + " - " + ChatColor.DARK_RED
 								+ "MUTED");
 					}
 					sender.sendMessage(sb.toString());
-				}
-				else
-				{
+				} else {
 					break;
 				}
 			}
@@ -1531,30 +1261,25 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Grabs the reason for being in jail
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 * @return String of jailer's reason
 	 */
 	private String getJailReason(String name) {
 		String reason = "";
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + name
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				reason = rs.getString("reason");
-				if (rs.wasNull())
-				{
+				if (rs.wasNull()) {
 					reason = "";
 				}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1563,26 +1288,20 @@ public class KarmicJail extends JavaPlugin {
 
 	public boolean playerIsMuted(String name) {
 		boolean mute = false;
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + name
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				int muteInt = rs.getInt("muted");
-				if (!rs.wasNull())
-				{
-					if (muteInt == 1)
-					{
+				if (!rs.wasNull()) {
+					if (muteInt == 1) {
 						mute = true;
 					}
 				}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1591,7 +1310,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Returns the player's current status
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 * @return String of the player's JailStatus
@@ -1599,49 +1318,34 @@ public class KarmicJail extends JavaPlugin {
 	public String getPlayerStatus(String name) {
 		boolean found = true;
 		String status = "" + JailStatus.FREED;
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + name
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				status = rs.getString("status");
-				if (rs.wasNull())
-				{
+				if (rs.wasNull()) {
 					status = "" + JailStatus.FREED;
 					found = false;
 				}
-			}
-			else
-			{
+			} else {
 				found = false;
 			}
 			rs.close();
 
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
-		if (found)
-		{
-			if (status.equals("" + JailStatus.JAILED))
-			{
+		if (found) {
+			if (status.equals("" + JailStatus.JAILED)) {
 				status = "" + JailStatus.JAILED;
-			}
-			else if (status.equals("" + JailStatus.PENDINGFREE))
-			{
+			} else if (status.equals("" + JailStatus.PENDINGFREE)) {
 				status = "" + JailStatus.PENDINGFREE;
-			}
-			else if (status.equals("" + JailStatus.PENDINGJAIL))
-			{
+			} else if (status.equals("" + JailStatus.PENDINGJAIL)) {
 				status = "" + JailStatus.PENDINGJAIL;
 			}
-		}
-		else
-		{
+		} else {
 			setPlayerStatus(JailStatus.FREED, name);
 		}
 		return status;
@@ -1649,7 +1353,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Sets a player's status
-	 *
+	 * 
 	 * @param JailStatus
 	 *            to set to
 	 * @param name
@@ -1662,35 +1366,28 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Returns a list of all the groups a player has
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 * @return List of groups with associated world
 	 */
 	public List<String> getGroups(String player) {
 		List<String> list = new ArrayList<String>();
-		if (perm.getName().equals("PermissionsBukkit"))
-		{
+		if (perm.getName().equals("PermissionsBukkit")) {
 			final PermissionsPlugin permission = (PermissionsPlugin) this
 					.getServer().getPluginManager()
 					.getPlugin("PermissionsBukkit");
-			for (Group group : permission.getGroups(player))
-			{
+			for (Group group : permission.getGroups(player)) {
 				final String s = group.getName() + "!"
 						+ this.getServer().getWorlds().get(0).getName();
 				list.add(s);
 			}
-		}
-		else
-		{
-			for (World w : this.getServer().getWorlds())
-			{
+		} else {
+			for (World w : this.getServer().getWorlds()) {
 				String[] groups = perm.getPlayerGroups(w, player);
-				for (String group : groups)
-				{
+				for (String group : groups) {
 					String s = group + "!" + w.getName();
-					if (!list.contains(s))
-					{
+					if (!list.contains(s)) {
 						list.add(s);
 					}
 				}
@@ -1702,21 +1399,19 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Makes the minutes readable
-	 *
+	 * 
 	 * @param minutes
 	 * @return String of readable minutes
 	 */
 	public String prettifyMinutes(int minutes) {
-		if (minutes < 1)
-		{
+		if (minutes < 1) {
 			return "about less than a minute";
 		}
 		if (minutes == 1)
 			return "about one minute";
 		if (minutes < 60)
 			return "about " + minutes + " minutes";
-		if (minutes % 60 == 0)
-		{
+		if (minutes % 60 == 0) {
 			if (minutes / 60 == 1)
 				return "about one hour";
 			else
@@ -1729,30 +1424,25 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Grabs player's time left in jail
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 * @return long of time left to serve
 	 */
 	public long getPlayerTime(String name) {
 		long time = 0;
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT * FROM jailed WHERE playername='" + name
 							+ "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				time = rs.getLong("time");
-				if (rs.wasNull())
-				{
+				if (rs.wasNull()) {
 					time = 0;
 				}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1761,7 +1451,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Sets a player's time
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 * @param duration
@@ -1774,26 +1464,24 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Removes a task
-	 *
+	 * 
 	 * @param name
 	 */
 	public void removeTask(String name) {
-		if (threads.containsKey(name))
-		{
+		if (threads.containsKey(name)) {
 			threads.remove(name);
 		}
 	}
 
 	/**
 	 * Teleports a player to unjail locaiton
-	 *
+	 * 
 	 * @param name
 	 *            of player to be teleported
 	 */
 	public void teleportOut(String name) {
 		Player player = this.getServer().getPlayer(name);
-		if (player != null)
-		{
+		if (player != null) {
 			player.teleport(config.unjailLoc);
 		}
 	}
@@ -1804,46 +1492,39 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Stops a player's timed task
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 */
 	public void stopTask(String name) {
-		if (threads.containsKey(name))
-		{
+		if (threads.containsKey(name)) {
 			threads.get(name).stop();
 		}
 	}
 
 	/**
 	 * Check if player exists in master database
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 * @return true if player is in database, else false
 	 */
 	public boolean playerInDatabase(String name) {
 		boolean has = false;
-		try
-		{
+		try {
 			ResultSet rs = database
 					.select("SELECT COUNT(*) FROM jailed WHERE playername='"
 							+ name + "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				final int count = rs.getInt(1);
-				if (!rs.wasNull())
-				{
-					if (count > 0)
-					{
+				if (!rs.wasNull()) {
+					if (count > 0) {
 						has = true;
 					}
 				}
 			}
 			rs.close();
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1852,38 +1533,31 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Adds a player to the database if they do not exist
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 */
 	public void addPlayerToDatabase(String name) {
-		try
-		{
+		try {
 			boolean has = false;
 			ResultSet rs = database
 					.select("SELECT COUNT(*) FROM jailed WHERE playername='"
 							+ name + "';");
-			if (rs.next())
-			{
+			if (rs.next()) {
 				final int count = rs.getInt(1);
-				if (!rs.wasNull())
-				{
-					if (count > 0)
-					{
+				if (!rs.wasNull()) {
+					if (count > 0) {
 						has = true;
 					}
 				}
 			}
 			rs.close();
-			if (!has)
-			{
+			if (!has) {
 				// Add to database
 				database.standardQuery("INSERT INTO jailed (playername,status,time) VALUES ('"
 						+ name + "', '" + JailStatus.FREED + "', '0');");
 			}
-		}
-		catch (SQLException e)
-		{
+		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
@@ -1891,7 +1565,7 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Creates a new thread for a player to get auto-released
-	 *
+	 * 
 	 * @param name
 	 *            of player
 	 */
@@ -1902,21 +1576,18 @@ public class KarmicJail extends JavaPlugin {
 	/**
 	 * Attempts to look up full name based on who's on the server Given a
 	 * partial name
-	 *
+	 * 
 	 * @author Frigid, edited by Raphfrk and petteyg359
 	 */
 	public String expandName(String Name) {
 		int m = 0;
 		String Result = "";
-		for (int n = 0; n < this.getServer().getOnlinePlayers().length; n++)
-		{
+		for (int n = 0; n < this.getServer().getOnlinePlayers().length; n++) {
 			String str = this.getServer().getOnlinePlayers()[n].getName();
-			if (str.matches("(?i).*" + Name + ".*"))
-			{
+			if (str.matches("(?i).*" + Name + ".*")) {
 				m++;
 				Result = str;
-				if (m == 2)
-				{
+				if (m == 2) {
 					return null;
 				}
 			}
@@ -1925,8 +1596,7 @@ public class KarmicJail extends JavaPlugin {
 		}
 		if (m == 1)
 			return Result;
-		if (m > 1)
-		{
+		if (m > 1) {
 			return null;
 		}
 		return Name;
@@ -1934,14 +1604,13 @@ public class KarmicJail extends JavaPlugin {
 
 	/**
 	 * Colorizes a given string to Bukkit standards
-	 *
+	 * 
 	 * @param string
 	 * @return String with appropriate Bukkit ChatColor in them
 	 * @author Coryf88
 	 */
 	public String colorizeText(String string) {
-		for (ChatColor color : ChatColor.values())
-		{
+		for (ChatColor color : ChatColor.values()) {
 			string = string.replace(String.format("&%x", color.getChar()),
 					color.toString());
 		}
