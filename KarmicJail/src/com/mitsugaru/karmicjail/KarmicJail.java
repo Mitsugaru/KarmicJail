@@ -475,7 +475,7 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	private void setPlayerReason(String name, String reason) {
-		this.database.standardQuery("UPDATE jailed SET reason='" + reason
+		this.database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET reason='" + reason
 				+ "' WHERE playername='" + name + "';");
 	}
 
@@ -564,7 +564,7 @@ public class KarmicJail extends JavaPlugin {
 				this.setPlayerStatus(JailStatus.PENDINGJAIL, name);
 			}
 			final String date = new Date().toString();
-			database.standardQuery("UPDATE jailed SET jailer='"
+			database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET jailer='"
 					+ sender.getName() + "',date='" + date + "',reason='"
 					+ reason + "',muted='0' WHERE playername='" + name + "';");
 			sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
@@ -594,7 +594,7 @@ public class KarmicJail extends JavaPlugin {
 		if (append) {
 			sb.deleteCharAt(sb.length() - 1);
 		}
-		this.database.standardQuery("UPDATE jailed SET groups='"
+		this.database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET groups='"
 				+ sb.toString() + "' WHERE playername='" + name + "';");
 	}
 
@@ -651,7 +651,7 @@ public class KarmicJail extends JavaPlugin {
 		this.returnGroups(name);
 
 		// Clear other columns
-		database.standardQuery("UPDATE jailed SET time='',jailer='',date='',reason='' WHERE playername='"
+		database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET time='',jailer='',date='',reason='' WHERE playername='"
 				+ name + "';");
 		cache.remove(name);
 		// Check if player is offline:
@@ -702,7 +702,7 @@ public class KarmicJail extends JavaPlugin {
 	public void returnGroups(String name) {
 		try {
 			ResultSet rs = this.database
-					.select("SELECT * FROM jailed WHERE playername='" + name
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + name
 							+ "';");
 			if (rs.next()) {
 				String groups = rs.getString("groups");
@@ -737,12 +737,12 @@ public class KarmicJail extends JavaPlugin {
 			return;
 		}
 		if (playerIsMuted(name)) {
-			database.standardQuery("UPDATE jailed SET muted='0' WHERE playername='"
+			database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET muted='0' WHERE playername='"
 					+ name + "';");
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.GREEN
 					+ " unmuted");
 		} else {
-			database.standardQuery("UPDATE jailed SET muted='1' WHERE playername='"
+			database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET muted='1' WHERE playername='"
 					+ name + "';");
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.RED + " muted");
 		}
@@ -964,7 +964,7 @@ public class KarmicJail extends JavaPlugin {
 		String jailer = "NOBODY";
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + name
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + name
 							+ "';");
 			if (rs.next()) {
 				jailer = rs.getString("jailer");
@@ -991,7 +991,7 @@ public class KarmicJail extends JavaPlugin {
 		String date = "";
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + name
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + name
 							+ "';");
 			if (rs.next()) {
 				date = rs.getString("date");
@@ -1018,7 +1018,7 @@ public class KarmicJail extends JavaPlugin {
 		boolean jailed = false;
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + player
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + player
 							+ "';");
 			if (rs.next()) {
 				final String status = rs.getString("status");
@@ -1046,7 +1046,7 @@ public class KarmicJail extends JavaPlugin {
 		boolean missing = false;
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + player
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + player
 							+ "';");
 			if (rs.next()) {
 				final String status = rs.getString("status");
@@ -1081,7 +1081,7 @@ public class KarmicJail extends JavaPlugin {
 		boolean missing = false;
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + player
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + player
 							+ "';");
 			if (rs.next()) {
 				time = rs.getDouble("time");
@@ -1118,7 +1118,7 @@ public class KarmicJail extends JavaPlugin {
 		// Update cache of jailed players
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE status='"
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE status='"
 							+ JailStatus.JAILED + "' OR status='"
 							+ JailStatus.PENDINGJAIL + "';");
 			if (rs.next()) {
@@ -1270,7 +1270,7 @@ public class KarmicJail extends JavaPlugin {
 		String reason = "";
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + name
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + name
 							+ "';");
 			if (rs.next()) {
 				reason = rs.getString("reason");
@@ -1290,7 +1290,7 @@ public class KarmicJail extends JavaPlugin {
 		boolean mute = false;
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + name
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + name
 							+ "';");
 			if (rs.next()) {
 				int muteInt = rs.getInt("muted");
@@ -1320,7 +1320,7 @@ public class KarmicJail extends JavaPlugin {
 		String status = "" + JailStatus.FREED;
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + name
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + name
 							+ "';");
 			if (rs.next()) {
 				status = rs.getString("status");
@@ -1360,7 +1360,7 @@ public class KarmicJail extends JavaPlugin {
 	 *            of player
 	 */
 	public void setPlayerStatus(JailStatus status, String name) {
-		this.database.standardQuery("UPDATE jailed SET status='" + status
+		this.database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET status='" + status
 				+ "' WHERE playername='" + name + "';");
 	}
 
@@ -1433,7 +1433,7 @@ public class KarmicJail extends JavaPlugin {
 		long time = 0;
 		try {
 			ResultSet rs = database
-					.select("SELECT * FROM jailed WHERE playername='" + name
+					.select("SELECT * FROM " + config.tablePrefix +"jailed WHERE playername='" + name
 							+ "';");
 			if (rs.next()) {
 				time = rs.getLong("time");
@@ -1458,7 +1458,7 @@ public class KarmicJail extends JavaPlugin {
 	 *            of time
 	 */
 	public void updatePlayerTime(String name, long duration) {
-		database.standardQuery("UPDATE jailed SET time='" + duration
+		database.standardQuery("UPDATE " + config.tablePrefix +"jailed SET time='" + duration
 				+ "' WHERE playername='" + name + "';");
 	}
 
@@ -1513,7 +1513,7 @@ public class KarmicJail extends JavaPlugin {
 		boolean has = false;
 		try {
 			ResultSet rs = database
-					.select("SELECT COUNT(*) FROM jailed WHERE playername='"
+					.select("SELECT COUNT(*) FROM " + config.tablePrefix +"jailed WHERE playername='"
 							+ name + "';");
 			if (rs.next()) {
 				final int count = rs.getInt(1);
@@ -1541,7 +1541,7 @@ public class KarmicJail extends JavaPlugin {
 		try {
 			boolean has = false;
 			ResultSet rs = database
-					.select("SELECT COUNT(*) FROM jailed WHERE playername='"
+					.select("SELECT COUNT(*) FROM " + config.tablePrefix +"jailed WHERE playername='"
 							+ name + "';");
 			if (rs.next()) {
 				final int count = rs.getInt(1);
@@ -1554,7 +1554,7 @@ public class KarmicJail extends JavaPlugin {
 			rs.close();
 			if (!has) {
 				// Add to database
-				database.standardQuery("INSERT INTO jailed (playername,status,time) VALUES ('"
+				database.standardQuery("INSERT INTO " + config.tablePrefix +"jailed (playername,status,time) VALUES ('"
 						+ name + "', '" + JailStatus.FREED + "', '0');");
 			}
 		} catch (SQLException e) {
