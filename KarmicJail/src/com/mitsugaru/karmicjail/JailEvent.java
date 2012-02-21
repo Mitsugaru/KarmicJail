@@ -10,6 +10,7 @@ public class JailEvent extends Event implements Cancellable {
 	public String name, date,jailer,reason;
 	public long duration;
 
+	//TODO fix
 	public JailEvent(String event, PrisonerInfo pi)
 	{
 		super();
