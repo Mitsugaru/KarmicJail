@@ -1210,6 +1210,7 @@ public class KarmicJail extends JavaPlugin {
 					+ ChatColor.BLUE + " of " + ChatColor.GRAY + num
 					+ ChatColor.BLUE + "===");
 			// list
+			//FIXME not going into for loop for whatever reason
 			for (int i = ((page.get(sender.getName()).intValue()) * limit); i < ((page
 					.get(sender.getName()).intValue()) * limit) + limit; i++) {
 				// Don't try to pull something beyond the bounds
