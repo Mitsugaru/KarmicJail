@@ -47,8 +47,6 @@ public class KarmicJail extends JavaPlugin {
 	private final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-	private boolean debugTime, unjailTeleport;
-	private int limit;
 
 	@Override
 	public void onDisable() {
@@ -95,7 +93,7 @@ public class KarmicJail extends JavaPlugin {
 			String commandLabel, String[] args) {
 		boolean com = false;
 		long dTime = 0;
-		if (debugTime) {
+		if (config.debugTime) {
 			dTime = System.nanoTime();
 		}
 		if (commandLabel.equalsIgnoreCase("jail")
@@ -421,6 +419,7 @@ public class KarmicJail extends JavaPlugin {
 					|| perm.has(sender, "KarmicJail.unjail")
 					|| perm.has(sender, "KarmicJail.setjail")) {
 				config.reload();
+				sender.sendMessage(ChatColor.GREEN + prefix + " Config reloaded.");
 			} else {
 				sender.sendMessage(ChatColor.RED + "Lack permission to reload");
 			}
@@ -466,7 +465,7 @@ public class KarmicJail extends JavaPlugin {
 		}
 
 		if (com) {
-			if (debugTime) {
+			if (config.debugTime) {
 				this.debugTime(sender, dTime);
 			}
 			return true;
@@ -668,7 +667,7 @@ public class KarmicJail extends JavaPlugin {
 		}
 
 		// Move player out of jail
-		if (unjailTeleport) {
+		if (config.unjailTeleport) {
 			player.teleport(config.unjailLoc);
 		}
 		// Change status
@@ -1183,7 +1182,7 @@ public class KarmicJail extends JavaPlugin {
 		boolean valid = true;
 		// Caluclate amount of pages
 		int num = array.length / 8;
-		double rem = (double) array.length % (double) limit;
+		double rem = (double) array.length % (double) config.limit;
 		if (rem != 0) {
 			num++;
 		}
@@ -1194,7 +1193,7 @@ public class KarmicJail extends JavaPlugin {
 			// reset their current page back to 0
 			page.put(sender.getName(), 0);
 			valid = false;
-		} else if ((page.get(sender.getName()).intValue()) * limit > array.length) {
+		} else if ((page.get(sender.getName()).intValue()) * config.limit > array.length) {
 			// They tried to use /ks next at the end of the list
 			sender.sendMessage(ChatColor.YELLOW + prefix
 					+ " Page does not exist");
@@ -1211,8 +1210,8 @@ public class KarmicJail extends JavaPlugin {
 					+ ChatColor.BLUE + "===");
 			// list
 			//FIXME not going into for loop for whatever reason
-			for (int i = ((page.get(sender.getName()).intValue()) * limit); i < ((page
-					.get(sender.getName()).intValue()) * limit) + limit; i++) {
+			for (int i = ((page.get(sender.getName()).intValue()) * config.limit); i < ((page
+					.get(sender.getName()).intValue()) * config.limit) + config.limit; i++) {
 				// Don't try to pull something beyond the bounds
 				if (i < array.length) {
 					StringBuilder sb = new StringBuilder();
