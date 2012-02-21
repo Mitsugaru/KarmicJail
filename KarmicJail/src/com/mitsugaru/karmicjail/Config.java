@@ -63,7 +63,7 @@ public class Config {
 		database = config.getString("mysql.database", "minecraft");
 		user = config.getString("mysql.user", "user");
 		password = config.getString("mysql.password", "password");
-		tablePrefix = config.getString("mysql.prefix", "ks_");
+		tablePrefix = config.getString("mysql.prefix", "kj_");
 		importSQL = config.getBoolean("mysql.import", false);
 		jailLoc = new Location(plugin.getServer().getWorld(
 				config.getString("jail.world", plugin.getServer().getWorlds()
