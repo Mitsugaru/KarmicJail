@@ -1,16 +1,15 @@
 package com.mitsugaru.karmicjail;
 
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 
-public class JailEvent extends Event implements Cancellable {
-	private boolean cancel;
-	public String name, date,jailer,reason;
-	public long duration;
+public class JailEvent extends Event {
+	private static final HandlerList handlers = new HandlerList();
+	private String name, date,jailer,reason;
+	private long duration;
 
-	//TODO fix
 	public JailEvent(String event, PrisonerInfo pi)
 	{
 		super();
@@ -19,17 +18,31 @@ public class JailEvent extends Event implements Cancellable {
 		jailer = pi.jailer;
 		reason = pi.reason;
 		duration = pi.time;
-		cancel = false;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public String getJailer() {
+		return jailer;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public long getDuration() {
+		return duration;
 	}
 
 	@Override
-	public boolean isCancelled() {
-		return cancel;
-	}
-
-	@Override
-	public void setCancelled(boolean c) {
-		cancel = c;
+	public HandlerList getHandlers() {
+		return handlers;
 	}
 
 }
