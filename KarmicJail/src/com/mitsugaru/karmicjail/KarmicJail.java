@@ -574,9 +574,8 @@ public class KarmicJail extends JavaPlugin {
 			final PrisonerInfo pi = new PrisonerInfo(name, sender.getName(),
 					date, reason, duration, false);
 			cache.put(name, pi);
-			// Throw jail event
-			// JailEvent event = new JailEvent("JailEvent", pi);
-			// this.getServer().getPluginManager().callEvent(event);
+			//Throw jail event
+			this.getServer().getPluginManager().callEvent(new JailEvent("JailEvent", pi));
 		}
 	}
 
