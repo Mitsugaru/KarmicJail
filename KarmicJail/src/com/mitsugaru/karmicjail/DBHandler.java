@@ -1,10 +1,10 @@
 package com.mitsugaru.karmicjail;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 
+import lib.Mitsugaru.SQLibrary.Database.Query;
 import lib.Mitsugaru.SQLibrary.MySQL;
 import lib.Mitsugaru.SQLibrary.SQLite;
 
@@ -62,39 +62,39 @@ public class DBHandler {
 			sqlite = new SQLite(plugin.getLogger(), KarmicJail.prefix, "jail",
 					plugin.getDataFolder().getAbsolutePath());
 			// Copy items
-			ResultSet rs = sqlite.select("SELECT * FROM " + config.tablePrefix
+			Query rs = sqlite.select("SELECT * FROM " + config.tablePrefix
 					+ "jailed;");
-			if (rs.next()) {
+			if (rs.getResult().next()) {
 				plugin.getLogger().info(
 						KarmicJail.prefix + " Importing jailed players...");
 				do {
-					String name = rs.getString("playername");
-					String status = rs.getString("status");
-					if (!rs.wasNull()) {
+					String name = rs.getResult().getString("playername");
+					String status = rs.getResult().getString("status");
+					if (!rs.getResult().wasNull()) {
 						status = JailStatus.JAILED + "";
 					}
-					long time = rs.getLong("time");
-					if (!rs.wasNull()) {
+					long time = rs.getResult().getLong("time");
+					if (!rs.getResult().wasNull()) {
 						time = -1;
 					}
-					String groups = rs.getString("groups");
-					if (!rs.wasNull()) {
+					String groups = rs.getResult().getString("groups");
+					if (!rs.getResult().wasNull()) {
 						groups = "";
 					}
-					String jailer = rs.getString("jailer");
-					if (!rs.wasNull()) {
+					String jailer = rs.getResult().getString("jailer");
+					if (!rs.getResult().wasNull()) {
 						jailer = "";
 					}
-					String date = rs.getString("date");
-					if (!rs.wasNull()) {
+					String date = rs.getResult().getString("date");
+					if (!rs.getResult().wasNull()) {
 						date = "";
 					}
-					String reason = rs.getString("reason");
-					if (!rs.wasNull()) {
+					String reason = rs.getResult().getString("reason");
+					if (!rs.getResult().wasNull()) {
 						reason = "";
 					}
-					int muted = rs.getInt("muted");
-					if (!rs.wasNull()) {
+					int muted = rs.getResult().getInt("muted");
+					if (!rs.getResult().wasNull()) {
 						muted = 0;
 					}
 					sb.append("INSERT INTO ");
@@ -119,9 +119,9 @@ public class DBHandler {
 					final String query = sb.toString();
 					mysql.standardQuery(query);
 					sb = new StringBuilder();
-				} while (rs.next());
+				} while (rs.getResult().next());
 			}
-			rs.close();
+			rs.closeQuery();
 			plugin.getLogger().info(
 					KarmicJail.prefix + " Done importing SQLite into MySQL");
 		} catch (SQLException e) {
@@ -150,7 +150,7 @@ public class DBHandler {
 		}
 	}
 
-	public ResultSet select(String query) {
+	public Query select(String query) {
 		if (useMySQL) {
 			return mysql.select(query);
 		} else {

@@ -9,7 +9,6 @@
 
 package com.mitsugaru.karmicjail;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -20,6 +19,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.logging.Logger;
+
+import lib.Mitsugaru.SQLibrary.Database.Query;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -705,12 +706,12 @@ public class KarmicJail extends JavaPlugin {
 	 */
 	public void returnGroups(String name) {
 		try {
-			ResultSet rs = this.database.select("SELECT * FROM "
+			Query rs = this.database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				String groups = rs.getString("groups");
-				if (!rs.wasNull() && !groups.equals(""))
+			if (rs.getResult().next()) {
+				String groups = rs.getResult().getString("groups");
+				if (!rs.getResult().wasNull() && !groups.equals(""))
 
 					if (groups.contains("&")) {
 						String[] cut = groups.split("&");
@@ -723,7 +724,7 @@ public class KarmicJail extends JavaPlugin {
 						perm.playerAddGroup(split[1], name, split[0]);
 					}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -967,16 +968,16 @@ public class KarmicJail extends JavaPlugin {
 	private String getJailer(String name) {
 		String jailer = "NOBODY";
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				jailer = rs.getString("jailer");
-				if (rs.wasNull()) {
+			if (rs.getResult().next()) {
+				jailer = rs.getResult().getString("jailer");
+				if (rs.getResult().wasNull()) {
 					jailer = "NOBODY";
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -994,16 +995,16 @@ public class KarmicJail extends JavaPlugin {
 	private String getJailDate(String name) {
 		String date = "";
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				date = rs.getString("date");
-				if (rs.wasNull()) {
+			if (rs.getResult().next()) {
+				date = rs.getResult().getString("date");
+				if (rs.getResult().wasNull()) {
 					date = "NO DATE";
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -1021,16 +1022,16 @@ public class KarmicJail extends JavaPlugin {
 	public boolean playerIsPendingJail(String player) {
 		boolean jailed = false;
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + player
 					+ "';");
-			if (rs.next()) {
-				final String status = rs.getString("status");
+			if (rs.getResult().next()) {
+				final String status = rs.getResult().getString("status");
 				if (status.equals("" + JailStatus.PENDINGJAIL)) {
 					jailed = true;
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -1049,19 +1050,19 @@ public class KarmicJail extends JavaPlugin {
 		boolean jailed = false;
 		boolean missing = false;
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + player
 					+ "';");
-			if (rs.next()) {
-				final String status = rs.getString("status");
-				if (rs.wasNull()) {
+			if (rs.getResult().next()) {
+				final String status = rs.getResult().getString("status");
+				if (rs.getResult().wasNull()) {
 					log.severe(prefix + " MISSING STATUS FOR: " + player);
 					missing = true;
 				} else if (status.equals("" + JailStatus.JAILED)) {
 					jailed = true;
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 			if (missing) {
 				setPlayerStatus(JailStatus.FREED, player);
 			}
@@ -1084,17 +1085,17 @@ public class KarmicJail extends JavaPlugin {
 		double time = 0;
 		boolean missing = false;
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + player
 					+ "';");
-			if (rs.next()) {
-				time = rs.getDouble("time");
-				if (rs.wasNull()) {
+			if (rs.getResult().next()) {
+				time = rs.getResult().getDouble("time");
+				if (rs.getResult().wasNull()) {
 					time = 0;
 					missing = true;
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 			if (missing) {
 				setJailTime(console, player, 0);
 				log.warning(prefix + " " + player
@@ -1121,31 +1122,31 @@ public class KarmicJail extends JavaPlugin {
 	private void listJailed(CommandSender sender, int pageAdjust) {
 		// Update cache of jailed players
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE status='"
 					+ JailStatus.JAILED + "' OR status='"
 					+ JailStatus.PENDINGJAIL + "';");
-			if (rs.next()) {
+			if (rs.getResult().next()) {
 				do {
-					String name = rs.getString("playername");
-					String jailer = rs.getString("jailer");
-					if (rs.wasNull()) {
+					String name = rs.getResult().getString("playername");
+					String jailer = rs.getResult().getString("jailer");
+					if (rs.getResult().wasNull()) {
 						jailer = "NOBODY";
 					}
-					String date = rs.getString("date");
-					if (rs.wasNull()) {
+					String date = rs.getResult().getString("date");
+					if (rs.getResult().wasNull()) {
 						date = "NO DATE";
 					}
-					String reason = rs.getString("reason");
-					if (rs.wasNull()) {
+					String reason = rs.getResult().getString("reason");
+					if (rs.getResult().wasNull()) {
 						reason = "";
 					}
-					long time = rs.getLong("time");
-					if (rs.wasNull()) {
+					long time = rs.getResult().getLong("time");
+					if (rs.getResult().wasNull()) {
 						time = 0;
 					}
-					int muteInt = rs.getInt("muted");
-					if (rs.wasNull()) {
+					int muteInt = rs.getResult().getInt("muted");
+					if (rs.getResult().wasNull()) {
 						muteInt = 0;
 					}
 					boolean muted = false;
@@ -1159,9 +1160,9 @@ public class KarmicJail extends JavaPlugin {
 						cache.get(name).updateTime(
 								threads.get(name).remainingTime());
 					}
-				} while (rs.next());
+				} while (rs.getResult().next());
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -1271,16 +1272,16 @@ public class KarmicJail extends JavaPlugin {
 	private String getJailReason(String name) {
 		String reason = "";
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				reason = rs.getString("reason");
-				if (rs.wasNull()) {
+			if (rs.getResult().next()) {
+				reason = rs.getResult().getString("reason");
+				if (rs.getResult().wasNull()) {
 					reason = "";
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -1291,18 +1292,18 @@ public class KarmicJail extends JavaPlugin {
 	public boolean playerIsMuted(String name) {
 		boolean mute = false;
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				int muteInt = rs.getInt("muted");
-				if (!rs.wasNull()) {
+			if (rs.getResult().next()) {
+				int muteInt = rs.getResult().getInt("muted");
+				if (!rs.getResult().wasNull()) {
 					if (muteInt == 1) {
 						mute = true;
 					}
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -1321,19 +1322,19 @@ public class KarmicJail extends JavaPlugin {
 		boolean found = true;
 		String status = "" + JailStatus.FREED;
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				status = rs.getString("status");
-				if (rs.wasNull()) {
+			if (rs.getResult().next()) {
+				status = rs.getResult().getString("status");
+				if (rs.getResult().wasNull()) {
 					status = "" + JailStatus.FREED;
 					found = false;
 				}
 			} else {
 				found = false;
 			}
-			rs.close();
+			rs.closeQuery();
 
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
@@ -1435,16 +1436,16 @@ public class KarmicJail extends JavaPlugin {
 	public long getPlayerTime(String name) {
 		long time = 0;
 		try {
-			ResultSet rs = database.select("SELECT * FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				time = rs.getLong("time");
-				if (rs.wasNull()) {
+			if (rs.getResult().next()) {
+				time = rs.getResult().getLong("time");
+				if (rs.getResult().wasNull()) {
 					time = 0;
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -1516,18 +1517,18 @@ public class KarmicJail extends JavaPlugin {
 	public boolean playerInDatabase(String name) {
 		boolean has = false;
 		try {
-			ResultSet rs = database.select("SELECT COUNT(*) FROM "
+			Query rs = database.select("SELECT COUNT(*) FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				final int count = rs.getInt(1);
-				if (!rs.wasNull()) {
+			if (rs.getResult().next()) {
+				final int count = rs.getResult().getInt(1);
+				if (!rs.getResult().wasNull()) {
 					if (count > 0) {
 						has = true;
 					}
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 		} catch (SQLException e) {
 			log.warning(prefix + " SQL Exception");
 			e.printStackTrace();
@@ -1544,18 +1545,18 @@ public class KarmicJail extends JavaPlugin {
 	public void addPlayerToDatabase(String name) {
 		try {
 			boolean has = false;
-			ResultSet rs = database.select("SELECT COUNT(*) FROM "
+			Query rs = database.select("SELECT COUNT(*) FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.next()) {
-				final int count = rs.getInt(1);
-				if (!rs.wasNull()) {
+			if (rs.getResult().next()) {
+				final int count = rs.getResult().getInt(1);
+				if (!rs.getResult().wasNull()) {
 					if (count > 0) {
 						has = true;
 					}
 				}
 			}
-			rs.close();
+			rs.closeQuery();
 			if (!has) {
 				// Add to database
 				database.standardQuery("INSERT INTO " + config.tablePrefix
