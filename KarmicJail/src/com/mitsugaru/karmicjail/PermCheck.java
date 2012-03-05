@@ -9,8 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import de.bananaco.permissions.Permissions;
-
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
@@ -122,17 +120,10 @@ public class PermCheck {
 				//Last I remember, PermissionsBukkit forces the default group to be named default
 				return def;
 			}
-			else if (pluginName.equals("bPermissions"))
+			else if (pluginName.equals("bPermissions2") || pluginName.equals("bPermissions"))
 			{
-				try
-				{
-					def =  Permissions.getWorldPermissionsManager().getPermissionSet(this.plugin.getServer().getWorlds().get(0).toString()).getDefaultGroup();
-				}
-				catch(IndexOutOfBoundsException e)
-				{
-					this.plugin.log.warning(KarmicJail.prefix + " Cannot grab default group.");
-					return def;
-				}
+				//IDEK anymore
+				return def;
 			}
 			else if (pluginName.equals("GroupManager"))
 			{
