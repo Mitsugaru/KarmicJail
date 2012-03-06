@@ -148,7 +148,7 @@ public class KarmicJail extends JavaPlugin {
 						reason = sb.toString().replaceAll("\\s+$", "");
 					}
 					for (String name : players) {
-						this.jailPlayer(sender, name, reason, time, timed);
+						this.jailPlayer(sender, name, reason.replaceAll("\\W", ""), time, timed);
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
 					// no player name given, error
@@ -442,11 +442,11 @@ public class KarmicJail extends JavaPlugin {
 						// Remove all trailing whitespace
 						reason = sb.toString().replaceAll("\\s+$", "");
 					}
-					setPlayerReason(name, reason);
+					setPlayerReason(name, reason.replaceAll("\\W", ""));
 					sender.sendMessage(ChatColor.GREEN + prefix
 							+ " Set reason for " + ChatColor.AQUA + name
 							+ ChatColor.GREEN + " to: " + ChatColor.GRAY
-							+ reason);
+							+ reason.replaceAll("\\W", ""));
 				} else {
 					sender.sendMessage(ChatColor.RED + "Missing name");
 					sender.sendMessage(ChatColor.RED
@@ -564,7 +564,6 @@ public class KarmicJail extends JavaPlugin {
 				// Set player status to pending
 				this.setPlayerStatus(JailStatus.PENDINGJAIL, name);
 			}
-			reason = reason.replaceAll("[^A-Za-z0-9 ]", " ");
 			final String date = new Date().toString();
 			database.standardQuery("UPDATE " + config.tablePrefix
 					+ "jailed SET jailer='" + sender.getName() + "',date='"
