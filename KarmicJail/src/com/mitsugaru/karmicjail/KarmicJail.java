@@ -564,6 +564,7 @@ public class KarmicJail extends JavaPlugin {
 				// Set player status to pending
 				this.setPlayerStatus(JailStatus.PENDINGJAIL, name);
 			}
+			reason = reason.replaceAll("[^A-Za-z0-9 ]", " ");
 			final String date = new Date().toString();
 			database.standardQuery("UPDATE " + config.tablePrefix
 					+ "jailed SET jailer='" + sender.getName() + "',date='"
