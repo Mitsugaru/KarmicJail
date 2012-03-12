@@ -70,31 +70,31 @@ public class DBHandler {
 				do {
 					String name = rs.getResult().getString("playername");
 					String status = rs.getResult().getString("status");
-					if (!rs.getResult().wasNull()) {
+					if (rs.getResult().wasNull()) {
 						status = JailStatus.JAILED + "";
 					}
 					long time = rs.getResult().getLong("time");
-					if (!rs.getResult().wasNull()) {
+					if (rs.getResult().wasNull()) {
 						time = -1;
 					}
 					String groups = rs.getResult().getString("groups");
-					if (!rs.getResult().wasNull()) {
+					if (rs.getResult().wasNull()) {
 						groups = "";
 					}
 					String jailer = rs.getResult().getString("jailer");
-					if (!rs.getResult().wasNull()) {
+					if (rs.getResult().wasNull()) {
 						jailer = "";
 					}
 					String date = rs.getResult().getString("date");
-					if (!rs.getResult().wasNull()) {
+					if (rs.getResult().wasNull()) {
 						date = "";
 					}
 					String reason = rs.getResult().getString("reason");
-					if (!rs.getResult().wasNull()) {
+					if (rs.getResult().wasNull()) {
 						reason = "";
 					}
 					int muted = rs.getResult().getInt("muted");
-					if (!rs.getResult().wasNull()) {
+					if (rs.getResult().wasNull()) {
 						muted = 0;
 					}
 					sb.append("INSERT INTO ");
