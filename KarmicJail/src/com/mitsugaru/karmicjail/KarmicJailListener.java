@@ -51,7 +51,7 @@ public class KarmicJailListener implements Listener {
         event.setRespawnLocation(plugin.getJailLocation());
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(final PlayerJoinEvent event) {
 
     	//Attempt to add player to database

@@ -655,7 +655,7 @@ public class KarmicJail extends JavaPlugin {
 		// Clear other columns
 		database.standardQuery("UPDATE "
 				+ config.tablePrefix
-				+ "jailed SET time='',jailer='',date='',reason='' WHERE playername='"
+				+ "jailed SET time='0',jailer='',date='',reason='' WHERE playername='"
 				+ name + "';");
 		cache.remove(name);
 		// Check if player is offline:
