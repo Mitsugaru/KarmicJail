@@ -324,8 +324,8 @@ public class KarmicJail extends JavaPlugin
 			if (perm.has(sender, "KarmicJail.jail"))
 			{
 				sender.sendMessage(ChatColor.GREEN + "/jailtime"
-						+ ChatColor.AQUA + " <player>" + ChatColor.YELLOW
-						+ " : Toggle mute for a player. Alias: /jtime");
+						+ ChatColor.AQUA + " <player> <time>" + ChatColor.YELLOW
+						+ " : Sets time for jailed player. Alias: /jtime");
 				sender.sendMessage(ChatColor.GREEN + "/jailreason"
 						+ ChatColor.AQUA + " <player> "
 						+ ChatColor.LIGHT_PURPLE + "[reason]"

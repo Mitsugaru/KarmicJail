@@ -87,11 +87,7 @@ public class KarmicJailListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(final PlayerQuitEvent event)
     {
-    	final Player player = event.getPlayer();
-
-        if (plugin.playerIsTempJailed(player.getName())) {
-        	plugin.stopTask(player.getName());
-        }
+    	plugin.stopTask(event.getPlayer().getName());
     }
 
 }
