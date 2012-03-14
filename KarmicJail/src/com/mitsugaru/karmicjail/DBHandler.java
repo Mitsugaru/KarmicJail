@@ -1,5 +1,6 @@
 package com.mitsugaru.karmicjail;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -57,7 +58,6 @@ public class DBHandler {
 	private void importSQL() {
 		// Connect to sql database
 		try {
-			StringBuilder sb = new StringBuilder();
 			// Grab local SQLite database
 			sqlite = new SQLite(plugin.getLogger(), KarmicJail.prefix, "jail",
 					plugin.getDataFolder().getAbsolutePath());
@@ -67,6 +67,7 @@ public class DBHandler {
 			if (rs.getResult().next()) {
 				plugin.getLogger().info(
 						KarmicJail.prefix + " Importing jailed players...");
+				PreparedStatement statement = mysql.prepare("INSERT INTO " + config.tablePrefix + "jailed (playername, status, time, groups, jailer, date, reason, muted) VALUES(?,?,?,?,?,?,?,?);");
 				do {
 					String name = rs.getResult().getString("playername");
 					String status = rs.getResult().getString("status");
@@ -97,28 +98,15 @@ public class DBHandler {
 					if (rs.getResult().wasNull()) {
 						muted = 0;
 					}
-					sb.append("INSERT INTO ");
-					sb.append(config.tablePrefix);
-					sb.append("jailed (playername, status, time, groups, jailer, date, reason, muted) VALUES('");
-					sb.append(name);
-					sb.append("','");
-					sb.append(status);
-					sb.append("','");
-					sb.append(time);
-					sb.append("','");
-					sb.append(groups);
-					sb.append("','");
-					sb.append(jailer);
-					sb.append("','");
-					sb.append(date);
-					sb.append("','");
-					sb.append(reason);
-					sb.append("','");
-					sb.append(muted);
-					sb.append("');");
-					final String query = sb.toString();
-					mysql.standardQuery(query);
-					sb = new StringBuilder();
+					statement.setString(1,name);
+					statement.setString(2,status);
+					statement.setLong(3,time);
+					statement.setString(4,groups);
+					statement.setString(5,jailer);
+					statement.setString(6,date);
+					statement.setString(7,reason);
+					statement.setInt(8,muted);
+					statement.executeUpdate();
 				} while (rs.getResult().next());
 			}
 			rs.closeQuery();
@@ -171,6 +159,18 @@ public class DBHandler {
 			mysql.createTable(query);
 		} else {
 			sqlite.createTable(query);
+		}
+	}
+	
+	public PreparedStatement prepare(String statement)
+	{
+		if(useMySQL)
+		{
+			return mysql.prepare(statement);
+		}
+		else
+		{
+			return sqlite.prepare(statement);
 		}
 	}
 }
