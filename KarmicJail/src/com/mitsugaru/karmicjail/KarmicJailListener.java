@@ -64,9 +64,16 @@ public class KarmicJailListener implements Listener {
         if (status.equals(""+JailStatus.PENDINGJAIL) || status.equals(""+JailStatus.JAILED)) {
             if (plugin.playerIsTempJailed(player.getName())) {
             	final long time = plugin.getPlayerTime(player.getName());
-                final int minutes = (int) ((time / minutesToTicks));
-                player.sendMessage(ChatColor.AQUA + "You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
-                plugin.addThread(player.getName(), time);
+            	if(time > 0)
+            	{
+            		final int minutes = (int) ((time / minutesToTicks));
+            		player.sendMessage(ChatColor.AQUA + "You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
+            		plugin.addThread(player.getName(), time);
+            	}
+            	else
+            	{
+            		plugin.unjailPlayer(plugin.console, player.getName());
+            	}
             } else {
                 player.sendMessage(ChatColor.AQUA + "You are jailed.");
             }
@@ -81,7 +88,6 @@ public class KarmicJailListener implements Listener {
             plugin.teleportOut(player.getName());
             player.sendMessage(ChatColor.AQUA + "You have been removed from jail.");
         }
-        //TODO if they are free, and if they contain the group Jailed, remove it.
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
