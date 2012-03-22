@@ -72,7 +72,7 @@ public class KarmicJailListener implements Listener {
             	}
             	else
             	{
-            		plugin.unjailPlayer(plugin.console, player.getName());
+            		plugin.unjailPlayer(plugin.console, player.getName(), true);
             	}
             } else {
                 player.sendMessage(ChatColor.AQUA + "You are jailed.");
