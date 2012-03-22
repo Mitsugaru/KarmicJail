@@ -36,17 +36,20 @@ public class JailTask implements Runnable {
 		return (duration - (long) (Math.floor(((System.nanoTime() - start) * 0.000000001) + 0.5f)) * 20);
 	}
 
-	public void stop()
+	public boolean stop()
 	{
 		if(id != -1)
 		{
 			//Stop thread
 			sj.getServer().getScheduler().cancelTask(id);
+			final long early = System.nanoTime() - start;
+			duration -= (long) (Math.floor((early * 0.000000001) + 0.5f) * 20);
+			sj.updatePlayerTime(name, duration);
+			sj.removeTask(name);
+			return true;
 		}
-		final long early = System.nanoTime() - start;
-		duration -= (long) (Math.floor((early * 0.000000001) + 0.5f) * 20);
-		sj.updatePlayerTime(name, duration);
-		sj.removeTask(name);
+		return false;
+		
 	}
 
 	public int getId() {

@@ -1867,12 +1867,13 @@ public class KarmicJail extends JavaPlugin
 	 * @param name
 	 *            of player
 	 */
-	public void stopTask(String name)
+	public boolean stopTask(String name)
 	{
 		if (threads.containsKey(name))
 		{
-			threads.get(name).stop();
+			return threads.get(name).stop();
 		}
+		return false;
 	}
 
 	/**
