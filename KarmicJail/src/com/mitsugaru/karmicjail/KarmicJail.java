@@ -671,11 +671,13 @@ public class KarmicJail extends JavaPlugin
 				// Player has never been on server, adding to list
 				addPlayerToDatabase(name);
 			}
-
-			// Save groups
-			this.savePlayerGroups(name);
-			// Remove all groups
-			this.removePlayerGroups(name);
+			if(config.removeGroups)
+			{
+				// Save groups
+				this.savePlayerGroups(name);
+				// Remove all groups
+				this.removePlayerGroups(name);
+			}
 			// Add to jail group
 			perm.playerAddGroup(config.jailLoc.getWorld().getName(), name,
 					config.jailGroup);
@@ -834,8 +836,11 @@ public class KarmicJail extends JavaPlugin
 		// Remove jail group
 		perm.playerRemoveGroup(config.jailLoc.getWorld(), name,
 				config.jailGroup);
-		// Return previous groups
-		this.returnGroups(name);
+		if(config.removeGroups)
+		{
+			// Return previous groups
+			this.returnGroups(name);
+		}
 
 		// Clear other columns
 		database.standardQuery("UPDATE "

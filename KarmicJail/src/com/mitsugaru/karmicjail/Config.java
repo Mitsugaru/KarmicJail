@@ -11,7 +11,7 @@ public class Config {
 
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
-	public boolean useMySQL, debugTime, importSQL, unjailTeleport;
+	public boolean useMySQL, debugTime, importSQL, unjailTeleport, removeGroups;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup;
 	public int limit;
@@ -25,6 +25,7 @@ public class Config {
 		ConfigurationSection config = plugin.getConfig();
 		final Map<String, Object> defaults = new HashMap<String, Object>();
 		defaults.put("jailgroup", "Jailed");
+		defaults.put("removegroups", true);
 		defaults.put("jail.world", plugin.getServer().getWorlds().get(0)
 				.getName());
 		defaults.put("jail.x", 0);
@@ -77,6 +78,7 @@ public class Config {
 		debugTime = config.getBoolean("debugTime", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
+		removeGroups = config.getBoolean("removegroups", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16) {
 			plugin.log.warning(KarmicJail.prefix
@@ -104,6 +106,7 @@ public class Config {
 		debugTime = config.getBoolean("debugTime", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
+		removeGroups = config.getBoolean("removegroups", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16) {
 			plugin.log.warning(KarmicJail.prefix
