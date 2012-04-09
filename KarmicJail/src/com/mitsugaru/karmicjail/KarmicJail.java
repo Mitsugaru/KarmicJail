@@ -1895,6 +1895,8 @@ public class KarmicJail extends JavaPlugin
 	 */
 	public boolean playerInDatabase(String name)
 	{
+		//TODO don't check against caps when comparing.
+		//need method for when this is true to get the name as is.
 		boolean has = false;
 		try
 		{
