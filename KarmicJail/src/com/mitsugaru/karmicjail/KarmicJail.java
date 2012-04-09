@@ -605,8 +605,13 @@ public class KarmicJail extends JavaPlugin
 		return false;
 	}
 
-	private void setPlayerReason(String name, String reason)
+	private void setPlayerReason(String inName, String reason)
 	{
+		String name = playerInDatabase(inName);
+		if(name == null)
+		{
+			name = inName;
+		}
 		try
 		{
 			final PreparedStatement statement = database.prepare("UPDATE " + config.tablePrefix
@@ -821,10 +826,14 @@ public class KarmicJail extends JavaPlugin
 	 * @param fromTempJail
 	 *            , if the jailed player's time ran out
 	 */
-	public void unjailPlayer(CommandSender sender, String name,
+	public void unjailPlayer(CommandSender sender, String inName,
 			boolean fromTempJail)
 	{
-
+		String name = playerInDatabase(inName);
+		if(name == null)
+		{
+			name = inName;
+		}
 		// Check if player is in jail:
 		if (getPlayerStatus(name).equals("" + JailStatus.FREED))
 		{
@@ -901,7 +910,7 @@ public class KarmicJail extends JavaPlugin
 	 * @param name
 	 *            of player
 	 */
-	public void returnGroups(String name)
+	private void returnGroups(String name)
 	{
 		try
 		{
@@ -942,8 +951,13 @@ public class KarmicJail extends JavaPlugin
 		this.unjailPlayer(sender, name, false);
 	}
 
-	public void mutePlayer(CommandSender sender, String name)
+	public void mutePlayer(CommandSender sender, String player)
 	{
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		// Check if player is in jail:
 		if (!playerIsJailed(name) && !playerIsPendingJail(name))
 		{
@@ -1284,10 +1298,15 @@ public class KarmicJail extends JavaPlugin
 	public boolean playerIsPendingJail(String player)
 	{
 		boolean jailed = false;
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		try
 		{
 			Query rs = database.select("SELECT * FROM " + config.tablePrefix
-					+ "jailed WHERE playername='" + player + "';");
+					+ "jailed WHERE playername='" + name + "';");
 			if (rs.getResult().next())
 			{
 				final String status = rs.getResult().getString("status");
@@ -1317,16 +1336,21 @@ public class KarmicJail extends JavaPlugin
 	{
 		boolean jailed = false;
 		boolean missing = false;
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		try
 		{
 			Query rs = database.select("SELECT * FROM " + config.tablePrefix
-					+ "jailed WHERE playername='" + player + "';");
+					+ "jailed WHERE playername='" + name + "';");
 			if (rs.getResult().next())
 			{
 				final String status = rs.getResult().getString("status");
 				if (rs.getResult().wasNull())
 				{
-					log.severe(prefix + " MISSING STATUS FOR: " + player);
+					log.severe(prefix + " MISSING STATUS FOR: " + name);
 					missing = true;
 				}
 				else if (status.equals("" + JailStatus.JAILED))
@@ -1337,7 +1361,7 @@ public class KarmicJail extends JavaPlugin
 			rs.closeQuery();
 			if (missing)
 			{
-				setPlayerStatus(JailStatus.FREED, player);
+				setPlayerStatus(JailStatus.FREED, name);
 			}
 		}
 		catch (SQLException e)
@@ -1360,10 +1384,15 @@ public class KarmicJail extends JavaPlugin
 	{
 		double time = 0;
 		boolean missing = false;
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		try
 		{
 			Query rs = database.select("SELECT * FROM " + config.tablePrefix
-					+ "jailed WHERE playername='" + player + "';");
+					+ "jailed WHERE playername='" + name + "';");
 			if (rs.getResult().next())
 			{
 				time = rs.getResult().getDouble("time");
@@ -1376,8 +1405,8 @@ public class KarmicJail extends JavaPlugin
 			rs.closeQuery();
 			if (missing)
 			{
-				setJailTime(console, player, 0);
-				log.warning(prefix + " " + player
+				setJailTime(console, name, 0);
+				log.warning(prefix + " " + name
 						+ "'s Time was missing. Reset to 0.");
 			}
 		}
@@ -1586,9 +1615,14 @@ public class KarmicJail extends JavaPlugin
 	 *            of player
 	 * @return String of jailer's reason
 	 */
-	private String getJailReason(String name)
+	private String getJailReason(String player)
 	{
 		String reason = "";
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		try
 		{
 			Query rs = database.select("SELECT * FROM " + config.tablePrefix
@@ -1611,9 +1645,14 @@ public class KarmicJail extends JavaPlugin
 		return reason;
 	}
 
-	public boolean playerIsMuted(String name)
+	public boolean playerIsMuted(String player)
 	{
 		boolean mute = false;
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		try
 		{
 			Query rs = database.select("SELECT * FROM " + config.tablePrefix
@@ -1646,10 +1685,15 @@ public class KarmicJail extends JavaPlugin
 	 *            of player
 	 * @return String of the player's JailStatus
 	 */
-	public String getPlayerStatus(String name)
+	public String getPlayerStatus(String inName)
 	{
 		boolean found = true;
 		String status = "" + JailStatus.FREED;
+		String name = playerInDatabase(inName);
+		if(name == null)
+		{
+			name = inName;
+		}
 		try
 		{
 			Query rs = database.select("SELECT * FROM " + config.tablePrefix
@@ -1705,8 +1749,13 @@ public class KarmicJail extends JavaPlugin
 	 * @param name
 	 *            of player
 	 */
-	public void setPlayerStatus(JailStatus status, String name)
+	public void setPlayerStatus(JailStatus status, String inName)
 	{
+		String name = playerInDatabase(inName);
+		if(name == null)
+		{
+			name = inName;
+		}
 		this.database.standardQuery("UPDATE " + config.tablePrefix
 				+ "jailed SET status='" + status + "' WHERE playername='"
 				+ name + "';");
@@ -1788,9 +1837,14 @@ public class KarmicJail extends JavaPlugin
 	 *            of player
 	 * @return long of time left to serve
 	 */
-	public long getPlayerTime(String name)
+	public long getPlayerTime(String player)
 	{
 		long time = 0;
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		try
 		{
 			Query rs = database.select("SELECT * FROM " + config.tablePrefix
@@ -1821,8 +1875,13 @@ public class KarmicJail extends JavaPlugin
 	 * @param duration
 	 *            of time
 	 */
-	public void updatePlayerTime(String name, long duration)
+	public void updatePlayerTime(String player, long duration)
 	{
+		String name = playerInDatabase(player);
+		if(name == null)
+		{
+			name = player;
+		}
 		database.standardQuery("UPDATE " + config.tablePrefix
 				+ "jailed SET time='" + duration + "' WHERE playername='"
 				+ name + "';");
@@ -1901,14 +1960,17 @@ public class KarmicJail extends JavaPlugin
 		{
 			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed;");
-			do
+			if(rs.getResult().next())
 			{
-				if(name.equalsIgnoreCase(rs.getResult().getString("playername")))
+				do
 				{
-					has = rs.getResult().getString("playername");
-					break;
-				}
-			}while(rs.getResult().next());
+					if(name.equalsIgnoreCase(rs.getResult().getString("playername")))
+					{
+						has = rs.getResult().getString("playername");
+						break;
+					}
+				}while(rs.getResult().next());
+			}
 			rs.closeQuery();
 		}
 		catch (SQLException e)
