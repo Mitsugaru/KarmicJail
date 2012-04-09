@@ -11,7 +11,7 @@ public class Config {
 
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
-	public boolean useMySQL, debugTime, importSQL, unjailTeleport, removeGroups;
+	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL, unjailTeleport, removeGroups;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup;
 	public int limit;
@@ -46,6 +46,9 @@ public class Config {
 		defaults.put("mysql.password", "pass");
 		defaults.put("mysql.tablePrefix", "kj_");
 		defaults.put("mysql.import", false);
+		defaults.put("debug.logToConsole", false);
+		defaults.put("debug.events", false);
+		defaults.put("debug.time", false);
 		defaults.put("version", plugin.getDescription().getVersion());
 
 		// Insert defaults into config file if they're not present
@@ -75,7 +78,9 @@ public class Config {
 						.get(0).getName())), config.getInt("unjail.x", 0),
 				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
 		jailGroup = config.getString("jailgroup", "Jailed");
-		debugTime = config.getBoolean("debugTime", false);
+		debugLog = config.getBoolean("debug.logToConsole", false);
+		debugEvents = config.getBoolean("debug.events", false);
+		debugTime = config.getBoolean("debug.time", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		removeGroups = config.getBoolean("removegroups", true);
@@ -103,6 +108,8 @@ public class Config {
 						.get(0).getName())), config.getInt("unjail.x", 0),
 				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
 		jailGroup = config.getString("jailgroup", "Jailed");
+		debugLog = config.getBoolean("debug.logToConsole", false);
+		debugEvents = config.getBoolean("debug.events", false);
 		debugTime = config.getBoolean("debugTime", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);

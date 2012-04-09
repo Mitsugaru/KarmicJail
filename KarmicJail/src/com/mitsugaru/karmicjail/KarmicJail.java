@@ -824,7 +824,7 @@ public class KarmicJail extends JavaPlugin
 	{
 
 		// Check if player is in jail:
-		if (!playerIsJailed(name) && !playerIsPendingJail(name))
+		if (getPlayerStatus(name).equals("" + JailStatus.FREED))
 		{
 			sender.sendMessage(ChatColor.RED + "That player is not in jail!");
 			return;
@@ -884,7 +884,7 @@ public class KarmicJail extends JavaPlugin
 				jailer.sendMessage(ChatColor.GOLD + player.getName()
 						+ ChatColor.AQUA + " auto-unjailed.");
 			}
-			// Notify console
+			// Notify sender
 			sender.sendMessage(ChatColor.GOLD + player.getName()
 					+ ChatColor.AQUA + " auto-unjailed.");
 		}
@@ -1834,10 +1834,7 @@ public class KarmicJail extends JavaPlugin
 	 */
 	public void removeTask(String name)
 	{
-		if (threads.containsKey(name))
-		{
-			threads.remove(name);
-		}
+		threads.remove(name);
 	}
 
 	/**
@@ -1870,7 +1867,21 @@ public class KarmicJail extends JavaPlugin
 	{
 		if (threads.containsKey(name))
 		{
-			return threads.get(name).stop();
+			getLogger().info("Thread found for: " + name);
+			final boolean stop = threads.get(name).stop();
+			if(stop)
+			{
+				getLogger().info("Thread stopped for: " + name);
+			}
+			else
+			{
+				getLogger().warning("Thread NOT stopped for: " + name);
+			}
+			return stop;
+		}
+		else
+		{
+			getLogger().warning("Thread NOT found for: " + name);
 		}
 		return false;
 	}
@@ -2025,6 +2036,11 @@ public class KarmicJail extends JavaPlugin
 	    string = string.replaceAll("&e", ""+ChatColor.YELLOW);
 	    string = string.replaceAll("&f", ""+ChatColor.WHITE);
 	    return string;
+	}
+	
+	public Config getPluginConfig()
+	{
+		return config;
 	}
 
 	public enum JailStatus

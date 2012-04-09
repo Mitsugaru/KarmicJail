@@ -22,10 +22,12 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 public class KarmicJailListener implements Listener {
 	//Class variables
     private final KarmicJail plugin;
+    private final Config config;
     private static final long minutesToTicks = 1200;
 
     public KarmicJailListener(KarmicJail plugin) {
         this.plugin = plugin;
+        this.config = plugin.getPluginConfig();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -36,6 +38,10 @@ public class KarmicJailListener implements Listener {
         {
         	if(plugin.playerIsMuted(player.getName()))
         	{
+        		if(config.debugLog && config.debugEvents)
+        		{
+        			plugin.getLogger().info("Muted '" + player.getName() + "' with message: " + event.getMessage());
+        		}
         		event.setCancelled(true);
         	}
         }
@@ -47,7 +53,10 @@ public class KarmicJailListener implements Listener {
         final Player player = event.getPlayer();
 
         if(!plugin.playerIsJailed(player.getName())) return;
-
+        if(config.debugLog && config.debugEvents)
+		{
+			plugin.getLogger().info("Respawned '" + player.getName() + "' to jail.");
+		}
         event.setRespawnLocation(plugin.getJailLocation());
     }
 
@@ -69,24 +78,31 @@ public class KarmicJailListener implements Listener {
             		final int minutes = (int) ((time / minutesToTicks));
             		player.sendMessage(ChatColor.AQUA + "You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
             		plugin.addThread(player.getName(), time);
-            	}
-            	else
-            	{
-            		plugin.unjailPlayer(plugin.console, player.getName(), true);
+            		if(config.debugLog && config.debugEvents)
+            		{
+            			plugin.getLogger().info("Jailed '" + player.getName() + "' on login with time: " + plugin.prettifyMinutes(minutes));
+            		}
             	}
             } else {
                 player.sendMessage(ChatColor.AQUA + "You are jailed.");
+                if(config.debugLog && config.debugEvents)
+        		{
+        			plugin.getLogger().info("Jailed '" + player.getName() + "' on login.");
+        		}
             }
             player.teleport(plugin.getJailLocation());
             if(status.equals(""+JailStatus.PENDINGJAIL))
             {
             	plugin.setPlayerStatus(JailStatus.JAILED, player.getName());
             }
-
         } else if (status.equals(""+JailStatus.PENDINGFREE)) {
-            plugin.setPlayerStatus(JailStatus.FREED, player.getName());
+        	plugin.unjailPlayer(plugin.console, player.getName(), true);
             plugin.teleportOut(player.getName());
             player.sendMessage(ChatColor.AQUA + "You have been removed from jail.");
+            if(config.debugLog && config.debugEvents)
+    		{
+    			plugin.getLogger().info("Unjailed '" + player.getName() + "' on login.");
+    		}
         }
     }
 
@@ -94,6 +110,10 @@ public class KarmicJailListener implements Listener {
 	public void onPlayerQuit(final PlayerQuitEvent event)
     {
     	plugin.stopTask(event.getPlayer().getName());
+    	if(config.debugLog && config.debugEvents)
+		{
+			plugin.getLogger().info("Quit Event for: " + event.getPlayer().getName());
+		}
     }
 
 }
