@@ -667,9 +667,10 @@ public class KarmicJail extends JavaPlugin
 			if (name == null)
 			{
 				sender.sendMessage(ChatColor.YELLOW
-						+ " Player has never been on server! Adding to database...");
+						+ " Player '" + ChatColor.GREEN + inName + ChatColor.YELLOW + "' has never been on server! Adding to database...");
 				// Player has never been on server, adding to list
-				addPlayerToDatabase(name);
+				addPlayerToDatabase(inName);
+				name = inName;
 			}
 			if(config.removeGroups)
 			{
@@ -1899,8 +1900,7 @@ public class KarmicJail extends JavaPlugin
 		try
 		{
 			Query rs = database.select("SELECT * FROM "
-					+ config.tablePrefix + "jailed WHERE playername='" + name
-					+ "';");
+					+ config.tablePrefix + "jailed;");
 			do
 			{
 				if(name.equalsIgnoreCase(rs.getResult().getString("playername")))
