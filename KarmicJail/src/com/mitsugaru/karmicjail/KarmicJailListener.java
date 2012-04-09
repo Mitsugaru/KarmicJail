@@ -109,11 +109,11 @@ public class KarmicJailListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(final PlayerQuitEvent event)
     {
-    	plugin.stopTask(event.getPlayer().getName());
     	if(config.debugLog && config.debugEvents)
 		{
 			plugin.getLogger().info("Quit Event for: " + event.getPlayer().getName());
 		}
+    	plugin.stopTask(event.getPlayer().getName());
     }
 
 }

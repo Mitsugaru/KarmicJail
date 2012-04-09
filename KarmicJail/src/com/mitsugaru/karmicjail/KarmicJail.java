@@ -650,11 +650,11 @@ public class KarmicJail extends JavaPlugin
 	 *            for how long they're in jail
 	 * @param boolean to determine of player has a timed release
 	 */
-	public void jailPlayer(CommandSender sender, String name, String reason,
+	public void jailPlayer(CommandSender sender, String inName, String reason,
 			int minutes, boolean timed)
 	{
 		// Check if player is already jailed:
-		if (playerIsJailed(name) || playerIsPendingJail(name))
+		if (playerIsJailed(inName) || playerIsPendingJail(inName))
 		{
 			sender.sendMessage(ChatColor.RED
 					+ "That player is already in jail!");
@@ -663,7 +663,8 @@ public class KarmicJail extends JavaPlugin
 		{
 
 			// Check if player is in database
-			if (!playerInDatabase(name))
+			String name = playerInDatabase(inName);
+			if (name == null)
 			{
 				sender.sendMessage(ChatColor.YELLOW
 						+ " Player has never been on server! Adding to database...");
@@ -1512,7 +1513,6 @@ public class KarmicJail extends JavaPlugin
 					+ ChatColor.BLUE + " of " + ChatColor.GRAY + num
 					+ ChatColor.BLUE + "===");
 			// list
-			// FIXME not going into for loop for whatever reason
 			for (int i = ((page.get(sender.getName()).intValue()) * config.limit); i < ((page
 					.get(sender.getName()).intValue()) * config.limit)
 					+ config.limit; i++)
@@ -1893,27 +1893,22 @@ public class KarmicJail extends JavaPlugin
 	 *            of player
 	 * @return true if player is in database, else false
 	 */
-	public boolean playerInDatabase(String name)
+	public String playerInDatabase(String name)
 	{
-		//TODO don't check against caps when comparing.
-		//need method for when this is true to get the name as is.
-		boolean has = false;
+		String has = null;
 		try
 		{
-			Query rs = database.select("SELECT COUNT(*) FROM "
+			Query rs = database.select("SELECT * FROM "
 					+ config.tablePrefix + "jailed WHERE playername='" + name
 					+ "';");
-			if (rs.getResult().next())
+			do
 			{
-				final int count = rs.getResult().getInt(1);
-				if (!rs.getResult().wasNull())
+				if(name.equalsIgnoreCase(rs.getResult().getString("playername")))
 				{
-					if (count > 0)
-					{
-						has = true;
-					}
+					has = rs.getResult().getString("playername");
+					break;
 				}
-			}
+			}while(rs.getResult().next());
 			rs.closeQuery();
 		}
 		catch (SQLException e)
