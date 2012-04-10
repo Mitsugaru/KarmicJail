@@ -11,7 +11,7 @@ public class Config {
 
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
-	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL, unjailTeleport, removeGroups;
+	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL, unjailTeleport, removeGroups, broadcastJail, broadcastUnjail, broadcastReason, broadcastPerms;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup;
 	public int limit;
@@ -38,6 +38,10 @@ public class Config {
 		defaults.put("unjail.z", 0);
 		defaults.put("unjail.teleport", true);
 		defaults.put("entrylimit", 10);
+		defaults.put("broadcast.jail", false);
+		defaults.put("broadcast.unjail", false);
+		defaults.put("broadcast.reasonChange", false);
+		defaults.put("broadcast.ignorePermission", false);
 		defaults.put("mysql.use", false);
 		defaults.put("mysql.host", "localhost");
 		defaults.put("mysql.port", 3306);
@@ -81,6 +85,10 @@ public class Config {
 		debugLog = config.getBoolean("debug.logToConsole", false);
 		debugEvents = config.getBoolean("debug.events", false);
 		debugTime = config.getBoolean("debug.time", false);
+		broadcastJail = config.getBoolean("broadcast.jail", false);
+		broadcastUnjail = config.getBoolean("broadcast.unjail", false);
+		broadcastReason = config.getBoolean("broadcast.reasonChange", false);
+		broadcastPerms = !config.getBoolean("broadcast.ignorePermission", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		removeGroups = config.getBoolean("removegroups", true);
@@ -113,6 +121,10 @@ public class Config {
 		debugTime = config.getBoolean("debugTime", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
+		broadcastJail = config.getBoolean("broadcast.jail", false);
+		broadcastUnjail = config.getBoolean("broadcast.unjail", false);
+		broadcastReason = config.getBoolean("broadcast.reason", false);
+		broadcastPerms = !config.getBoolean("broadcast.ignorePermission", false);
 		removeGroups = config.getBoolean("removegroups", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16) {

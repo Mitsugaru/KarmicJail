@@ -173,8 +173,7 @@ public class KarmicJail extends JavaPlugin
 					}
 					for (String name : players)
 					{
-						this.jailPlayer(sender, name,
-								reason, time, timed);
+						this.jailPlayer(sender, name, reason, time, timed);
 					}
 				}
 				catch (ArrayIndexOutOfBoundsException e)
@@ -323,7 +322,8 @@ public class KarmicJail extends JavaPlugin
 			if (perm.has(sender, "KarmicJail.jail"))
 			{
 				sender.sendMessage(ChatColor.GREEN + "/jailtime"
-						+ ChatColor.AQUA + " <player> <time>" + ChatColor.YELLOW
+						+ ChatColor.AQUA + " <player> <time>"
+						+ ChatColor.YELLOW
 						+ " : Sets time for jailed player. Alias: /jtime");
 				sender.sendMessage(ChatColor.GREEN + "/jailreason"
 						+ ChatColor.AQUA + " <player> "
@@ -608,18 +608,32 @@ public class KarmicJail extends JavaPlugin
 	private void setPlayerReason(String inName, String reason)
 	{
 		String name = playerInDatabase(inName);
-		if(name == null)
+		if (name == null)
 		{
 			name = inName;
 		}
 		try
 		{
-			final PreparedStatement statement = database.prepare("UPDATE " + config.tablePrefix
-					+ "jailed SET reason=? WHERE playername='"
-					+ name + "';");
+			final PreparedStatement statement = database.prepare("UPDATE "
+					+ config.tablePrefix
+					+ "jailed SET reason=? WHERE playername='" + name + "';");
 			statement.setString(1, reason);
 			statement.executeUpdate();
 			statement.close();
+			// broadcast
+			if (config.broadcastReason)
+			{
+				final String out = ChatColor.AQUA + name + ChatColor.RED
+						+ " for " + ChatColor.GRAY + this.colorizeText(reason);
+				if (config.broadcastPerms)
+				{
+					getServer().broadcast(out, "KarmicJail.broadcast");
+				}
+				else
+				{
+					getServer().broadcastMessage(out);
+				}
+			}
 		}
 		catch (SQLException e)
 		{
@@ -671,13 +685,14 @@ public class KarmicJail extends JavaPlugin
 			String name = playerInDatabase(inName);
 			if (name == null)
 			{
-				sender.sendMessage(ChatColor.YELLOW
-						+ " Player '" + ChatColor.GREEN + inName + ChatColor.YELLOW + "' has never been on server! Adding to database...");
+				sender.sendMessage(ChatColor.YELLOW + " Player '"
+						+ ChatColor.GREEN + inName + ChatColor.YELLOW
+						+ "' has never been on server! Adding to database...");
 				// Player has never been on server, adding to list
 				addPlayerToDatabase(inName);
 				name = inName;
 			}
-			if(config.removeGroups)
+			if (config.removeGroups)
 			{
 				// Save groups
 				this.savePlayerGroups(name);
@@ -734,8 +749,10 @@ public class KarmicJail extends JavaPlugin
 			try
 			{
 				final String date = new Date().toString();
-				final PreparedStatement statement = database.prepare("UPDATE "
-						+ config.tablePrefix + "jailed SET jailer=?,date=?,reason=?, muted=? WHERE playername=?;");
+				final PreparedStatement statement = database
+						.prepare("UPDATE "
+								+ config.tablePrefix
+								+ "jailed SET jailer=?,date=?,reason=?, muted=? WHERE playername=?;");
 				statement.setString(1, sender.getName());
 				statement.setString(2, date);
 				statement.setString(3, reason);
@@ -751,6 +768,36 @@ public class KarmicJail extends JavaPlugin
 				// Throw jail event
 				this.getServer().getPluginManager()
 						.callEvent(new JailEvent("JailEvent", pi));
+				// Broadcast if necessary
+				if (config.broadcastJail)
+				{
+					// Setup broadcast string
+					final StringBuilder sb = new StringBuilder();
+					sb.append(ChatColor.AQUA + pi.name + ChatColor.RED
+							+ " was jailed on " + ChatColor.GREEN + pi.date
+							+ ChatColor.RED + " by " + ChatColor.GOLD
+							+ pi.jailer);
+					if (!pi.reason.equals(""))
+					{
+						sb.append(ChatColor.RED + " for " + ChatColor.GRAY
+								+ this.colorizeText(pi.reason));
+					}
+					if (pi.mute)
+					{
+						sb.append(ChatColor.GRAY + " - " + ChatColor.DARK_RED
+								+ "MUTED");
+					}
+					// Broadcast
+					if (config.broadcastPerms)
+					{
+						getServer().broadcast(sb.toString(),
+								"KarmicJail.broadcast");
+					}
+					else
+					{
+						getServer().broadcastMessage(sb.toString());
+					}
+				}
 			}
 			catch (SQLException e)
 			{
@@ -830,7 +877,7 @@ public class KarmicJail extends JavaPlugin
 			boolean fromTempJail)
 	{
 		String name = playerInDatabase(inName);
-		if(name == null)
+		if (name == null)
 		{
 			name = inName;
 		}
@@ -846,7 +893,7 @@ public class KarmicJail extends JavaPlugin
 		// Remove jail group
 		perm.playerRemoveGroup(config.jailLoc.getWorld(), name,
 				config.jailGroup);
-		if(config.removeGroups)
+		if (config.removeGroups)
 		{
 			// Return previous groups
 			this.returnGroups(name);
@@ -900,8 +947,35 @@ public class KarmicJail extends JavaPlugin
 					+ ChatColor.AQUA + " auto-unjailed.");
 		}
 		else
+		{
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
 					+ " removed from jail.");
+		}
+		// Broadcast if necessary
+		if (config.broadcastUnjail)
+		{
+			// Setup broadcast string
+			final StringBuilder sb = new StringBuilder();
+			sb.append(ChatColor.AQUA + name);
+			if (fromTempJail)
+			{
+				sb.append(ChatColor.RED + " was auto-unjailed by ");
+			}
+			else
+			{
+				sb.append(ChatColor.RED + " was unjailed by ");
+			}
+			sb.append(ChatColor.GOLD + sender.getName());
+			// Broadcast
+			if (config.broadcastPerms)
+			{
+				getServer().broadcast(sb.toString(), "KarmicJail.broadcast");
+			}
+			else
+			{
+				getServer().broadcastMessage(sb.toString());
+			}
+		}
 	}
 
 	/**
@@ -954,7 +1028,7 @@ public class KarmicJail extends JavaPlugin
 	public void mutePlayer(CommandSender sender, String player)
 	{
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1299,7 +1373,7 @@ public class KarmicJail extends JavaPlugin
 	{
 		boolean jailed = false;
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1337,7 +1411,7 @@ public class KarmicJail extends JavaPlugin
 		boolean jailed = false;
 		boolean missing = false;
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1385,7 +1459,7 @@ public class KarmicJail extends JavaPlugin
 		double time = 0;
 		boolean missing = false;
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1619,7 +1693,7 @@ public class KarmicJail extends JavaPlugin
 	{
 		String reason = "";
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1649,7 +1723,7 @@ public class KarmicJail extends JavaPlugin
 	{
 		boolean mute = false;
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1690,7 +1764,7 @@ public class KarmicJail extends JavaPlugin
 		boolean found = true;
 		String status = "" + JailStatus.FREED;
 		String name = playerInDatabase(inName);
-		if(name == null)
+		if (name == null)
 		{
 			name = inName;
 		}
@@ -1752,7 +1826,7 @@ public class KarmicJail extends JavaPlugin
 	public void setPlayerStatus(JailStatus status, String inName)
 	{
 		String name = playerInDatabase(inName);
-		if(name == null)
+		if (name == null)
 		{
 			name = inName;
 		}
@@ -1841,7 +1915,7 @@ public class KarmicJail extends JavaPlugin
 	{
 		long time = 0;
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1878,7 +1952,7 @@ public class KarmicJail extends JavaPlugin
 	public void updatePlayerTime(String player, long duration)
 	{
 		String name = playerInDatabase(player);
-		if(name == null)
+		if (name == null)
 		{
 			name = player;
 		}
@@ -1929,7 +2003,7 @@ public class KarmicJail extends JavaPlugin
 		{
 			getLogger().info("Thread found for: " + name);
 			final boolean stop = threads.get(name).stop();
-			if(stop)
+			if (stop)
 			{
 				getLogger().info("Thread stopped for: " + name);
 			}
@@ -1958,18 +2032,19 @@ public class KarmicJail extends JavaPlugin
 		String has = null;
 		try
 		{
-			Query rs = database.select("SELECT * FROM "
-					+ config.tablePrefix + "jailed;");
-			if(rs.getResult().next())
+			Query rs = database.select("SELECT * FROM " + config.tablePrefix
+					+ "jailed;");
+			if (rs.getResult().next())
 			{
 				do
 				{
-					if(name.equalsIgnoreCase(rs.getResult().getString("playername")))
+					if (name.equalsIgnoreCase(rs.getResult().getString(
+							"playername")))
 					{
 						has = rs.getResult().getString("playername");
 						break;
 					}
-				}while(rs.getResult().next());
+				} while (rs.getResult().next());
 			}
 			rs.closeQuery();
 		}
@@ -2078,25 +2153,25 @@ public class KarmicJail extends JavaPlugin
 	 */
 	public String colorizeText(String string)
 	{
-		string = string.replaceAll("&0", ""+ChatColor.BLACK);
-	    string = string.replaceAll("&1", ""+ChatColor.DARK_BLUE);
-	    string = string.replaceAll("&2", ""+ChatColor.DARK_GREEN);
-	    string = string.replaceAll("&3", ""+ChatColor.DARK_AQUA);
-	    string = string.replaceAll("&4", ""+ChatColor.DARK_RED);
-	    string = string.replaceAll("&5", ""+ChatColor.DARK_PURPLE);
-	    string = string.replaceAll("&6", ""+ChatColor.GOLD);
-	    string = string.replaceAll("&7", ""+ChatColor.GRAY);
-	    string = string.replaceAll("&8", ""+ChatColor.DARK_GRAY);
-	    string = string.replaceAll("&9", ""+ChatColor.BLUE);
-	    string = string.replaceAll("&a", ""+ChatColor.GREEN);
-	    string = string.replaceAll("&b", ""+ChatColor.AQUA);
-	    string = string.replaceAll("&c", ""+ChatColor.RED);
-	    string = string.replaceAll("&d", ""+ChatColor.LIGHT_PURPLE);
-	    string = string.replaceAll("&e", ""+ChatColor.YELLOW);
-	    string = string.replaceAll("&f", ""+ChatColor.WHITE);
-	    return string;
+		string = string.replaceAll("&0", "" + ChatColor.BLACK);
+		string = string.replaceAll("&1", "" + ChatColor.DARK_BLUE);
+		string = string.replaceAll("&2", "" + ChatColor.DARK_GREEN);
+		string = string.replaceAll("&3", "" + ChatColor.DARK_AQUA);
+		string = string.replaceAll("&4", "" + ChatColor.DARK_RED);
+		string = string.replaceAll("&5", "" + ChatColor.DARK_PURPLE);
+		string = string.replaceAll("&6", "" + ChatColor.GOLD);
+		string = string.replaceAll("&7", "" + ChatColor.GRAY);
+		string = string.replaceAll("&8", "" + ChatColor.DARK_GRAY);
+		string = string.replaceAll("&9", "" + ChatColor.BLUE);
+		string = string.replaceAll("&a", "" + ChatColor.GREEN);
+		string = string.replaceAll("&b", "" + ChatColor.AQUA);
+		string = string.replaceAll("&c", "" + ChatColor.RED);
+		string = string.replaceAll("&d", "" + ChatColor.LIGHT_PURPLE);
+		string = string.replaceAll("&e", "" + ChatColor.YELLOW);
+		string = string.replaceAll("&f", "" + ChatColor.WHITE);
+		return string;
 	}
-	
+
 	public Config getPluginConfig()
 	{
 		return config;
