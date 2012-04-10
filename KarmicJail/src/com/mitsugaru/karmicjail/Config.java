@@ -7,11 +7,14 @@ import java.util.Map.Entry;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
-public class Config {
+public class Config
+{
 
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
-	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL, unjailTeleport, removeGroups, broadcastJail, broadcastUnjail, broadcastReason, broadcastPerms;
+	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL,
+			unjailTeleport, removeGroups, broadcastJail, broadcastUnjail,
+			broadcastReason, broadcastPerms, broadcastJoin;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup;
 	public int limit;
@@ -19,7 +22,8 @@ public class Config {
 	/**
 	 * Loads config from yaml file
 	 */
-	public Config(KarmicJail karmicJail) {
+	public Config(KarmicJail karmicJail)
+	{
 		plugin = karmicJail;
 		// Init config files:
 		ConfigurationSection config = plugin.getConfig();
@@ -41,6 +45,7 @@ public class Config {
 		defaults.put("broadcast.jail", false);
 		defaults.put("broadcast.unjail", false);
 		defaults.put("broadcast.reasonChange", false);
+		defaults.put("broadcast.onjoin", false);
 		defaults.put("broadcast.ignorePermission", false);
 		defaults.put("mysql.use", false);
 		defaults.put("mysql.host", "localhost");
@@ -56,8 +61,10 @@ public class Config {
 		defaults.put("version", plugin.getDescription().getVersion());
 
 		// Insert defaults into config file if they're not present
-		for (final Entry<String, Object> e : defaults.entrySet()) {
-			if (!config.contains(e.getKey())) {
+		for (final Entry<String, Object> e : defaults.entrySet())
+		{
+			if (!config.contains(e.getKey()))
+			{
 				config.set(e.getKey(), e.getValue());
 			}
 		}
@@ -88,12 +95,15 @@ public class Config {
 		broadcastJail = config.getBoolean("broadcast.jail", false);
 		broadcastUnjail = config.getBoolean("broadcast.unjail", false);
 		broadcastReason = config.getBoolean("broadcast.reasonChange", false);
-		broadcastPerms = !config.getBoolean("broadcast.ignorePermission", false);
+		broadcastPerms = !config
+				.getBoolean("broadcast.ignorePermission", false);
+		broadcastJoin = config.getBoolean("broadcast.onjoin", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		removeGroups = config.getBoolean("removegroups", true);
 		// Bounds check on the limit
-		if (limit <= 0 || limit > 16) {
+		if (limit <= 0 || limit > 16)
+		{
 			plugin.log.warning(KarmicJail.prefix
 					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
@@ -101,7 +111,8 @@ public class Config {
 		}
 	}
 
-	public void reload() {
+	public void reload()
+	{
 		// Reload
 		plugin.reloadConfig();
 		// Grab config
@@ -124,21 +135,25 @@ public class Config {
 		broadcastJail = config.getBoolean("broadcast.jail", false);
 		broadcastUnjail = config.getBoolean("broadcast.unjail", false);
 		broadcastReason = config.getBoolean("broadcast.reason", false);
-		broadcastPerms = !config.getBoolean("broadcast.ignorePermission", false);
+		broadcastPerms = !config
+				.getBoolean("broadcast.ignorePermission", false);
+		broadcastJoin = config.getBoolean("broadcast.onjoin", false);
 		removeGroups = config.getBoolean("removegroups", true);
 		// Bounds check on the limit
-		if (limit <= 0 || limit > 16) {
+		if (limit <= 0 || limit > 16)
+		{
 			plugin.log.warning(KarmicJail.prefix
 					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);
 		}
 	}
-	
+
 	/**
 	 * Check if updates are necessary
 	 */
-	public void checkUpdate() {
+	public void checkUpdate()
+	{
 		// Check if need to update
 		ConfigurationSection config = plugin.getConfig();
 		if (Double.parseDouble(plugin.getDescription().getVersion()) > Double
@@ -150,14 +165,16 @@ public class Config {
 			update();
 		}
 	}
-	
+
 	/**
 	 * This method is called to make the appropriate changes, most likely only
 	 * necessary for database schema modification, for a proper update.
 	 */
-	private void update() {
+	private void update()
+	{
 		// Grab current version
-		double ver = Double.parseDouble(plugin.getConfig().getString("version"));
+		double ver = Double
+				.parseDouble(plugin.getConfig().getString("version"));
 		String query = "";
 		// Updates to alpha 0.08
 		if (ver < 0.2)
@@ -166,18 +183,18 @@ public class Config {
 			query = "ALTER TABLE jailed ADD muted INTEGER;";
 			plugin.getDatabaseHandler().standardQuery(query);
 		}
-		//Updates for new tables
-		if(ver < 0.3)
+		// Updates for new tables
+		if (ver < 0.3)
 		{
-			//Drop newly created tables
+			// Drop newly created tables
 			plugin.getLogger().info(
-					KarmicJail.prefix
-							+ " Dropping empty tables.");
-			plugin.getDatabaseHandler().standardQuery("DROP TABLE " + tablePrefix + "jailed;");
+					KarmicJail.prefix + " Dropping empty tables.");
+			plugin.getDatabaseHandler().standardQuery(
+					"DROP TABLE " + tablePrefix + "jailed;");
 			// Update tables to have prefix
 			plugin.getLogger().info(
-					KarmicJail.prefix
-							+ " Renaming jailed table to '" + tablePrefix +"jailed'.");
+					KarmicJail.prefix + " Renaming jailed table to '"
+							+ tablePrefix + "jailed'.");
 			query = "ALTER TABLE jailed RENAME TO " + tablePrefix + "jailed;";
 			plugin.getDatabaseHandler().standardQuery(query);
 		}
@@ -185,8 +202,9 @@ public class Config {
 		plugin.getConfig().set("version", plugin.getDescription().getVersion());
 		plugin.saveConfig();
 	}
-	
-	public void set(String path, Object o) {
+
+	public void set(String path, Object o)
+	{
 		final ConfigurationSection config = plugin.getConfig();
 		config.set(path, o);
 		plugin.saveConfig();

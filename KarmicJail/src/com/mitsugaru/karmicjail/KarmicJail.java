@@ -1689,7 +1689,7 @@ public class KarmicJail extends JavaPlugin
 	 *            of player
 	 * @return String of jailer's reason
 	 */
-	private String getJailReason(String player)
+	public String getJailReason(String player)
 	{
 		String reason = "";
 		String name = playerInDatabase(player);

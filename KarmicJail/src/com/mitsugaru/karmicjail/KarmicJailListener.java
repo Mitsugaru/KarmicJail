@@ -95,6 +95,25 @@ public class KarmicJailListener implements Listener {
             {
             	plugin.setPlayerStatus(JailStatus.JAILED, player.getName());
             }
+            if(config.broadcastJoin)
+            {
+            	final StringBuilder sb = new StringBuilder();
+            	final String reason = plugin.getJailReason(player.getName());
+            	sb.append(ChatColor.AQUA + player.getName());
+            	if(!reason.equals(""))
+            	{
+            		sb.append(ChatColor.RED
+						+ " for " + ChatColor.GRAY + plugin.colorizeText(reason));
+            	}
+            	if(config.broadcastPerms)
+            	{
+            		plugin.getServer().broadcast(sb.toString(), "KarmicJail.broadcast");
+            	}
+            	else
+            	{
+            		plugin.getServer().broadcastMessage(sb.toString());
+            	}
+            }
         } else if (status.equals(""+JailStatus.PENDINGFREE)) {
         	plugin.unjailPlayer(plugin.console, player.getName(), true);
             plugin.teleportOut(player.getName());
