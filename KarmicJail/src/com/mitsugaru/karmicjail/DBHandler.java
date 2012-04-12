@@ -38,17 +38,17 @@ public class DBHandler {
 					config.password);
 			// Check if jailed table exists
 			if (!mysql.checkTable(config.tablePrefix +"jailed")) {
-				plugin.log.info(KarmicJail.prefix + " Created jailed table");
+				plugin.getLogger().info(KarmicJail.prefix + " Created jailed table");
 				// Jail table
 				mysql.createTable("CREATE TABLE `" + config.tablePrefix +"jailed` (`playername` varchar(32) NOT NULL, `status` TEXT, `time` REAL, `groups` TEXT, `jailer` varchar(32), `date` TEXT, `reason` TEXT, `muted` INTEGER, UNIQUE (`playername`));");
 			}
 		} else {
 			// Connect to sql database
-			sqlite = new SQLite(plugin.log, KarmicJail.prefix, "jail", plugin
+			sqlite = new SQLite(plugin.getLogger(), KarmicJail.prefix, "jail", plugin
 					.getDataFolder().getAbsolutePath());
 			// Check if jailed table exists
 			if (!sqlite.checkTable(config.tablePrefix +"jailed")) {
-				plugin.log.info(KarmicJail.prefix + " Created jailed table");
+				plugin.getLogger().info(KarmicJail.prefix + " Created jailed table");
 				// Jail table
 				sqlite.createTable("CREATE TABLE `"+ config.tablePrefix +"jailed` (`playername` varchar(32) NOT NULL, `status` TEXT, `time` REAL, `groups` TEXT, `jailer` varchar(32), `date` TEXT, `reason` TEXT, `muted` INTEGER, UNIQUE (`playername`));");
 			}

@@ -110,7 +110,7 @@ public class PermCheck {
 					}
 					catch(IndexOutOfBoundsException e)
 					{
-						this.plugin.log.warning(KarmicJail.prefix + " Cannot grab default group.");
+						this.plugin.getLogger().warning(KarmicJail.prefix + " Cannot grab default group.");
 						return def;
 					}
 				}
@@ -152,7 +152,7 @@ public class PermCheck {
 				final boolean check = plugin.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
 				if(!check)
 				{
-					plugin.log.warning("Could not remove group '" + group + "' from '" + name + "'... Permissions error.");
+					plugin.getLogger().warning("Could not remove group '" + group + "' from '" + name + "'... Permissions error.");
 				}
 			}
 			else if(pluginName.equals("PermissionsEX"))
@@ -167,7 +167,7 @@ public class PermCheck {
 				final boolean check = perm.playerRemoveGroup(w, name, group);
 				if(!check)
 				{
-					plugin.log.warning("Could not remove group '" + group + "' of world '" + w.getName() + "' from '" + name + "'... Permissions error.");
+					plugin.getLogger().warning("Could not remove group '" + group + "' of world '" + w.getName() + "' from '" + name + "'... Permissions error.");
 				}
 			}
 		}
@@ -183,7 +183,7 @@ public class PermCheck {
 				final boolean check = plugin.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
 				if(!check)
 				{
-					plugin.log.warning("Could not add group '" + group + "' to '" + name + "' = Permissions error.");
+					plugin.getLogger().warning("Could not add group '" + group + "' to '" + name + "' = Permissions error.");
 				}
 			}
 			else if(pluginName.equals("PermissionsEX"))
@@ -198,7 +198,7 @@ public class PermCheck {
 				final boolean check = perm.playerAddGroup(world, name, group);
 				if(!check)
 				{
-					plugin.log.warning("Could not add group '" + group + "' of world '" + world + "' to '" + name + "' = Permissions error.");
+					plugin.getLogger().warning("Could not add group '" + group + "' of world '" + world + "' to '" + name + "' = Permissions error.");
 				}
 			}
 		}

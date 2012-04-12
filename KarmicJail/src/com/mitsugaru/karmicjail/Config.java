@@ -104,7 +104,7 @@ public class Config
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
-			plugin.log.warning(KarmicJail.prefix
+			plugin.getLogger().warning(KarmicJail.prefix
 					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);
@@ -142,7 +142,7 @@ public class Config
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
-			plugin.log.warning(KarmicJail.prefix
+			plugin.getLogger().warning(KarmicJail.prefix
 					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);
@@ -160,7 +160,7 @@ public class Config
 				.parseDouble(config.getString("version")))
 		{
 			// Update to latest version
-			plugin.log.info(KarmicJail.prefix + " Updating to v"
+			plugin.getLogger().info(KarmicJail.prefix + " Updating to v"
 					+ plugin.getDescription().getVersion());
 			update();
 		}

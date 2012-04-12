@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Vector;
-import java.util.logging.Logger;
 
 import lib.Mitsugaru.SQLibrary.Database.Query;
 
@@ -37,7 +36,6 @@ import com.platymuus.bukkit.permissions.PermissionsPlugin;
 public class KarmicJail extends JavaPlugin
 {
 	// Class Variables
-	public final Logger log = Logger.getLogger("Minecraft");
 	public static final String prefix = "[KarmicJail]";
 	private static final String bar = "======================";
 	private static final long minutesToTicks = 1200;
@@ -53,7 +51,7 @@ public class KarmicJail extends JavaPlugin
 	public void onDisable()
 	{
 		// Stop all running threads
-		this.log.info(prefix + " Stopping all jail threads...");
+		getLogger().info(prefix + " Stopping all jail threads...");
 		for (JailTask task : threads.values())
 		{
 			task.stop();
@@ -64,7 +62,7 @@ public class KarmicJail extends JavaPlugin
 			// Close connection
 			database.close();
 		}
-		log.info(prefix + " " + this.getDescription().getName() + " v"
+		getLogger().info(prefix + " " + this.getDescription().getName() + " v"
 				+ this.getDescription().getVersion() + " disabled.");
 	}
 
@@ -89,7 +87,7 @@ public class KarmicJail extends JavaPlugin
 		this.getServer().getPluginManager()
 				.registerEvents(new KarmicJailListener(this), this);
 
-		log.info(prefix + " " + this.getDescription().getName() + " v"
+		getLogger().info(prefix + " " + this.getDescription().getName() + " v"
 				+ this.getDescription().getVersion() + " enabled.");
 	}
 
@@ -709,35 +707,45 @@ public class KarmicJail extends JavaPlugin
 			{
 				duration = minutes * minutesToTicks;
 				this.updatePlayerTime(name, duration);
-				// Create thread to release player
-				threads.put(name, new JailTask(this, name, duration));
 			}
 
 			// Grab player from server if they are online
 			final Player player = this.getServer().getPlayer(name);
 			if (player != null)
 			{
-				// Move to jail
-				player.teleport(config.jailLoc);
-				// Set status to jailed
-				this.setPlayerStatus(JailStatus.JAILED, name);
-				// Notify player
-				if (reason.equals(""))
+				if (player.isOnline())
 				{
-					player.sendMessage(ChatColor.RED + "Jailed by "
-							+ ChatColor.AQUA + sender.getName() + ChatColor.RED);
+					// Move to jail
+					player.teleport(config.jailLoc);
+					// Set status to jailed
+					this.setPlayerStatus(JailStatus.JAILED, name);
+					// Notify player
+					if (reason.equals(""))
+					{
+						player.sendMessage(ChatColor.RED + "Jailed by "
+								+ ChatColor.AQUA + sender.getName()
+								+ ChatColor.RED);
+					}
+					else
+					{
+						player.sendMessage(ChatColor.RED + "Jailed by "
+								+ ChatColor.AQUA + sender.getName()
+								+ ChatColor.RED + " for: " + ChatColor.GRAY
+								+ this.colorizeText(reason));
+					}
+					if (timed)
+					{
+						player.sendMessage(ChatColor.AQUA + "Time in jail: "
+								+ ChatColor.GOLD
+								+ this.prettifyMinutes(minutes));
+						// Create thread to release player
+						threads.put(name, new JailTask(this, name, duration));
+					}
 				}
 				else
 				{
-					player.sendMessage(ChatColor.RED + "Jailed by "
-							+ ChatColor.AQUA + sender.getName() + ChatColor.RED
-							+ " for: " + ChatColor.GRAY
-							+ this.colorizeText(reason));
-				}
-				if (timed)
-				{
-					player.sendMessage(ChatColor.AQUA + "Time in jail: "
-							+ ChatColor.GOLD + this.prettifyMinutes(minutes));
+					// Set player status to pending
+					this.setPlayerStatus(JailStatus.PENDINGJAIL, name);
 				}
 			}
 			else
@@ -910,7 +918,7 @@ public class KarmicJail extends JavaPlugin
 		{
 			this.setPlayerStatus(JailStatus.PENDINGFREE, name);
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
-					+ " will be released from jail on login.");
+					+ " will be released from jail on getLogger()in.");
 			return;
 		}
 
@@ -1015,7 +1023,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 	}
@@ -1324,7 +1332,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return jailer;
@@ -1356,7 +1364,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return date;
@@ -1393,7 +1401,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return jailed;
@@ -1424,7 +1432,7 @@ public class KarmicJail extends JavaPlugin
 				final String status = rs.getResult().getString("status");
 				if (rs.getResult().wasNull())
 				{
-					log.severe(prefix + " MISSING STATUS FOR: " + name);
+					getLogger().severe(prefix + " MISSING STATUS FOR: " + name);
 					missing = true;
 				}
 				else if (status.equals("" + JailStatus.JAILED))
@@ -1440,7 +1448,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return jailed;
@@ -1480,13 +1488,13 @@ public class KarmicJail extends JavaPlugin
 			if (missing)
 			{
 				setJailTime(console, name, 0);
-				log.warning(prefix + " " + name
+				getLogger().warning(prefix + " " + name
 						+ "'s Time was missing. Reset to 0.");
 			}
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		if (time > 0)
@@ -1561,7 +1569,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		if (cache.isEmpty())
@@ -1713,7 +1721,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return reason;
@@ -1746,7 +1754,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return mute;
@@ -1790,7 +1798,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		if (found)
@@ -1935,7 +1943,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return time;
@@ -2050,7 +2058,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 		return has;
@@ -2092,7 +2100,7 @@ public class KarmicJail extends JavaPlugin
 		}
 		catch (SQLException e)
 		{
-			log.warning(prefix + " SQL Exception");
+			getLogger().warning(prefix + " SQL Exception");
 			e.printStackTrace();
 		}
 	}
