@@ -129,7 +129,7 @@ public class Config
 		jailGroup = config.getString("jailgroup", "Jailed");
 		debugLog = config.getBoolean("debug.logToConsole", false);
 		debugEvents = config.getBoolean("debug.events", false);
-		debugTime = config.getBoolean("debugTime", false);
+		debugTime = config.getBoolean("debug.time", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		broadcastJail = config.getBoolean("broadcast.jail", false);
