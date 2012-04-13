@@ -107,6 +107,7 @@ public class DBHandler {
 					statement.setString(7,reason);
 					statement.setInt(8,muted);
 					statement.executeUpdate();
+					statement.close();
 				} while (rs.getResult().next());
 			}
 			rs.closeQuery();
