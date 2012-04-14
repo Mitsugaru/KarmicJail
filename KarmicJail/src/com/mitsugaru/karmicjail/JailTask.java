@@ -1,7 +1,7 @@
 package com.mitsugaru.karmicjail;
 
 public class JailTask implements Runnable {
-	private KarmicJail sj;
+	private KarmicJail plugin;
 	private long start;
 	private long duration;
 	private String name;
@@ -14,16 +14,16 @@ public class JailTask implements Runnable {
 
 	public JailTask(KarmicJail plugin, String playerName, long time)
 	{
-		sj = plugin;
+		this.plugin = plugin;
 		name = playerName;
 		duration = (long) Math.floor(time + 0.5f);
 		start = System.nanoTime();
-		id = sj.getServer().getScheduler().scheduleSyncDelayedTask(sj, this, duration);
+		id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, this, duration);
 	}
 
 	@Override
 	public void run() {
-		sj.unjailPlayer(sj.console, name, true);
+		JailLogic.unjailPlayer(plugin.getServer().getConsoleSender(), name, true);
 	}
 
 	public String getName()
@@ -41,11 +41,11 @@ public class JailTask implements Runnable {
 		if(id != -1)
 		{
 			//Stop thread
-			sj.getServer().getScheduler().cancelTask(id);
+			plugin.getServer().getScheduler().cancelTask(id);
 			final long early = System.nanoTime() - start;
 			duration -= (long) (Math.floor((early * 0.000000001) + 0.5f) * 20);
-			sj.updatePlayerTime(name, duration);
-			sj.removeTask(name);
+			JailLogic.updatePlayerTime(name, duration);
+			KarmicJail.removeTask(name);
 			return true;
 		}
 		return false;

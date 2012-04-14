@@ -6,9 +6,13 @@
  * @author imjake9
  * @author Mitsugaru
  */
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.karmicjail.events;
 
+import com.mitsugaru.karmicjail.JailLogic;
+import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.utils.Config;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,9 +38,9 @@ public class KarmicJailListener implements Listener {
     public void onPlayerChat(final PlayerChatEvent event)
     {
     	final Player player = event.getPlayer();
-        if(plugin.playerIsJailed(player.getName()))
+        if(JailLogic.playerIsJailed(player.getName()))
         {
-        	if(plugin.playerIsMuted(player.getName()))
+        	if(JailLogic.playerIsMuted(player.getName()))
         	{
         		if(config.debugLog && config.debugEvents)
         		{
@@ -52,27 +56,27 @@ public class KarmicJailListener implements Listener {
 
         final Player player = event.getPlayer();
 
-        if(!plugin.playerIsJailed(player.getName())) return;
+        if(!JailLogic.playerIsJailed(player.getName())) return;
         if(config.debugLog && config.debugEvents)
 		{
 			plugin.getLogger().info("Respawned '" + player.getName() + "' to jail.");
 		}
-        event.setRespawnLocation(plugin.getJailLocation());
+        event.setRespawnLocation(JailLogic.getJailLocation());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(final PlayerJoinEvent event) {
 
     	//Attempt to add player to database
-    	plugin.addPlayerToDatabase(event.getPlayer().getName());
+    	JailLogic.addPlayerToDatabase(event.getPlayer().getName());
 
         final Player player = event.getPlayer();
-        final String status = plugin.getPlayerStatus(player.getName());
+        final String status = JailLogic.getPlayerStatus(player.getName());
 
         // Check status
         if (status.equals(""+JailStatus.PENDINGJAIL) || status.equals(""+JailStatus.JAILED)) {
-            if (plugin.playerIsTempJailed(player.getName())) {
-            	final long time = plugin.getPlayerTime(player.getName());
+            if (JailLogic.playerIsTempJailed(player.getName())) {
+            	final long time = JailLogic.getPlayerTime(player.getName());
             	if(time > 0)
             	{
             		final int minutes = (int) ((time / minutesToTicks));
@@ -90,15 +94,15 @@ public class KarmicJailListener implements Listener {
         			plugin.getLogger().info("Jailed '" + player.getName() + "' on login.");
         		}
             }
-            player.teleport(plugin.getJailLocation());
+            player.teleport(JailLogic.getJailLocation());
             if(status.equals(""+JailStatus.PENDINGJAIL))
             {
-            	plugin.setPlayerStatus(JailStatus.JAILED, player.getName());
+            	JailLogic.setPlayerStatus(JailStatus.JAILED, player.getName());
             }
             if(config.broadcastJoin)
             {
             	final StringBuilder sb = new StringBuilder();
-            	final String reason = plugin.getJailReason(player.getName());
+            	final String reason = JailLogic.getJailReason(player.getName());
             	sb.append(ChatColor.AQUA + player.getName());
             	if(!reason.equals(""))
             	{
@@ -115,8 +119,8 @@ public class KarmicJailListener implements Listener {
             	}
             }
         } else if (status.equals(""+JailStatus.PENDINGFREE)) {
-        	plugin.unjailPlayer(plugin.console, player.getName(), true);
-            plugin.teleportOut(player.getName());
+        	JailLogic.unjailPlayer(plugin.console, player.getName(), true);
+        	JailLogic.teleportOut(player.getName());
             player.sendMessage(ChatColor.AQUA + "You have been removed from jail.");
             if(config.debugLog && config.debugEvents)
     		{

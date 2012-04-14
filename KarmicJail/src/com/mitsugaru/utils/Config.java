@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
+
+import com.mitsugaru.karmicjail.KarmicJail;
 
 public class Config
 {
