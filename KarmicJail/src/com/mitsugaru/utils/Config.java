@@ -1,12 +1,20 @@
 package com.mitsugaru.utils;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import lib.Mitsugaru.SQLibrary.Database.Query;
 
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
+import com.mitsugaru.karmicjail.DBHandler.Table;
+import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail;
 
 public class Config
@@ -16,7 +24,7 @@ public class Config
 	public String host, port, database, user, password, tablePrefix;
 	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL,
 			unjailTeleport, removeGroups, broadcastJail, broadcastUnjail,
-			broadcastReason, broadcastPerms, broadcastJoin;
+			broadcastReason, broadcastPerms, broadcastJoin, debugUnhandled;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup;
 	public int limit;
@@ -60,6 +68,7 @@ public class Config
 		defaults.put("debug.logToConsole", false);
 		defaults.put("debug.events", false);
 		defaults.put("debug.time", false);
+		defaults.put("debug.unhandled", false);
 		defaults.put("version", plugin.getDescription().getVersion());
 
 		// Insert defaults into config file if they're not present
@@ -103,11 +112,14 @@ public class Config
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		removeGroups = config.getBoolean("removegroups", true);
+		debugUnhandled = config.getBoolean("debug.unhandled", false);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
-			plugin.getLogger().warning(KarmicJail.prefix
-					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
+			plugin.getLogger()
+					.warning(
+							KarmicJail.prefix
+									+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);
 		}
@@ -132,6 +144,7 @@ public class Config
 		debugLog = config.getBoolean("debug.logToConsole", false);
 		debugEvents = config.getBoolean("debug.events", false);
 		debugTime = config.getBoolean("debug.time", false);
+		debugUnhandled = config.getBoolean("debug.unhandled", false);
 		limit = config.getInt("entrylimit", 10);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		broadcastJail = config.getBoolean("broadcast.jail", false);
@@ -144,8 +157,10 @@ public class Config
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
-			plugin.getLogger().warning(KarmicJail.prefix
-					+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
+			plugin.getLogger()
+					.warning(
+							KarmicJail.prefix
+									+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);
 		}
@@ -162,8 +177,9 @@ public class Config
 				.parseDouble(config.getString("version")))
 		{
 			// Update to latest version
-			plugin.getLogger().info(KarmicJail.prefix + " Updating to v"
-					+ plugin.getDescription().getVersion());
+			plugin.getLogger().info(
+					KarmicJail.prefix + " Updating to v"
+							+ plugin.getDescription().getVersion());
 			update();
 		}
 	}
@@ -178,14 +194,14 @@ public class Config
 		double ver = Double
 				.parseDouble(plugin.getConfig().getString("version"));
 		String query = "";
-		// Updates to alpha 0.08
+		// Update to 0.2
 		if (ver < 0.2)
 		{
-			// Add enchantments column
+			// Add mute column
 			query = "ALTER TABLE jailed ADD muted INTEGER;";
 			plugin.getDatabaseHandler().standardQuery(query);
 		}
-		// Updates for new tables
+		// Update to 0.3
 		if (ver < 0.3)
 		{
 			// Drop newly created tables
@@ -200,6 +216,108 @@ public class Config
 			query = "ALTER TABLE jailed RENAME TO " + tablePrefix + "jailed;";
 			plugin.getDatabaseHandler().standardQuery(query);
 		}
+		// Update to 0.4
+		if (ver < 0.4)
+		{
+			try
+			{
+				final Set<PointThreeObject> entries = new HashSet<PointThreeObject>();
+				plugin.getLogger().info(
+						KarmicJail.prefix + " Converting table '"
+								+ Table.JAILED.getName() + "' ...");
+				// Grab old entries
+				final Query rs = plugin.getDatabaseHandler().select(
+						"SELECT * FROM " + Table.JAILED.getName() + ";");
+				if (rs.getResult().next())
+				{
+					// save entry
+					String name = rs.getResult().getString("playername");
+					String status = rs.getResult().getString("status");
+					if (rs.getResult().wasNull())
+					{
+						status = JailStatus.FREED + "";
+					}
+					double time = rs.getResult().getDouble("time");
+					if (rs.getResult().wasNull())
+					{
+						time = -1;
+					}
+					String groups = rs.getResult().getString("groups");
+					if (rs.getResult().wasNull())
+					{
+						groups = "";
+					}
+					String jailer = rs.getResult().getString("jailer");
+					if (rs.getResult().wasNull())
+					{
+						jailer = "";
+					}
+					String date = rs.getResult().getString("date");
+					if (rs.getResult().wasNull())
+					{
+						date = "";
+					}
+					String reason = rs.getResult().getString("reason");
+					if (rs.getResult().wasNull())
+					{
+						reason = "";
+					}
+					int muted = rs.getResult().getInt("muted");
+					if (rs.getResult().wasNull())
+					{
+						muted = 0;
+					}
+					entries.add(new PointThreeObject(name, status, groups,
+							jailer, date, reason, time, muted));
+				}
+				rs.closeQuery();
+				// Drop old table
+				plugin.getDatabaseHandler().standardQuery(
+						"DROP TABLE " + Table.JAILED.getName() + ";");
+				// Create new table
+				if (useMySQL)
+				{
+					query = "CREATE TABLE "
+							+ Table.JAILED.getName()
+							+ " (id INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INT, UNIQUE (playername), PRIMARY KEY(id));";
+				}
+				else
+				{
+					query = "CREATE TABLE "
+							+ Table.JAILED.getName()
+							+ " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, UNIQUE (playername));";
+				}
+				plugin.getDatabaseHandler().createTable(query);
+				//Add back entries
+				if (!entries.isEmpty())
+				{
+					PreparedStatement statement = plugin.getDatabaseHandler().prepare("INSERT INTO " + Table.JAILED.getName() + " (playername,status,time,groups,jailer,date,reason,muted) VALUES(?,?,?,?,?,?,?,?)");
+					for(PointThreeObject entry : entries)
+					{
+						statement.setString(1, entry.playername);
+						statement.setString(2, entry.status);
+						statement.setDouble(3, entry.time);
+						statement.setString(4, entry.groups);
+						statement.setString(5, entry.jailer);
+						statement.setString(6, entry.date);
+						statement.setString(7, entry.reason);
+						statement.setInt(8, entry.mute);
+						statement.executeUpdate();
+					}
+					statement.close();
+				}
+				plugin.getLogger().info(
+						KarmicJail.prefix + " Conversion of table '"
+								+ Table.JAILED.getName() + "' finished.");
+			}
+			catch (SQLException e)
+			{
+				plugin.getLogger().warning(
+						KarmicJail.prefix + " SQL Exception on 0.4 update");
+				e.printStackTrace();
+			}
+
+		}
 		// Update version number in config.yml
 		plugin.getConfig().set("version", plugin.getDescription().getVersion());
 		plugin.saveConfig();
@@ -210,5 +328,25 @@ public class Config
 		final ConfigurationSection config = plugin.getConfig();
 		config.set(path, o);
 		plugin.saveConfig();
+	}
+
+	private class PointThreeObject
+	{
+		public String playername, status, groups, jailer, date, reason;
+		public double time;
+		public int mute;
+
+		public PointThreeObject(String name, String status, String groups,
+				String jailer, String date, String reason, double time, int mute)
+		{
+			this.playername = name;
+			this.status = status;
+			this.groups = groups;
+			this.jailer = jailer;
+			this.date = date;
+			this.reason = reason;
+			this.time = time;
+			this.mute = mute;
+		}
 	}
 }
