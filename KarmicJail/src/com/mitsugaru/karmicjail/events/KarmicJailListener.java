@@ -86,7 +86,7 @@ public class KarmicJailListener implements Listener
 			{
 				JailLogic.setPlayerStatus(JailStatus.JAILED, player.getName());
 				jailPlayer(player);
-				//TODO throw inventory into database
+				// TODO throw inventory into database
 				break;
 			}
 			case JAILED:
@@ -98,8 +98,8 @@ public class KarmicJailListener implements Listener
 			{
 				JailLogic.unjailPlayer(plugin.console, player.getName(), true);
 				JailLogic.teleportOut(player.getName());
-				player.sendMessage(ChatColor.GREEN + KarmicJail.prefix +ChatColor.AQUA
-						+ "You have been removed from jail.");
+				player.sendMessage(ChatColor.GREEN + KarmicJail.prefix
+						+ ChatColor.AQUA + "You have been removed from jail.");
 				if (config.debugLog && config.debugEvents)
 				{
 					plugin.getLogger().info(
@@ -112,6 +112,16 @@ public class KarmicJailListener implements Listener
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(final PlayerQuitEvent event)
 	{
+		// Record location
+		if (event.getPlayer() != null)
+		{
+			if (event.getPlayer().getName() != null
+					&& event.getPlayer().getLocation() != null)
+			{
+				JailLogic.setPlayerLastLocation(event.getPlayer().getName(),
+						event.getPlayer().getLocation());
+			}
+		}
 		if (config.debugLog && config.debugEvents)
 		{
 			plugin.getLogger().info(
@@ -128,7 +138,8 @@ public class KarmicJailListener implements Listener
 			if (time > 0)
 			{
 				final int minutes = (int) ((time / minutesToTicks));
-				player.sendMessage(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA + "You are jailed for "
+				player.sendMessage(ChatColor.RED + KarmicJail.prefix
+						+ ChatColor.AQUA + "You are jailed for "
 						+ plugin.prettifyMinutes(minutes) + ".");
 				plugin.addThread(player.getName(), time);
 				if (config.debugLog && config.debugEvents)
@@ -142,7 +153,8 @@ public class KarmicJailListener implements Listener
 		}
 		else
 		{
-			player.sendMessage(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA + "You are jailed.");
+			player.sendMessage(ChatColor.RED + KarmicJail.prefix
+					+ ChatColor.AQUA + "You are jailed.");
 			if (config.debugLog && config.debugEvents)
 			{
 				plugin.getLogger().info(
@@ -154,7 +166,8 @@ public class KarmicJailListener implements Listener
 		{
 			final StringBuilder sb = new StringBuilder();
 			final String reason = JailLogic.getJailReason(player.getName());
-			sb.append(ChatColor.RED + KarmicJail.prefix +ChatColor.AQUA + player.getName());
+			sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA
+					+ player.getName());
 			if (!reason.equals(""))
 			{
 				sb.append(ChatColor.RED + " for " + ChatColor.GRAY

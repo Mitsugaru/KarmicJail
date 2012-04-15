@@ -105,6 +105,8 @@ public class JailLogic
 			{
 				if (player.isOnline())
 				{
+					// Set previous location
+					setPlayerLastLocation(name, player.getLocation());
 					// Move to jail
 					player.teleport(config.jailLoc);
 					// Set status to jailed
@@ -144,7 +146,6 @@ public class JailLogic
 				// Set player status to pending
 				setPlayerStatus(JailStatus.PENDINGJAIL, name);
 			}
-
 			try
 			{
 				final String date = dateFormat.format(new Date());
@@ -229,7 +230,8 @@ public class JailLogic
 		}
 		// Check if player is in jail:
 		final JailStatus currentStatus = getPlayerStatus(name);
-		if (currentStatus == JailStatus.FREED || currentStatus == JailStatus.PENDINGFREE)
+		if (currentStatus == JailStatus.FREED
+				|| currentStatus == JailStatus.PENDINGFREE)
 		{
 			sender.sendMessage(ChatColor.RED + "That player is not in jail!");
 			return;
@@ -434,8 +436,8 @@ public class JailLogic
 		String has = null;
 		try
 		{
-			Query rs = database.select("SELECT * FROM " + Table.JAILED.getName()
-					+ ";");
+			Query rs = database.select("SELECT * FROM "
+					+ Table.JAILED.getName() + ";");
 			if (rs.getResult().next())
 			{
 				do
@@ -618,7 +620,7 @@ public class JailLogic
 			name = player;
 		}
 		String reason = database.getStringField(Field.REASON, name);
-		if(reason.equals(""))
+		if (reason.equals(""))
 		{
 			reason = "UNKOWN";
 		}
@@ -844,7 +846,8 @@ public class JailLogic
 			}
 			catch (ArrayIndexOutOfBoundsException a)
 			{
-				plugin.getLogger().warning("Could not return groups for " + name);
+				plugin.getLogger().warning(
+						"Could not return groups for " + name);
 			}
 		}
 	}
@@ -949,7 +952,7 @@ public class JailLogic
 	private static String getJailer(String name)
 	{
 		String jailer = database.getStringField(Field.JAILER, name);
-		if(jailer.equals(""))
+		if (jailer.equals(""))
 		{
 			jailer = "UNKOWN";
 		}
@@ -966,7 +969,7 @@ public class JailLogic
 	private static String getJailDate(String name)
 	{
 		String date = database.getStringField(Field.DATE, name);
-		if(date.equals(""))
+		if (date.equals(""))
 		{
 			date = "UNKOWN";
 		}
@@ -1094,4 +1097,55 @@ public class JailLogic
 		}
 	}
 
+	public static void setPlayerLastLocation(String playername,
+			Location location)
+	{
+		String name = getPlayerInDatabase(playername);
+		if (name == null)
+		{
+			name = playername;
+		}
+		final String entry = location.getWorld().getName() + " "
+				+ location.getX() + " " + location.getY() + " "
+				+ location.getZ() + " " + location.getYaw() + " "
+				+ location.getPitch();
+		database.setField(Field.LAST_POSITION, name, entry, 0, 0);
+	}
+
+	public static Location getPlayerLastLocation(String playername)
+	{
+		Location location = null;
+		String name = getPlayerInDatabase(playername);
+		if (name == null)
+		{
+			name = playername;
+		}
+		final String entry = database.getStringField(Field.LAST_POSITION, name);
+		if (!entry.equals("") && entry.contains(" "))
+		{
+			try
+			{
+				final String[] split = entry.split(" ");
+				final World world = plugin.getServer().getWorld(split[0]);
+				if (world != null)
+				{
+					location = new Location(world,
+							Double.parseDouble(split[1]),
+							Double.parseDouble(split[2]),
+							Double.parseDouble(split[3]),
+							Float.parseFloat(split[4]),
+							Float.parseFloat(split[5]));
+				}
+			}
+			catch (ArrayIndexOutOfBoundsException a)
+			{
+				plugin.getLogger().warning("Bad last location for: " + name);
+			}
+			catch (NumberFormatException n)
+			{
+				plugin.getLogger().warning("Bad last location for: " + name);
+			}
+		}
+		return location;
+	}
 }

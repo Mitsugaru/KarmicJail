@@ -94,6 +94,22 @@ commands:
     description: Sets reason on a player. Alias to jailreason.
     usage: |
            /<command> <player> [reason]
+  jlast:
+    description: Warps to last location of jailed player. Alias to jaillast.
+    usage: |
+           /<command> <player>
+  jaillast:
+    description: Warps to last location of jailed player. 
+    usage: |
+           /<command> <player>
+  jwarp:
+    description: Warps to jail. Alias to jailwarp.
+    usage: |
+           /<command> [player]
+  jailwarp:
+    description: Warps to jail. 
+    usage: |
+           /<command> [player]
   jailversion:
     description: Get plugin version and config info.
     usage: |
@@ -126,6 +142,12 @@ permissions:
     default: op
   KarmicJail.mute:
     description: Mute players in jail
+    default: op
+  KarmicJail.warp.jail:
+    description: Warp to jail
+    default: op
+  KarmicJail.warp.last:
+    description: Warp to last location
     default: op
   KarmicJail.jailstatus:
     description: Gives access to the jailtime command.

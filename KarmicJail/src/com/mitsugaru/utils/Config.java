@@ -282,13 +282,13 @@ public class Config
 				{
 					query = "CREATE TABLE "
 							+ Table.JAILED.getName()
-							+ " (id INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INT, UNIQUE (playername), PRIMARY KEY(id));";
+							+ " (id INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INT, lastpos TEXT, UNIQUE (playername), PRIMARY KEY(id));";
 				}
 				else
 				{
 					query = "CREATE TABLE "
 							+ Table.JAILED.getName()
-							+ " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, UNIQUE (playername));";
+							+ " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, lastpos TEXT, UNIQUE (playername));";
 				}
 				plugin.getDatabaseHandler().createTable(query);
 				// Add back entries
@@ -299,7 +299,7 @@ public class Config
 							.prepare(
 									"INSERT INTO "
 											+ Table.JAILED.getName()
-											+ " (playername,status,time,groups,jailer,date,reason,muted) VALUES(?,?,?,?,?,?,?,?)");
+											+ " (playername,status,time,groups,jailer,date,reason,muted,lastpos) VALUES(?,?,?,?,?,?,?,?,?)");
 					for (PointThreeObject entry : entries)
 					{
 						statement.setString(1, entry.playername);
@@ -310,6 +310,7 @@ public class Config
 						statement.setString(6, entry.date);
 						statement.setString(7, entry.reason);
 						statement.setInt(8, entry.mute);
+						statement.setString(9, "");
 						try
 						{
 							statement.executeUpdate();

@@ -9,10 +9,12 @@ import java.util.Vector;
 import lib.Mitsugaru.SQLibrary.Database.Query;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 import com.mitsugaru.utils.Config;
@@ -209,105 +211,13 @@ public class FakeCommander
 		else if (commandLabel.equalsIgnoreCase("jailversion")
 				|| commandLabel.equalsIgnoreCase("jversion"))
 		{
-			// Version
-			sender.sendMessage(ChatColor.BLUE + bar + "==========");
-			sender.sendMessage(ChatColor.GREEN + "KarmicJail v"
-					+ plugin.getDescription().getVersion());
-			sender.sendMessage(ChatColor.GREEN + "Coded by Mitsugaru");
-			sender.sendMessage(ChatColor.AQUA
-					+ "Fork of imjake9's SimpleJail project");
-			sender.sendMessage(ChatColor.BLUE + "=============="
-					+ ChatColor.GRAY + "Config" + ChatColor.BLUE
-					+ "=============");
-			DecimalFormat twoDForm = new DecimalFormat("#.##");
-			sender.sendMessage(ChatColor.LIGHT_PURPLE + "Jail: "
-					+ ChatColor.GRAY + config.jailLoc.getWorld().getName()
-					+ ChatColor.BLUE + ":(" + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(config.jailLoc.getX()))
-					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(config.jailLoc.getY()))
-					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(config.jailLoc.getZ()))
-					+ ChatColor.BLUE + ")");
-			sender.sendMessage(ChatColor.LIGHT_PURPLE + "UnJail: "
-					+ ChatColor.GRAY + config.unjailLoc.getWorld().getName()
-					+ ChatColor.BLUE + ":(" + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(config.unjailLoc.getX()))
-					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(config.unjailLoc.getY()))
-					+ ChatColor.BLUE + "," + ChatColor.GOLD
-					+ Double.valueOf(twoDForm.format(config.unjailLoc.getZ()))
-					+ ChatColor.BLUE + ")");
+			showVersion(sender);
 			com = true;
 		}
 		else if (commandLabel.equalsIgnoreCase("jailhelp")
 				|| commandLabel.equalsIgnoreCase("jhelp"))
 		{
-			sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN
-					+ "KarmicJail" + ChatColor.BLUE + "=====");
-			if (perm.has(sender, "KarmicJail.jail"))
-			{
-				sender.sendMessage(ChatColor.GREEN + "/jail " + ChatColor.AQUA
-						+ "<player> " + ChatColor.LIGHT_PURPLE
-						+ "[player2]... [time] [reason]" + ChatColor.YELLOW
-						+ " : Jails player(s)");
-				sender.sendMessage(ChatColor.YELLOW
-						+ "Note - Names auto-complete if player is online. Alias: /j");
-			}
-			if (perm.has(sender, "KarmicJail.unjail"))
-			{
-				sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
-						+ " <player>" + ChatColor.YELLOW + " : Unjail player");
-			}
-			if (perm.has(sender, "KarmicJail.jail"))
-			{
-				sender.sendMessage(ChatColor.GREEN + "/jailtime"
-						+ ChatColor.AQUA + " <player> <time>"
-						+ ChatColor.YELLOW
-						+ " : Sets time for jailed player. Alias: /jtime");
-				sender.sendMessage(ChatColor.GREEN + "/jailreason"
-						+ ChatColor.AQUA + " <player> "
-						+ ChatColor.LIGHT_PURPLE + "[reason]"
-						+ ChatColor.YELLOW
-						+ " : Sets jail reason for player. Alias: /jreason");
-			}
-			if (perm.has(sender, "KarmicJail.mute"))
-			{
-				sender.sendMessage(ChatColor.GREEN + "/jailmute"
-						+ ChatColor.AQUA + " <player>" + ChatColor.YELLOW
-						+ " : Toggle mute for a player. Alias: /jmute");
-			}
-			if (perm.has(sender, "KarmicJail.list"))
-			{
-				sender.sendMessage(ChatColor.GREEN + "/jaillist"
-						+ ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
-						+ " : List jailed players. Alias: /jlist");
-				sender.sendMessage(ChatColor.GREEN + "/jailprev"
-						+ ChatColor.YELLOW + " : Previous page. Alias: /jprev");
-				sender.sendMessage(ChatColor.GREEN + "/jailnext"
-						+ ChatColor.YELLOW + " : Next page. Alias: /jnext");
-			}
-			if (perm.has(sender, "KarmicJail.setjail"))
-			{
-				sender.sendMessage(ChatColor.GREEN + "/setjail"
-						+ ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]"
-						+ ChatColor.YELLOW
-						+ " : Set jail teleport to current pos or given pos");
-				sender.sendMessage(ChatColor.GREEN + "/setunjail"
-						+ ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]"
-						+ ChatColor.YELLOW
-						+ " : Set unjail teleport to current pos or given pos");
-			}
-			if (perm.has(sender, "KarmicJail.jailstatus"))
-			{
-				sender.sendMessage(ChatColor.GREEN + "/jailstatus"
-						+ ChatColor.LIGHT_PURPLE + " [player]"
-						+ ChatColor.YELLOW
-						+ " : Get jail status. Alias: /jstatus");
-			}
-			sender.sendMessage(ChatColor.GREEN + "/jailversion"
-					+ ChatColor.YELLOW
-					+ " : Plugin version and config info. Alias: /jversion");
+			showHelp(sender);
 			com = true;
 		}
 		else if (commandLabel.equalsIgnoreCase("jaillist")
@@ -411,6 +321,89 @@ public class FakeCommander
 				for (String name : players)
 				{
 					JailLogic.mutePlayer(sender, name);
+				}
+			}
+			com = true;
+		}
+		else if (commandLabel.equals("jaillast")
+				|| commandLabel.equals("jlast"))
+		{
+			if (!perm.has(sender, "KarmicJail.warp.last"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.warp.last");
+			}
+			else
+			{
+				if (sender instanceof Player)
+				{
+					final Player player = (Player) sender;
+					if (args.length > 0)
+					{
+						String name = plugin.expandName(args[0]);
+						if (JailLogic.playerIsJailed(name)
+								|| JailLogic.playerIsPendingJail(name))
+						{
+							final Location last = JailLogic
+									.getPlayerLastLocation(name);
+							if (last != null)
+							{
+								player.teleport(last);
+								sender.sendMessage(ChatColor.GREEN
+										+ KarmicJail.prefix
+										+ " Warp to last location of "
+										+ ChatColor.AQUA + name);
+							}
+							else
+							{
+								sender.sendMessage(ChatColor.RED
+										+ KarmicJail.prefix
+										+ " No last location for "
+										+ ChatColor.AQUA + name);
+							}
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED
+									+ KarmicJail.prefix + " Player '"
+									+ ChatColor.AQUA + name + ChatColor.RED
+									+ "' not jailed.");
+						}
+					}
+					else
+					{
+						sender.sendMessage(ChatColor.RED + "Missing name");
+						sender.sendMessage(ChatColor.RED
+								+ "/jtime <player> [player2] ... <time>");
+					}
+				}
+				else
+				{
+					sender.sendMessage(ChatColor.RED
+							+ "Cannot use command as console.");
+				}
+			}
+			com = true;
+		}
+		else if (commandLabel.equals("jailwarp")
+				|| commandLabel.equals("jwarp"))
+		{
+			if (!perm.has(sender, "KarmicJail.warp.jail"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.warp.jail");
+			}
+			else
+			{
+				if (sender instanceof Player)
+				{
+					final Player player = (Player) sender;
+					player.teleport(JailLogic.getJailLocation());
+				}
+				else
+				{
+					sender.sendMessage(ChatColor.RED
+							+ "Cannot use command as console.");
 				}
 			}
 			com = true;
@@ -527,7 +520,7 @@ public class FakeCommander
 				{
 					sender.sendMessage(ChatColor.RED + "Missing name");
 					sender.sendMessage(ChatColor.RED
-							+ "/jtime <player> [player2] ... <time>");
+							+ "/jtime <player> <reason>");
 				}
 			}
 			com = true;
@@ -580,6 +573,103 @@ public class FakeCommander
 		cache.put(name, info);
 	}
 
+	public void showVersion(CommandSender sender)
+	{
+		// Version
+		sender.sendMessage(ChatColor.BLUE + bar + "==========");
+		sender.sendMessage(ChatColor.GREEN + "KarmicJail v"
+				+ plugin.getDescription().getVersion());
+		sender.sendMessage(ChatColor.GREEN + "Coded by Mitsugaru");
+		sender.sendMessage(ChatColor.AQUA
+				+ "Fork of imjake9's SimpleJail project");
+		sender.sendMessage(ChatColor.BLUE + "==============" + ChatColor.GRAY
+				+ "Config" + ChatColor.BLUE + "=============");
+		DecimalFormat twoDForm = new DecimalFormat("#.##");
+		sender.sendMessage(ChatColor.LIGHT_PURPLE + "Jail: " + ChatColor.GRAY
+				+ config.jailLoc.getWorld().getName() + ChatColor.BLUE + ":("
+				+ ChatColor.GOLD
+				+ Double.valueOf(twoDForm.format(config.jailLoc.getX()))
+				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ Double.valueOf(twoDForm.format(config.jailLoc.getY()))
+				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ Double.valueOf(twoDForm.format(config.jailLoc.getZ()))
+				+ ChatColor.BLUE + ")");
+		sender.sendMessage(ChatColor.LIGHT_PURPLE + "UnJail: " + ChatColor.GRAY
+				+ config.unjailLoc.getWorld().getName() + ChatColor.BLUE + ":("
+				+ ChatColor.GOLD
+				+ Double.valueOf(twoDForm.format(config.unjailLoc.getX()))
+				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ Double.valueOf(twoDForm.format(config.unjailLoc.getY()))
+				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ Double.valueOf(twoDForm.format(config.unjailLoc.getZ()))
+				+ ChatColor.BLUE + ")");
+	}
+
+	public void showHelp(CommandSender sender)
+	{
+		sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN
+				+ "KarmicJail" + ChatColor.BLUE + "=====");
+		if (perm.has(sender, "KarmicJail.jail"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jail " + ChatColor.AQUA
+					+ "<player> " + ChatColor.LIGHT_PURPLE
+					+ "[player2]... [time] [reason]" + ChatColor.YELLOW
+					+ " : Jails player(s)");
+			sender.sendMessage(ChatColor.YELLOW
+					+ "Note - Names auto-complete if player is online. Alias: /j");
+		}
+		if (perm.has(sender, "KarmicJail.unjail"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
+					+ " <player>" + ChatColor.YELLOW + " : Unjail player");
+		}
+		if (perm.has(sender, "KarmicJail.jail"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jailtime" + ChatColor.AQUA
+					+ " <player> <time>" + ChatColor.YELLOW
+					+ " : Sets time for jailed player. Alias: /jtime");
+			sender.sendMessage(ChatColor.GREEN + "/jailreason" + ChatColor.AQUA
+					+ " <player> " + ChatColor.LIGHT_PURPLE + "[reason]"
+					+ ChatColor.YELLOW
+					+ " : Sets jail reason for player. Alias: /jreason");
+		}
+		if (perm.has(sender, "KarmicJail.mute"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jailmute" + ChatColor.AQUA
+					+ " <player>" + ChatColor.YELLOW
+					+ " : Toggle mute for a player. Alias: /jmute");
+		}
+		if (perm.has(sender, "KarmicJail.list"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jaillist"
+					+ ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
+					+ " : List jailed players. Alias: /jlist");
+			sender.sendMessage(ChatColor.GREEN + "/jailprev" + ChatColor.YELLOW
+					+ " : Previous page. Alias: /jprev");
+			sender.sendMessage(ChatColor.GREEN + "/jailnext" + ChatColor.YELLOW
+					+ " : Next page. Alias: /jnext");
+		}
+		if (perm.has(sender, "KarmicJail.setjail"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/setjail"
+					+ ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]"
+					+ ChatColor.YELLOW
+					+ " : Set jail teleport to current pos or given pos");
+			sender.sendMessage(ChatColor.GREEN + "/setunjail"
+					+ ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]"
+					+ ChatColor.YELLOW
+					+ " : Set unjail teleport to current pos or given pos");
+		}
+		if (perm.has(sender, "KarmicJail.jailstatus"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jailstatus"
+					+ ChatColor.LIGHT_PURPLE + " [player]" + ChatColor.YELLOW
+					+ " : Get jail status. Alias: /jstatus");
+		}
+		sender.sendMessage(ChatColor.GREEN + "/jailversion" + ChatColor.YELLOW
+				+ " : Plugin version and config info. Alias: /jversion");
+	}
+
 	/**
 	 * Lists the players in jail
 	 * 
@@ -594,8 +684,8 @@ public class FakeCommander
 		try
 		{
 			Query rs = plugin.getDatabaseHandler().select(
-					"SELECT * FROM " + config.tablePrefix
-							+ "jailed WHERE status='" + JailStatus.JAILED
+					"SELECT * FROM " + Table.JAILED.getName()
+							+ " WHERE status='" + JailStatus.JAILED
 							+ "' OR status='" + JailStatus.PENDINGJAIL + "';");
 			if (rs.getResult().next())
 			{
@@ -728,7 +818,7 @@ public class FakeCommander
 					try
 					{
 						sb.append(ChatColor.GOLD
-								+ array[i].date.substring(4, 10)
+								+ array[i].date.substring(0, 10)
 								+ ChatColor.GRAY + " - ");
 					}
 					catch (StringIndexOutOfBoundsException e)

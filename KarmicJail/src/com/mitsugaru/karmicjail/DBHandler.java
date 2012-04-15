@@ -51,7 +51,27 @@ public class DBHandler
 				// Jail table
 				mysql.createTable("CREATE TABLE "
 						+ Table.JAILED.getName()
-						+ " (id INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INT, UNIQUE (playername), PRIMARY KEY(id));");
+						+ " (id INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INT, lastpos TEXT, UNIQUE (playername), PRIMARY KEY(id));");
+			}
+			// Check for history table
+			if (!mysql.checkTable(Table.HISTORY.getName()))
+			{
+				plugin.getLogger().info(
+						KarmicJail.prefix + " Created history table");
+				// history table
+				mysql.createTable("CREATE TABLE"
+						+ Table.HISTORY.getName()
+						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, history TEXT NOT NULL, PRIMARY KEY(row));");
+			}
+			// Check inventory table
+			if (!mysql.checkTable(Table.INVENTORY.getName()))
+			{
+				plugin.getLogger().info(
+						KarmicJail.prefix + " Created inventory table");
+				// inventory table
+				mysql.createTable("CREATE TABLE "
+						+ Table.INVENTORY.getName()
+						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT, durability TINYTEXT, enchantments TEXT, PRIMARY KEY(row));");
 			}
 		}
 		else
@@ -67,7 +87,27 @@ public class DBHandler
 				// Jail table
 				sqlite.createTable("CREATE TABLE "
 						+ Table.JAILED.getName()
-						+ " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, UNIQUE (playername));");
+						+ " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, lastpos TEXT, UNIQUE (playername));");
+			}
+			// Check for history table
+			if (!sqlite.checkTable(Table.HISTORY.getName()))
+			{
+				plugin.getLogger().info(
+						KarmicJail.prefix + " Created history table");
+				// history table
+				sqlite.createTable("CREATE TABLE"
+						+ Table.HISTORY.getName()
+						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, history TEXT NOT NULL);");
+			}
+			// Check inventory table
+			if (!mysql.checkTable(Table.INVENTORY.getName()))
+			{
+				plugin.getLogger().info(
+						KarmicJail.prefix + " Created inventory table");
+				// inventory table
+				mysql.createTable("CREATE TABLE "
+						+ Table.INVENTORY.getName()
+						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT, durability TEXT, enchantments TEXT);");
 			}
 		}
 	}
@@ -90,7 +130,7 @@ public class DBHandler
 				PreparedStatement statement = mysql
 						.prepare("INSERT INTO "
 								+ config.tablePrefix
-								+ "jailed (playername, status, time, groups, jailer, date, reason, muted) VALUES(?,?,?,?,?,?,?,?);");
+								+ "jailed (playername, status, time, groups, jailer, date, reason, muted, lastpos) VALUES(?,?,?,?,?,?,?,?,?);");
 				do
 				{
 					String name = rs.getResult().getString("playername");
@@ -129,6 +169,20 @@ public class DBHandler
 					{
 						muted = 0;
 					}
+					String lastpos = "";
+					try
+					{
+						lastpos = rs.getResult().getString("lastpos");
+						if (rs.getResult().wasNull())
+						{
+							lastpos = "";
+						}
+					}
+					catch (SQLException e)
+					{
+						// Ignore. Try catch for < 0.4 databases that don't have
+						// this field
+					}
 					statement.setString(1, name);
 					statement.setString(2, status);
 					statement.setDouble(3, time);
@@ -137,6 +191,7 @@ public class DBHandler
 					statement.setString(6, date);
 					statement.setString(7, reason);
 					statement.setInt(8, muted);
+					statement.setString(9, lastpos);
 					try
 					{
 						statement.executeUpdate();
@@ -243,8 +298,9 @@ public class DBHandler
 		int id = -1;
 		try
 		{
-			final Query query = select("SELECT * FROM " + Table.JAILED.getName()
-					+ " WHERE playername='" + playername + "';");
+			final Query query = select("SELECT * FROM "
+					+ Table.JAILED.getName() + " WHERE playername='"
+					+ playername + "';");
 			if (query.getResult().next())
 			{
 				id = query.getResult().getInt("id");
@@ -547,7 +603,9 @@ public class DBHandler
 				"time", Type.DOUBLE), GROUPS(Table.JAILED, "groups",
 				Type.STRING), JAILER(Table.JAILED, "jailer", Type.STRING), DATE(
 				Table.JAILED, "date", Type.STRING), REASON(Table.JAILED,
-				"reason", Type.STRING), MUTE(Table.JAILED, "muted", Type.INT);
+				"reason", Type.STRING), MUTE(Table.JAILED, "muted", Type.INT), LAST_POSITION(
+				Table.JAILED, "lastpos", Type.STRING), HISTORY(Table.HISTORY,
+				"history", Type.STRING);
 		private final Table table;
 		private final Type type;
 		private final String columnname;
@@ -583,7 +641,7 @@ public class DBHandler
 	public enum Table
 	{
 		JAILED(config.tablePrefix + "jailed"), INVENTORY(config.tablePrefix
-				+ "inventory");
+				+ "inventory"), HISTORY(config.tablePrefix + "history");
 		private final String table;
 
 		private Table(String table)
