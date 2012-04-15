@@ -852,14 +852,19 @@ public class JailLogic
 		}
 		final Player player = (args.length == 0) ? (Player) sender : plugin
 				.getServer().getPlayer(args[0]);
-		String name = "";
+		String temp = "";
 		if (player == null)
 		{
-			name = args[0];
+			temp = args[0];
 		}
 		else
 		{
-			name = player.getName();
+			temp = player.getName();
+		}
+		String name = getPlayerInDatabase(temp);
+		if (name == null)
+		{
+			name = temp;
 		}
 
 		if (!playerIsJailed(name) && !playerIsPendingJail(name))
