@@ -137,11 +137,21 @@ public class DBHandler
 					statement.setString(6, date);
 					statement.setString(7, reason);
 					statement.setInt(8, muted);
-					statement.executeUpdate();
-					statement.close();
+					try
+					{
+						statement.executeUpdate();
+					}
+					catch (SQLException e)
+					{
+						plugin.getLogger().warning(
+								KarmicJail.prefix + " SQL Exception on Import");
+						e.printStackTrace();
+					}
 				} while (rs.getResult().next());
+				statement.close();
 			}
 			rs.closeQuery();
+			// TODO import inventory
 			plugin.getLogger().info(
 					KarmicJail.prefix + " Done importing SQLite into MySQL");
 		}
@@ -263,7 +273,7 @@ public class DBHandler
 			standardQuery("UPDATE " + Table.JAILED.getName()
 					+ " SET time='-1',jailer='',date='',reason='' WHERE id='"
 					+ id + "';");
-			//TODO drop inventory table entries of their id
+			// TODO drop inventory table entries of their id
 		}
 		else
 		{

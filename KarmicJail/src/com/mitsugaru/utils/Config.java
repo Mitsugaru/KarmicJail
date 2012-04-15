@@ -288,11 +288,16 @@ public class Config
 							+ " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, UNIQUE (playername));";
 				}
 				plugin.getDatabaseHandler().createTable(query);
-				//Add back entries
+				// Add back entries
 				if (!entries.isEmpty())
 				{
-					PreparedStatement statement = plugin.getDatabaseHandler().prepare("INSERT INTO " + Table.JAILED.getName() + " (playername,status,time,groups,jailer,date,reason,muted) VALUES(?,?,?,?,?,?,?,?)");
-					for(PointThreeObject entry : entries)
+					PreparedStatement statement = plugin
+							.getDatabaseHandler()
+							.prepare(
+									"INSERT INTO "
+											+ Table.JAILED.getName()
+											+ " (playername,status,time,groups,jailer,date,reason,muted) VALUES(?,?,?,?,?,?,?,?)");
+					for (PointThreeObject entry : entries)
 					{
 						statement.setString(1, entry.playername);
 						statement.setString(2, entry.status);
@@ -302,7 +307,16 @@ public class Config
 						statement.setString(6, entry.date);
 						statement.setString(7, entry.reason);
 						statement.setInt(8, entry.mute);
-						statement.executeUpdate();
+						try
+						{
+							statement.executeUpdate();
+						}
+						catch (SQLException s)
+						{
+							plugin.getLogger().warning(
+									KarmicJail.prefix + " SQLException");
+							s.printStackTrace();
+						}
 					}
 					statement.close();
 				}

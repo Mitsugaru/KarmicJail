@@ -2,6 +2,8 @@ package com.mitsugaru.karmicjail;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +33,7 @@ public class JailLogic
 	private static Config config;
 	private static PermCheck perm;
 	private static DBHandler database;
+	private final static DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm z");
 
 	public static void init(KarmicJail plugin)
 	{
@@ -143,7 +146,7 @@ public class JailLogic
 
 			try
 			{
-				final String date = new Date().toString();
+				final String date = dateFormat.format(new Date());
 				final PreparedStatement statement = database.prepare("UPDATE "
 						+ Table.JAILED.getName() + " SET "
 						+ Field.JAILER.getColumnName() + "=?,"
