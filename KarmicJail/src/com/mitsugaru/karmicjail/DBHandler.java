@@ -362,7 +362,7 @@ public class DBHandler
 
 	public String getStringField(Field field, String playername)
 	{
-		String out = "UNKNOWN";
+		String out = "";
 		int id = getPlayerId(playername);
 		if (id == -1)
 		{
@@ -386,7 +386,7 @@ public class DBHandler
 							out = query.getResult().getString(field.columnname);
 							if (query.getResult().wasNull())
 							{
-								out = "UNKNOWN";
+								out = "";
 							}
 						}
 						query.closeQuery();

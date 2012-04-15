@@ -33,7 +33,8 @@ public class JailLogic
 	private static Config config;
 	private static PermCheck perm;
 	private static DBHandler database;
-	private final static DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm z");
+	private final static DateFormat dateFormat = new SimpleDateFormat(
+			"MM-dd-yyyy 'at' HH:mm z");
 
 	public static void init(KarmicJail plugin)
 	{
@@ -615,7 +616,12 @@ public class JailLogic
 		{
 			name = player;
 		}
-		return database.getStringField(Field.REASON, name);
+		String reason = database.getStringField(Field.REASON, name);
+		if(reason.equals(""))
+		{
+			reason = "UNKOWN";
+		}
+		return reason;
 	}
 
 	public static boolean playerIsMuted(String player)
@@ -818,19 +824,26 @@ public class JailLogic
 		String groups = database.getStringField(Field.GROUPS, name);
 		if (!groups.equals(""))
 		{
-			if (groups.contains("&"))
+			try
 			{
-				String[] cut = groups.split("&");
-				for (String group : cut)
+				if (groups.contains("&"))
 				{
-					String[] split = group.split("!");
+					String[] cut = groups.split("&");
+					for (String group : cut)
+					{
+						String[] split = group.split("!");
+						perm.playerAddGroup(split[1], name, split[0]);
+					}
+				}
+				else
+				{
+					String[] split = groups.split("!");
 					perm.playerAddGroup(split[1], name, split[0]);
 				}
 			}
-			else
+			catch (ArrayIndexOutOfBoundsException a)
 			{
-				String[] split = groups.split("!");
-				perm.playerAddGroup(split[1], name, split[0]);
+				plugin.getLogger().warning("Could not return groups for " + name);
 			}
 		}
 	}
@@ -934,7 +947,12 @@ public class JailLogic
 	 */
 	private static String getJailer(String name)
 	{
-		return database.getStringField(Field.JAILER, name);
+		String jailer = database.getStringField(Field.JAILER, name);
+		if(jailer.equals(""))
+		{
+			jailer = "UNKOWN";
+		}
+		return jailer;
 	}
 
 	/**
@@ -946,7 +964,12 @@ public class JailLogic
 	 */
 	private static String getJailDate(String name)
 	{
-		return database.getStringField(Field.DATE, name);
+		String date = database.getStringField(Field.DATE, name);
+		if(date.equals(""))
+		{
+			date = "UNKOWN";
+		}
+		return date;
 	}
 
 	/**
