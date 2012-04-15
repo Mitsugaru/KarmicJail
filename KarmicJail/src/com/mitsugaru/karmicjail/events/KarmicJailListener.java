@@ -34,6 +34,8 @@ public class KarmicJailListener implements Listener
 		this.plugin = plugin;
 		this.config = plugin.getPluginConfig();
 	}
+	
+	//TODO inventory open / close events for our custom inventory
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)
@@ -122,6 +124,7 @@ public class KarmicJailListener implements Listener
 						event.getPlayer().getLocation());
 			}
 		}
+		//TODO record inventory
 		if (config.debugLog && config.debugEvents)
 		{
 			plugin.getLogger().info(
@@ -139,7 +142,7 @@ public class KarmicJailListener implements Listener
 			{
 				final int minutes = (int) ((time / minutesToTicks));
 				player.sendMessage(ChatColor.RED + KarmicJail.prefix
-						+ ChatColor.AQUA + "You are jailed for "
+						+ ChatColor.AQUA + " You are jailed for "
 						+ plugin.prettifyMinutes(minutes) + ".");
 				plugin.addThread(player.getName(), time);
 				if (config.debugLog && config.debugEvents)
@@ -154,7 +157,7 @@ public class KarmicJailListener implements Listener
 		else
 		{
 			player.sendMessage(ChatColor.RED + KarmicJail.prefix
-					+ ChatColor.AQUA + "You are jailed.");
+					+ ChatColor.AQUA + " You are jailed.");
 			if (config.debugLog && config.debugEvents)
 			{
 				plugin.getLogger().info(
@@ -166,11 +169,11 @@ public class KarmicJailListener implements Listener
 		{
 			final StringBuilder sb = new StringBuilder();
 			final String reason = JailLogic.getJailReason(player.getName());
-			sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA
-					+ player.getName());
+			sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA + " "
+					+ player.getName() + ChatColor.RED + " jailed");
 			if (!reason.equals(""))
 			{
-				sb.append(ChatColor.RED + " for " + ChatColor.GRAY
+				sb.append(" for " + ChatColor.GRAY
 						+ plugin.colorizeText(reason));
 			}
 			if (config.broadcastPerms)

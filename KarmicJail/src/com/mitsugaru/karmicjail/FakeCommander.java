@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -28,6 +29,7 @@ public class FakeCommander
 	private static final String bar = "======================";
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
+	public static final Map<String, JailInventory> inv = new HashMap<String, JailInventory>();
 
 	public FakeCommander(KarmicJail plugin)
 	{
@@ -374,7 +376,7 @@ public class FakeCommander
 					{
 						sender.sendMessage(ChatColor.RED + "Missing name");
 						sender.sendMessage(ChatColor.RED
-								+ "/jtime <player> [player2] ... <time>");
+								+ "/jlast <player>");
 					}
 				}
 				else
@@ -397,8 +399,59 @@ public class FakeCommander
 			{
 				if (sender instanceof Player)
 				{
+					//TODO check if they gave a player to warp to jail
 					final Player player = (Player) sender;
 					player.teleport(JailLogic.getJailLocation());
+				}
+				else
+				{
+					sender.sendMessage(ChatColor.RED
+							+ "Cannot use command as console.");
+				}
+			}
+			com = true;
+		}
+		else if (commandLabel.equals("jailinv")
+				|| commandLabel.equals("jinv"))
+		{
+			if (!perm.has(sender, "KarmicJail.inventory.view"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.inventory.view");
+			}
+			else
+			{
+				if (sender instanceof Player)
+				{
+					final Player player = (Player) sender;
+					if (args.length > 0)
+					{
+						String name = plugin.expandName(args[0]);
+						if (JailLogic.playerIsJailed(name)
+								|| JailLogic.playerIsPendingJail(name))
+						{
+								sender.sendMessage(ChatColor.GREEN
+										+ KarmicJail.prefix
+										+ " Warp to last location of "
+										+ ChatColor.AQUA + name);
+								final Map<Integer, ItemStack> testItems = new HashMap<Integer, ItemStack>();
+								testItems.put(0, new ItemStack(4, 10));
+								player.openInventory(new JailInventory(plugin, player.getName(), testItems));
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED
+									+ KarmicJail.prefix + " Player '"
+									+ ChatColor.AQUA + name + ChatColor.RED
+									+ "' not jailed.");
+						}
+					}
+					else
+					{
+						sender.sendMessage(ChatColor.RED + "Missing name");
+						sender.sendMessage(ChatColor.RED
+								+ "/jinv <player>");
+					}
 				}
 				else
 				{

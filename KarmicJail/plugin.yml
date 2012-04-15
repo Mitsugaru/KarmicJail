@@ -102,6 +102,14 @@ commands:
     description: Warps to last location of jailed player. 
     usage: |
            /<command> <player>
+  jinv:
+    description: View inventory of jailed player. Alias to jailinv.
+    usage: |
+           /<command> <player>
+  jailinv:
+    description: View inventory of jailed player. 
+    usage: |
+           /<command> <player>
   jwarp:
     description: Warps to jail. Alias to jailwarp.
     usage: |
@@ -143,6 +151,12 @@ permissions:
   KarmicJail.mute:
     description: Mute players in jail
     default: op
+  KarmicJail.inventory.view:
+    description: View inventory of jailed players
+    default: op
+  KarmicJail.inventory.modify:
+    description: View inventory of jailed players
+    default: op
   KarmicJail.warp.jail:
     description: Warp to jail
     default: op
@@ -165,3 +179,7 @@ permissions:
       KarmicJail.list: true
       KarmicJail.mute: true
       KarmicJail.broadcast: true
+      KarmicJail.warp.jail: true
+      KarmicJail.warp.last: true
+      KarmicJail.inventory.view: true
+      KarmicJail.inventory.modify: true

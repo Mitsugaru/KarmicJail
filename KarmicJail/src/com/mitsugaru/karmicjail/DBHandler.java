@@ -71,7 +71,7 @@ public class DBHandler
 				// inventory table
 				mysql.createTable("CREATE TABLE "
 						+ Table.INVENTORY.getName()
-						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT, durability TINYTEXT, enchantments TEXT, PRIMARY KEY(row));");
+						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, slot INT NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT, durability TINYTEXT, enchantments TEXT, PRIMARY KEY(row));");
 			}
 		}
 		else
@@ -107,7 +107,7 @@ public class DBHandler
 				// inventory table
 				mysql.createTable("CREATE TABLE "
 						+ Table.INVENTORY.getName()
-						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT, durability TEXT, enchantments TEXT);");
+						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT, durability TEXT, enchantments TEXT);");
 			}
 		}
 	}
@@ -605,7 +605,12 @@ public class DBHandler
 				Table.JAILED, "date", Type.STRING), REASON(Table.JAILED,
 				"reason", Type.STRING), MUTE(Table.JAILED, "muted", Type.INT), LAST_POSITION(
 				Table.JAILED, "lastpos", Type.STRING), HISTORY(Table.HISTORY,
-				"history", Type.STRING);
+				"history", Type.STRING), INV_SLOT(Table.INVENTORY, "slot",
+				Type.INT), INV_ITEM(Table.INVENTORY, "itemid", Type.INT), INV_AMOUNT(
+				Table.INVENTORY, "amount", Type.INT), INV_DATA(Table.INVENTORY,
+				"data", Type.STRING), INV_DURABILITY(Table.INVENTORY,
+				"durability", Type.STRING), INV_ENCHANT(Table.INVENTORY,
+				"enchantments", Type.STRING);
 		private final Table table;
 		private final Type type;
 		private final String columnname;

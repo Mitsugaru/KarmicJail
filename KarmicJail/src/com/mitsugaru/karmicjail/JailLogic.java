@@ -16,6 +16,8 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import com.mitsugaru.karmicjail.DBHandler.Field;
 import com.mitsugaru.karmicjail.DBHandler.Table;
@@ -109,6 +111,8 @@ public class JailLogic
 					setPlayerLastLocation(name, player.getLocation());
 					// Move to jail
 					player.teleport(config.jailLoc);
+					// Set inventory
+					setPlayerInventory(name, player.getInventory());
 					// Set status to jailed
 					setPlayerStatus(JailStatus.JAILED, name);
 					// Notify player
@@ -1147,5 +1151,14 @@ public class JailLogic
 			}
 		}
 		return location;
+	}
+	
+	public static void setPlayerInventory(String playername, Inventory inventory)
+	{
+		//TODO iterate through
+		for(int i = 0; i <= 44; i++)
+		{
+			final ItemStack item = inventory.getItem(i);
+		}
 	}
 }
