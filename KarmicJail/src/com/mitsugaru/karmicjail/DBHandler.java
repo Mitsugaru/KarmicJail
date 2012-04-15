@@ -44,7 +44,7 @@ public class DBHandler
 					config.host, config.port, config.database, config.user,
 					config.password);
 			// Check if jailed table exists
-			if (!mysql.checkTable(config.tablePrefix + "jailed"))
+			if (!mysql.checkTable(Table.JAILED.getName()))
 			{
 				plugin.getLogger().info(
 						KarmicJail.prefix + " Created jailed table");
@@ -60,7 +60,7 @@ public class DBHandler
 			sqlite = new SQLite(plugin.getLogger(), KarmicJail.prefix, "jail",
 					plugin.getDataFolder().getAbsolutePath());
 			// Check if jailed table exists
-			if (!sqlite.checkTable(config.tablePrefix + "jailed"))
+			if (!sqlite.checkTable(Table.JAILED.getName()))
 			{
 				plugin.getLogger().info(
 						KarmicJail.prefix + " Created jailed table");
@@ -243,7 +243,7 @@ public class DBHandler
 		int id = -1;
 		try
 		{
-			final Query query = select("SELECT * FROM " + Table.JAILED
+			final Query query = select("SELECT * FROM " + Table.JAILED.getName()
 					+ " WHERE playername='" + playername + "';");
 			if (query.getResult().next())
 			{
