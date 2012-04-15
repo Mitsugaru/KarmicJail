@@ -542,7 +542,7 @@ public class DBHandler
 
 	public enum Field
 	{
-		PlAYERNAME(Table.JAILED, "playername", Type.STRING), STATUS(
+		PLAYERNAME(Table.JAILED, "playername", Type.STRING), STATUS(
 				Table.JAILED, "status", Type.STRING), TIME(Table.JAILED,
 				"time", Type.DOUBLE), GROUPS(Table.JAILED, "groups",
 				Type.STRING), JAILER(Table.JAILED, "jailer", Type.STRING), DATE(

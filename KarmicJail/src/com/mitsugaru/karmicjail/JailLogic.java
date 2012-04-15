@@ -154,7 +154,7 @@ public class JailLogic
 						+ Field.DATE.getColumnName() + "=?,"
 						+ Field.REASON.getColumnName() + "=?, "
 						+ Field.MUTE.getColumnName() + "=? WHERE "
-						+ Field.PlAYERNAME.getColumnName() + "=?;");
+						+ Field.PLAYERNAME.getColumnName() + "=?;");
 				statement.setString(1, sender.getName());
 				statement.setString(2, date);
 				statement.setString(3, reason);
@@ -228,7 +228,8 @@ public class JailLogic
 			name = inName;
 		}
 		// Check if player is in jail:
-		if (getPlayerStatus(name).equals("" + JailStatus.FREED))
+		final JailStatus currentStatus = getPlayerStatus(name);
+		if (currentStatus == JailStatus.FREED || currentStatus == JailStatus.PENDINGFREE)
 		{
 			sender.sendMessage(ChatColor.RED + "That player is not in jail!");
 			return;
@@ -254,7 +255,7 @@ public class JailLogic
 		{
 			setPlayerStatus(JailStatus.PENDINGFREE, name);
 			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
-					+ " will be released from jail on getLogger()in.");
+					+ " will be released from jail on login.");
 			return;
 		}
 
@@ -426,21 +427,21 @@ public class JailLogic
 	 * 
 	 * @param name
 	 *            of player
-	 * @return true if player is in database, else false
+	 * @return Name of player in database, else null
 	 */
 	public static String getPlayerInDatabase(String name)
 	{
 		String has = null;
 		try
 		{
-			Query rs = database.select("SELECT * FROM " + config.tablePrefix
-					+ "jailed;");
+			Query rs = database.select("SELECT * FROM " + Table.JAILED.getName()
+					+ ";");
 			if (rs.getResult().next())
 			{
 				do
 				{
 					if (name.equalsIgnoreCase(rs.getResult().getString(
-							"playername")))
+							Field.PLAYERNAME.getColumnName())))
 					{
 						has = rs.getResult().getString("playername");
 						break;
