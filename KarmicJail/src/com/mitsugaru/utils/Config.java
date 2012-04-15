@@ -230,45 +230,48 @@ public class Config
 						"SELECT * FROM " + Table.JAILED.getName() + ";");
 				if (rs.getResult().next())
 				{
-					// save entry
-					String name = rs.getResult().getString("playername");
-					String status = rs.getResult().getString("status");
-					if (rs.getResult().wasNull())
+					do
 					{
-						status = JailStatus.FREED + "";
-					}
-					double time = rs.getResult().getDouble("time");
-					if (rs.getResult().wasNull())
-					{
-						time = -1;
-					}
-					String groups = rs.getResult().getString("groups");
-					if (rs.getResult().wasNull())
-					{
-						groups = "";
-					}
-					String jailer = rs.getResult().getString("jailer");
-					if (rs.getResult().wasNull())
-					{
-						jailer = "";
-					}
-					String date = rs.getResult().getString("date");
-					if (rs.getResult().wasNull())
-					{
-						date = "";
-					}
-					String reason = rs.getResult().getString("reason");
-					if (rs.getResult().wasNull())
-					{
-						reason = "";
-					}
-					int muted = rs.getResult().getInt("muted");
-					if (rs.getResult().wasNull())
-					{
-						muted = 0;
-					}
-					entries.add(new PointThreeObject(name, status, groups,
-							jailer, date, reason, time, muted));
+						// save entry
+						String name = rs.getResult().getString("playername");
+						String status = rs.getResult().getString("status");
+						if (rs.getResult().wasNull())
+						{
+							status = JailStatus.FREED + "";
+						}
+						double time = rs.getResult().getDouble("time");
+						if (rs.getResult().wasNull())
+						{
+							time = -1;
+						}
+						String groups = rs.getResult().getString("groups");
+						if (rs.getResult().wasNull())
+						{
+							groups = "";
+						}
+						String jailer = rs.getResult().getString("jailer");
+						if (rs.getResult().wasNull())
+						{
+							jailer = "";
+						}
+						String date = rs.getResult().getString("date");
+						if (rs.getResult().wasNull())
+						{
+							date = "";
+						}
+						String reason = rs.getResult().getString("reason");
+						if (rs.getResult().wasNull())
+						{
+							reason = "";
+						}
+						int muted = rs.getResult().getInt("muted");
+						if (rs.getResult().wasNull())
+						{
+							muted = 0;
+						}
+						entries.add(new PointThreeObject(name, status, groups,
+								jailer, date, reason, time, muted));
+					} while (rs.getResult().next());
 				}
 				rs.closeQuery();
 				// Drop old table
