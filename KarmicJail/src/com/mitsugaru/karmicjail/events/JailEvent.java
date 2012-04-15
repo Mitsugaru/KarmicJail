@@ -3,7 +3,6 @@ package com.mitsugaru.karmicjail.events;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 
 public class JailEvent extends Event {
