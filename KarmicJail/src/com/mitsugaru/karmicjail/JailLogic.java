@@ -170,7 +170,7 @@ public class JailLogic
 				statement.setString(5, name);
 				statement.executeUpdate();
 				statement.close();
-				//TODO add to history with same information, colorize
+				// TODO add to history with same information, colorize
 				sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 						+ " sent to jail.");
 				final PrisonerInfo pi = new PrisonerInfo(name,
@@ -597,7 +597,7 @@ public class JailLogic
 			name = inName;
 		}
 		database.setField(Field.REASON, name, reason, 0, 0);
-		//TODO add to history
+		// TODO add to history
 		// broadcast
 		if (config.broadcastReason)
 		{
@@ -1208,10 +1208,18 @@ public class JailLogic
 			}
 			if (database.setPlayerItems(playername, items))
 			{
-				//clear inventory
-				inv.clear();
-				final ItemStack[] clear = new ItemStack[]{null, null, null, null, null};
-				inv.setArmorContents(clear);
+				// clear inventory
+				try
+				{
+					inv.clear();
+					final ItemStack[] clear = new ItemStack[] { null, null,
+							null, null };
+					inv.setArmorContents(clear);
+				}
+				catch (ArrayIndexOutOfBoundsException e)
+				{
+					//ignore again
+				}
 			}
 		}
 
