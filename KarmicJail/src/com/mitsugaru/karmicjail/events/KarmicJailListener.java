@@ -40,13 +40,13 @@ public class KarmicJailListener implements Listener
 		this.config = plugin.getPluginConfig();
 	}
 	
-	//TODO inventory open / close events for our custom inventory
 	public void inventoryManipulation(final InventoryClickEvent event)
 	{
 		//Check if they're in our viewer list
 	}
 	
-	public void inventoryOpen(final InventoryOpenEvent event)
+	//Sadly unused
+	/*public void inventoryOpen(final InventoryOpenEvent event)
 	{
 		plugin.getLogger().info("inv open");
 		if(event.getInventory().getHolder() instanceof JailInventoryHolder)
@@ -62,7 +62,7 @@ public class KarmicJailListener implements Listener
 		{
 			plugin.getLogger().info("our holder");
 		}
-	}
+	}*/
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)
