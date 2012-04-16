@@ -118,7 +118,7 @@ public class JailLogic
 					// Move to jail
 					player.teleport(config.jailLoc);
 					// Set inventory
-					setPlayerInventory(name, player.getInventory());
+					setPlayerInventory(name, player.getInventory(), config.clearInventory);
 					// Set status to jailed
 					setPlayerStatus(JailStatus.JAILED, name);
 					// Notify player
@@ -1210,7 +1210,7 @@ public class JailLogic
 		return location;
 	}
 
-	public static void setPlayerInventory(String playername, Inventory inventory)
+	public static void setPlayerInventory(String playername, Inventory inventory, boolean clear)
 	{
 		Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
 		if (inventory instanceof PlayerInventory)
@@ -1251,15 +1251,15 @@ public class JailLogic
 			 * (ArrayIndexOutOfBoundsException a) { // Ignore } catch
 			 * (NullPointerException n) { // Ignore } }
 			 */
-			if (database.setPlayerItems(playername, items))
+			if (database.setPlayerItems(playername, items) && clear)
 			{
 				// clear inventory
 				try
 				{
 					inv.clear();
-					final ItemStack[] clear = new ItemStack[] { null, null,
+					final ItemStack[] cleared = new ItemStack[] { null, null,
 							null, null };
-					inv.setArmorContents(clear);
+					inv.setArmorContents(cleared);
 				}
 				catch (ArrayIndexOutOfBoundsException e)
 				{

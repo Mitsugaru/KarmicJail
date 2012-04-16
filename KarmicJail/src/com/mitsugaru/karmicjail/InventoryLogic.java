@@ -22,6 +22,11 @@ public class InventoryLogic implements Listener
 		if (!event.isCancelled()
 				&& event.getInventory().getHolder() instanceof JailInventoryHolder)
 		{
+			if(plugin.getPluginConfig().modifyInventory)
+			{
+				event.setCancelled(true);
+				return;
+			}
 			JailInventoryHolder holder = (JailInventoryHolder) event
 					.getInventory().getHolder();
 			final String target = holder.getTarget();
@@ -39,7 +44,7 @@ public class InventoryLogic implements Listener
 			{
 				//Ignore
 			}
-			if (rawSlot >= 0 && rawSlot <= 35)
+			else if (rawSlot >= 0 && rawSlot <= 35)
 			{
 				inside = true;
 				fromInventory = true;

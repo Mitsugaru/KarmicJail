@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -24,7 +25,8 @@ public class Config
 	public String host, port, database, user, password, tablePrefix;
 	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL,
 			unjailTeleport, removeGroups, broadcastJail, broadcastUnjail,
-			broadcastReason, broadcastPerms, broadcastJoin, debugUnhandled;
+			broadcastReason, broadcastPerms, broadcastJoin, debugUnhandled,
+			clearInventory, returnInventory, modifyInventory;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup;
 	public int limit;
@@ -37,9 +39,10 @@ public class Config
 		plugin = karmicJail;
 		// Init config files:
 		ConfigurationSection config = plugin.getConfig();
-		final Map<String, Object> defaults = new HashMap<String, Object>();
+		final Map<String, Object> defaults = new LinkedHashMap<String, Object>();
 		defaults.put("jailgroup", "Jailed");
 		defaults.put("removegroups", true);
+		defaults.put("entrylimit", 10);
 		defaults.put("jail.world", plugin.getServer().getWorlds().get(0)
 				.getName());
 		defaults.put("jail.x", 0);
@@ -51,7 +54,9 @@ public class Config
 		defaults.put("unjail.y", 0);
 		defaults.put("unjail.z", 0);
 		defaults.put("unjail.teleport", true);
-		defaults.put("entrylimit", 10);
+		defaults.put("inventory.clearOnJail", false);
+		defaults.put("inventory.returnOnUnjail", true);
+		defaults.put("inventory.modify", true);
 		defaults.put("broadcast.jail", false);
 		defaults.put("broadcast.unjail", false);
 		defaults.put("broadcast.reasonChange", false);
@@ -113,6 +118,9 @@ public class Config
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		removeGroups = config.getBoolean("removegroups", true);
 		debugUnhandled = config.getBoolean("debug.unhandled", false);
+		clearInventory = config.getBoolean("inventory.clearOnJail", false);
+		returnInventory = config.getBoolean("inventory.returnOnUnjail", true);
+		modifyInventory = config.getBoolean("inventory.modify", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
@@ -154,6 +162,9 @@ public class Config
 				.getBoolean("broadcast.ignorePermission", false);
 		broadcastJoin = config.getBoolean("broadcast.onjoin", false);
 		removeGroups = config.getBoolean("removegroups", true);
+		clearInventory = config.getBoolean("inventory.clearOnJail", false);
+		returnInventory = config.getBoolean("inventory.returnOnUnjail", true);
+		modifyInventory = config.getBoolean("inventory.modify", true);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{

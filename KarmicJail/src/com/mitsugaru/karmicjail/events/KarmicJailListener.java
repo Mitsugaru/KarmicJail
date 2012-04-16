@@ -18,8 +18,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-//import org.bukkit.event.inventory.InventoryCloseEvent;
-//import org.bukkit.event.inventory.InventoryOpenEvent;
+// import org.bukkit.event.inventory.InventoryCloseEvent;
+// import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -38,11 +38,11 @@ public class KarmicJailListener implements Listener
 		this.plugin = plugin;
 		this.config = plugin.getPluginConfig();
 	}
-	
+
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerMove(final PlayerMoveEvent event)
 	{
-		if(Commander.inv.containsKey(event.getPlayer().getName()))
+		if (Commander.inv.containsKey(event.getPlayer().getName()))
 		{
 			event.getPlayer().closeInventory();
 			Commander.inv.remove(event.getPlayer().getName());
@@ -132,20 +132,22 @@ public class KarmicJailListener implements Listener
 			if (event.getPlayer().getName() != null
 					&& event.getPlayer().getLocation() != null)
 			{
-				if(!JailLogic.playerIsJailed(event.getPlayer().getName()))
+				if (!JailLogic.playerIsJailed(event.getPlayer().getName()))
 				{
-				JailLogic.setPlayerLastLocation(event.getPlayer().getName(),
-						event.getPlayer().getLocation());
+					JailLogic.setPlayerLastLocation(
+							event.getPlayer().getName(), event.getPlayer()
+									.getLocation());
 				}
 			}
 		}
-		//TODO record inventory
+		JailLogic.setPlayerInventory(event.getPlayer().getName(), event
+				.getPlayer().getInventory(), false);
 		if (config.debugLog && config.debugEvents)
 		{
 			plugin.getLogger().info(
 					"Quit Event for: " + event.getPlayer().getName());
 		}
-		//Remove viewer
+		// Remove viewer
 		Commander.inv.remove(event.getPlayer().getName());
 		plugin.stopTask(event.getPlayer().getName());
 	}
