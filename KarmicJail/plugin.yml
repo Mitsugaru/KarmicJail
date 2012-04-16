@@ -118,6 +118,14 @@ commands:
     description: Warps to jail. 
     usage: |
            /<command> [player]
+  jhistory:
+    description: Player jail history. Alias to jailhistory.
+    usage: |
+           /<command> [player]
+  jailhistory:
+    description: Player jail history
+    usage: |
+           /<command> <args>...
   jailversion:
     description: Get plugin version and config info.
     usage: |

@@ -425,16 +425,36 @@ public class Commander implements CommandExecutor
 			}
 			else
 			{
-				if (sender instanceof Player)
+				if (args.length > 0)
 				{
-					// TODO check if they gave a player to warp to jail
+					final Player target = plugin.getServer().getPlayer(args[0]);
+					boolean warped = false;
+					if (target != null)
+					{
+						if (target.isOnline())
+						{
+							target.teleport(JailLogic.getJailLocation());
+							warped = true;
+							sender.sendMessage(ChatColor.GREEN + "Warped "
+									+ ChatColor.AQUA + target.getName()
+									+ ChatColor.GREEN + " to jail location.");
+						}
+					}
+					if (!warped)
+					{
+						sender.sendMessage(ChatColor.RED + "Could not warp "
+								+ ChatColor.AQUA + args[0]);
+					}
+				}
+				else if (sender instanceof Player)
+				{
 					final Player player = (Player) sender;
 					player.teleport(JailLogic.getJailLocation());
 				}
 				else
 				{
 					sender.sendMessage(ChatColor.RED
-							+ "Cannot use command as console.");
+							+ "Cannot use command as console without giving name.");
 				}
 			}
 			com = true;
@@ -557,23 +577,49 @@ public class Commander implements CommandExecutor
 						historyCache.put(sender.getName(), name);
 						listHistory(sender, 0);
 					}
+					else if (hcom.equalsIgnoreCase("add"))
+					{
+						String temp = plugin.expandName(args[1]);
+						String name = JailLogic.getPlayerInDatabase(temp);
+						if (name == null)
+						{
+							name = temp;
+						}
+						final StringBuilder sb = new StringBuilder();
+						for (int i = 1; i < args.length; i++)
+						{
+							sb.append(args[i] + " ");
+						}
+						String reason = "";
+						if (sb.length() > 0)
+						{
+							// Remove all trailing whitespace
+							reason = sb.toString().replaceAll("\\s+$", "");
+							reason = ChatColor.GOLD + sender.getName() + ChatColor.BLUE + " - "
+									+ ChatColor.GRAY + reason;
+						}
+						if (!reason.equals(""))
+						{
+							plugin.getDatabaseHandler().addToHistory(name,
+									reason);
+							sender.sendMessage(ChatColor.GREEN
+									+ "Added comment '" + reason
+									+ ChatColor.GREEN + "' to "
+									+ ChatColor.AQUA + name);
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED
+									+ KarmicJail.prefix
+									+ " Comment cannot be empty.");
+						}
+					}
 					else
 					{
-						try
-						{
-							// Attempt to parse argument for page number
-							int pageNum = Integer.parseInt(args[1]);
-							// Set current page to given number
-							historyPage.put(sender.getName(), pageNum - 1);
-							// Show page if possible
-							this.listJailed(sender, 0);
-						}
-						catch (NumberFormatException e)
-						{
+						
 							sender.sendMessage(ChatColor.YELLOW
 									+ KarmicJail.prefix
-									+ " Invalid integer for page number");
-						}
+									+ " Invalid command.");
 					}
 
 				}
@@ -914,20 +960,20 @@ public class Commander implements CommandExecutor
 		if (valid)
 		{
 			// Header with amount of pages
-			sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.AQUA
-					+ name + ChatColor.BLUE + "===" + ChatColor.GRAY
-					+ "Page: " + ((historyPage.get(sender.getName()).intValue()) + 1)
+			sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.AQUA + name
+					+ ChatColor.BLUE + "===" + ChatColor.GRAY + "Page: "
+					+ ((historyPage.get(sender.getName()).intValue()) + 1)
 					+ ChatColor.BLUE + " of " + ChatColor.GRAY + num
 					+ ChatColor.BLUE + "===");
 			// list
-			for (int i = ((historyPage.get(sender.getName()).intValue()) * config.limit); i < ((page
+			for (int i = ((historyPage.get(sender.getName()).intValue()) * config.limit); i < ((historyPage
 					.get(sender.getName()).intValue()) * config.limit)
 					+ config.limit; i++)
 			{
 				// Don't try to pull something beyond the bounds
 				if (i < array.length)
 				{
-					
+
 					sender.sendMessage(plugin.colorizeText(array[i]));
 				}
 				else
