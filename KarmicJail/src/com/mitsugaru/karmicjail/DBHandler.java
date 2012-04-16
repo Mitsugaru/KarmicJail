@@ -106,12 +106,12 @@ public class DBHandler
 						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, history TEXT NOT NULL);");
 			}
 			// Check inventory table
-			if (!mysql.checkTable(Table.INVENTORY.getName()))
+			if (!sqlite.checkTable(Table.INVENTORY.getName()))
 			{
 				plugin.getLogger().info(
 						KarmicJail.prefix + " Created inventory table");
 				// inventory table
-				mysql.createTable("CREATE TABLE "
+				sqlite.createTable("CREATE TABLE "
 						+ Table.INVENTORY.getName()
 						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT NOT NULL, durability TEXT NOT NULL, enchantments TEXT);");
 			}
