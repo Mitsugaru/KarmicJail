@@ -7,8 +7,7 @@
  */
 package com.mitsugaru.karmicjail.events;
 
-import com.mitsugaru.karmicjail.InventoryLogic;
-import com.mitsugaru.karmicjail.JailInventoryHolder;
+import com.mitsugaru.karmicjail.Commander;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -19,11 +18,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 //import org.bukkit.event.inventory.InventoryCloseEvent;
 //import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
@@ -40,24 +39,15 @@ public class KarmicJailListener implements Listener
 		this.config = plugin.getPluginConfig();
 	}
 	
-	//Sadly unused
-	/*public void inventoryOpen(final InventoryOpenEvent event)
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onPlayerMove(final PlayerMoveEvent event)
 	{
-		plugin.getLogger().info("inv open");
-		if(event.getInventory().getHolder() instanceof JailInventoryHolder)
+		if(Commander.inv.containsKey(event.getPlayer().getName()))
 		{
-			plugin.getLogger().info("our holder");
+			event.getPlayer().closeInventory();
+			Commander.inv.remove(event.getPlayer().getName());
 		}
 	}
-	
-	public void inventoryClose(final InventoryCloseEvent event)
-	{
-		plugin.getLogger().info("inv close");
-		if(event.getInventory().getHolder() instanceof JailInventoryHolder)
-		{
-			plugin.getLogger().info("our holder");
-		}
-	}*/
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)
@@ -155,6 +145,8 @@ public class KarmicJailListener implements Listener
 			plugin.getLogger().info(
 					"Quit Event for: " + event.getPlayer().getName());
 		}
+		//Remove viewer
+		Commander.inv.remove(event.getPlayer().getName());
 		plugin.stopTask(event.getPlayer().getName());
 	}
 

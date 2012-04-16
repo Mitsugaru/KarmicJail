@@ -30,11 +30,16 @@ public class InventoryLogic implements Listener
 			final int rawSlot = event.getRawSlot();
 			boolean inside = false;
 			boolean fromInventory = false;
-			boolean armor = false;
+			//boolean armor = false;
+			boolean invalid = false;
 			// TODO differentiate between regular inventory section and armor
-			// section
+			// section 36 -> 39
 			// and ignore the other sections
-			if (rawSlot >= 0 && rawSlot <= 44)
+			if(rawSlot < 0)
+			{
+				//Ignore
+			}
+			if (rawSlot >= 0 && rawSlot <= 35)
 			{
 				inside = true;
 				fromInventory = true;
@@ -42,6 +47,10 @@ public class InventoryLogic implements Listener
 			else if (rawSlot >= 45 && rawSlot <= 80)
 			{
 				inside = true;
+			}
+			else
+			{
+				invalid = true;
 			}
 			// They clicked inside, handle changes
 			if (inside)
@@ -240,22 +249,26 @@ public class InventoryLogic implements Listener
 						// shift click
 						if (event.isShiftClick())
 						{
-							if (event.isLeftClick())
+							event.setCancelled(true);
+							/*if (event.isLeftClick())
 							{
 								// Handle shift left click to inventory
 							}
 							else if (event.isRightClick())
 							{
 								// Handle right left click to inventory
-							}
+							}*/
 						}
-						event.setCancelled(true);
 					}
 				}
 				catch (NullPointerException e)
 				{
 					e.printStackTrace();
 				}
+			}
+			else if(invalid)
+			{
+				event.setCancelled(true);
 			}
 		}
 	}

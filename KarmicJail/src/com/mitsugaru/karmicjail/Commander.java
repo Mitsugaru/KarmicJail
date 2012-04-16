@@ -32,7 +32,7 @@ public class Commander implements CommandExecutor
 	private static final String bar = "======================";
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-	public static final Map<String, Inventory> inv = new HashMap<String, Inventory>();
+	public static final Map<String, JailInventoryHolder> inv = new HashMap<String, JailInventoryHolder>();
 
 	public Commander(KarmicJail plugin)
 	{
@@ -458,11 +458,11 @@ public class Commander implements CommandExecutor
 						if (JailLogic.playerIsJailed(name)
 								|| JailLogic.playerIsPendingJail(name))
 						{
-							// TODO implement
 							JailInventoryHolder holder = new JailInventoryHolder(plugin, name);
 							holder.setInventory(plugin.getServer()
 									.createInventory(holder, 45, name));
 							player.openInventory(holder.getInventory());
+							inv.put(player.getName(), holder);
 							sender.sendMessage(ChatColor.GREEN
 									+ KarmicJail.prefix + " Open inventory of "
 									+ ChatColor.AQUA + name);

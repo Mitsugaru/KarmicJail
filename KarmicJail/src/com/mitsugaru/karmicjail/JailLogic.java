@@ -7,9 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import lib.Mitsugaru.SQLibrary.Database.Query;
 
@@ -255,6 +257,27 @@ public class JailLogic
 		{
 			// Return previous groups
 			returnGroups(name);
+		}
+
+		// Remove viewers
+		final Set<String> viewList = new HashSet<String>();
+		for (Map.Entry<String, JailInventoryHolder> entry : Commander.inv
+				.entrySet())
+		{
+			if (entry.getValue().getTarget().equals(name))
+			{
+				final Player viewer = plugin.getServer().getPlayer(
+						entry.getKey());
+				if (viewer != null)
+				{
+					viewer.closeInventory();
+				}
+				viewList.add(entry.getKey());
+			}
+		}
+		for(String viewer : viewList)
+		{
+			Commander.inv.remove(viewer);
 		}
 
 		plugin.getCommander().removeFromCache(name);
