@@ -15,6 +15,7 @@ import lib.Mitsugaru.SQLibrary.Database.Query;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -256,9 +257,6 @@ public class JailLogic
 			returnGroups(name);
 		}
 
-		// Clear other columns
-		// TODO return inventory
-		database.resetPlayer(name);
 		plugin.getCommander().removeFromCache(name);
 		// Check if player is offline:
 		if (player == null)
@@ -269,74 +267,105 @@ public class JailLogic
 			return;
 		}
 
-		// Move player out of jail
-		if (config.unjailTeleport)
-		{
-			player.teleport(config.unjailLoc);
-		}
-		// Change status
-		setPlayerStatus(JailStatus.FREED, name);
-
-		// Remove task
-		if (KarmicJail.getJailThreads().containsKey(name))
-		{
-			int id = KarmicJail.getJailThreads().get(name).getId();
-			if (id != -1)
-			{
-				plugin.getServer().getScheduler().cancelTask(id);
-			}
-			KarmicJail.removeTask(name);
-		}
-		player.sendMessage(ChatColor.AQUA + "You have been released from jail!");
-		if (fromTempJail)
-		{
-			// Also notify jailer if they're online
-			Player jailer = plugin.getServer().getPlayer(getJailer(name));
-			if (jailer != null)
-			{
-				jailer.sendMessage(ChatColor.GOLD + player.getName()
-						+ ChatColor.AQUA + " auto-unjailed.");
-			}
-			// Notify sender
-			sender.sendMessage(ChatColor.GOLD + player.getName()
-					+ ChatColor.AQUA + " auto-unjailed.");
-		}
-		else
-		{
-			sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
-					+ " removed from jail.");
-		}
-		// Broadcast if necessary
-		if (config.broadcastUnjail)
-		{
-			// Setup broadcast string
-			final StringBuilder sb = new StringBuilder();
-			sb.append(ChatColor.AQUA + name);
-			if (fromTempJail)
-			{
-				sb.append(ChatColor.RED + " was auto-unjailed by ");
-			}
-			else
-			{
-				sb.append(ChatColor.RED + " was unjailed by ");
-			}
-			sb.append(ChatColor.GOLD + sender.getName());
-			// Broadcast
-			if (config.broadcastPerms)
-			{
-				plugin.getServer().broadcast(sb.toString(),
-						"KarmicJail.broadcast");
-			}
-			else
-			{
-				plugin.getServer().broadcastMessage(sb.toString());
-			}
-		}
+		freePlayer(sender, inName, fromTempJail);
 	}
 
 	public static void unjailPlayer(CommandSender sender, String name)
 	{
 		unjailPlayer(sender, name, false);
+	}
+
+	public static void freePlayer(CommandSender sender, String name)
+	{
+		freePlayer(sender, name, false);
+	}
+
+	public static void freePlayer(CommandSender sender, String inName,
+			boolean fromTempJail)
+	{
+		String name = getPlayerInDatabase(inName);
+		if (name == null)
+		{
+			name = inName;
+		}
+		// Grab player if on server
+		Player player = plugin.getServer().getPlayer(name);
+		if (player != null)
+		{
+			// Clear other columns
+			Map<Integer, ItemStack> items = database.getPlayerItems(name);
+			for (Map.Entry<Integer, ItemStack> item : items.entrySet())
+			{
+				player.getInventory().setItem(item.getKey().intValue(),
+						item.getValue());
+			}
+			database.resetPlayer(name);
+
+			// Move player out of jail
+			if (config.unjailTeleport)
+			{
+				player.teleport(config.unjailLoc);
+			}
+			// Change status
+			setPlayerStatus(JailStatus.FREED, name);
+
+			// Remove task
+			if (KarmicJail.getJailThreads().containsKey(name))
+			{
+				int id = KarmicJail.getJailThreads().get(name).getId();
+				if (id != -1)
+				{
+					plugin.getServer().getScheduler().cancelTask(id);
+				}
+				KarmicJail.removeTask(name);
+			}
+			player.sendMessage(ChatColor.AQUA
+					+ "You have been released from jail!");
+			if (fromTempJail)
+			{
+				// Also notify jailer if they're online
+				Player jailer = plugin.getServer().getPlayer(getJailer(name));
+				if (jailer != null)
+				{
+					jailer.sendMessage(ChatColor.GOLD + player.getName()
+							+ ChatColor.AQUA + " auto-unjailed.");
+				}
+				// Notify sender
+				sender.sendMessage(ChatColor.GOLD + player.getName()
+						+ ChatColor.AQUA + " auto-unjailed.");
+			}
+			else
+			{
+				sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA
+						+ " removed from jail.");
+			}
+			// Broadcast if necessary
+			if (config.broadcastUnjail)
+			{
+				// Setup broadcast string
+				final StringBuilder sb = new StringBuilder();
+				sb.append(ChatColor.AQUA + name);
+				if (fromTempJail)
+				{
+					sb.append(ChatColor.RED + " was auto-unjailed by ");
+				}
+				else
+				{
+					sb.append(ChatColor.RED + " was unjailed by ");
+				}
+				sb.append(ChatColor.GOLD + sender.getName());
+				// Broadcast
+				if (config.broadcastPerms)
+				{
+					plugin.getServer().broadcast(sb.toString(),
+							"KarmicJail.broadcast");
+				}
+				else
+				{
+					plugin.getServer().broadcastMessage(sb.toString());
+				}
+			}
+		}
 	}
 
 	/**
@@ -1172,8 +1201,12 @@ public class JailLogic
 					final ItemStack item = inventory.getItem(i);
 					if (item != null)
 					{
-						plugin.getLogger().info(item.toString() + " at " + i);
-						items.put(new Integer(i), item);
+						if (!item.getType().equals(Material.AIR))
+						{
+							plugin.getLogger().info(
+									item.toString() + " at " + i);
+							items.put(new Integer(i), item);
+						}
 					}
 				}
 				catch (ArrayIndexOutOfBoundsException a)
@@ -1185,27 +1218,16 @@ public class JailLogic
 					// Ignore
 				}
 			}
-			ItemStack[] armor = inv.getArmorContents();
-			for (int i = 0; i < armor.length; i++)
-			{
-				try
-				{
-					final ItemStack item = armor[i];
-					if (item != null)
-					{
-						plugin.getLogger().info(item.toString() + " at " + i);
-						items.put(new Integer(i + inv.getSize()), item);
-					}
-				}
-				catch (ArrayIndexOutOfBoundsException a)
-				{
-					// Ignore
-				}
-				catch (NullPointerException n)
-				{
-					// Ignore
-				}
-			}
+			// TODO implement
+			/*
+			 * ItemStack[] armor = inv.getArmorContents(); for (int i = 0; i <
+			 * armor.length; i++) { try { final ItemStack item = armor[i]; if
+			 * (item != null) { if (!item.getType().equals(Material.AIR)) {
+			 * plugin.getLogger().info( item.toString() + " at " + i);
+			 * items.put(new Integer(i + inv.getSize()), item); } } } catch
+			 * (ArrayIndexOutOfBoundsException a) { // Ignore } catch
+			 * (NullPointerException n) { // Ignore } }
+			 */
 			if (database.setPlayerItems(playername, items))
 			{
 				// clear inventory
@@ -1218,7 +1240,7 @@ public class JailLogic
 				}
 				catch (ArrayIndexOutOfBoundsException e)
 				{
-					//ignore again
+					// ignore again
 				}
 			}
 		}

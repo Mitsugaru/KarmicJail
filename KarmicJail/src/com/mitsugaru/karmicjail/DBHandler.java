@@ -336,7 +336,8 @@ public class DBHandler
 					+ " SET time='-1',jailer='',date='',reason='' WHERE id='"
 					+ id + "';");
 			// Delete inventory table entries of their id
-			standardQuery("DELETE FROM " + Table.INVENTORY.getName() + " WHERE id='" + id + "';");
+			standardQuery("DELETE FROM " + Table.INVENTORY.getName()
+					+ " WHERE id='" + id + "';");
 		}
 		else
 		{
@@ -702,25 +703,31 @@ public class DBHandler
 								Field.INV_ENCHANT.getColumnName());
 						if (!query.getResult().wasNull())
 						{
-							try
+							if (enchantments.contains("i")
+									|| enchantments.contains("v"))
 							{
-								String[] cut = enchantments.split("i");
-								for (int s = 0; s < cut.length; s++)
+								try
 								{
-									String[] cutter = cut[s].split("v");
-									EnchantmentWrapper e = new EnchantmentWrapper(
-											Integer.parseInt(cutter[0]));
-									add.addUnsafeEnchantment(
-											e.getEnchantment(),
-											Integer.parseInt(cutter[1]));
+									String[] cut = enchantments.split("i");
+									for (int s = 0; s < cut.length; s++)
+									{
+										String[] cutter = cut[s].split("v");
+										EnchantmentWrapper e = new EnchantmentWrapper(
+												Integer.parseInt(cutter[0]));
+										add.addUnsafeEnchantment(
+												e.getEnchantment(),
+												Integer.parseInt(cutter[1]));
+									}
+								}
+								catch (ArrayIndexOutOfBoundsException a)
+								{
+									// something went wrong
 								}
 							}
-							catch (ArrayIndexOutOfBoundsException a)
-							{
-								// something went wrong
-							}
 						}
-						items.put(new Integer(query.getResult().getInt(Field.INV_SLOT.getColumnName())), add);
+						items.put(
+								new Integer(query.getResult().getInt(
+										Field.INV_SLOT.getColumnName())), add);
 					} while (query.getResult().next());
 				}
 				query.closeQuery();

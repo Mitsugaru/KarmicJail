@@ -13,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+@Deprecated
 public class JailInventory implements Inventory
 {
 	KarmicJail plugin;
@@ -47,13 +48,12 @@ public class JailInventory implements Inventory
 	@Override
 	public void setItem(int index, ItemStack item)
 	{
-		plugin.getLogger().info("setItem(index, item)");
+		plugin.getLogger().info("setItem(" + index +", " + item.toString() + ")");
 		if (index <= 0 && index >= 44)
 		{
 			// What happens to old item?
 			storage[index] = item;
 		}
-		plugin.getLogger().info("setItem()");
 	}
 
 	@Override

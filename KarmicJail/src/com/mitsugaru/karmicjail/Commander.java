@@ -16,7 +16,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -459,11 +458,10 @@ public class Commander implements CommandExecutor
 								|| JailLogic.playerIsPendingJail(name))
 						{
 							// TODO implement
-							final Inventory i = plugin.getServer()
-									.createInventory(
-											new JailInventoryHolder(plugin,
-													name), 45);
-							player.openInventory(i);
+							JailInventoryHolder holder = new JailInventoryHolder(plugin, name);
+							holder.setInventory(plugin.getServer()
+									.createInventory(holder, 45, name));
+							player.openInventory(holder.getInventory());
 							sender.sendMessage(ChatColor.GREEN
 									+ KarmicJail.prefix + " Open inventory of "
 									+ ChatColor.AQUA + name);

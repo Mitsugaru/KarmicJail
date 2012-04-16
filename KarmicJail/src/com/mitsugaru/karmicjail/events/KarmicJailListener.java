@@ -8,6 +8,7 @@
 package com.mitsugaru.karmicjail.events;
 
 import com.mitsugaru.karmicjail.JailInventory;
+import com.mitsugaru.karmicjail.JailInventoryHolder;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -42,28 +43,24 @@ public class KarmicJailListener implements Listener
 	//TODO inventory open / close events for our custom inventory
 	public void inventoryManipulation(final InventoryClickEvent event)
 	{
-		if(event.getInventory() instanceof JailInventory)
-		{
-			plugin.getLogger().info("our inventory");
-		}
+		//Check if they're in our viewer list
 	}
 	
 	public void inventoryOpen(final InventoryOpenEvent event)
 	{
-		if(event.getInventory() instanceof JailInventory)
+		plugin.getLogger().info("inv open");
+		if(event.getInventory().getHolder() instanceof JailInventoryHolder)
 		{
-			JailInventory inv = (JailInventory) event.getInventory();
-			inv.onOpen(event.getPlayer());
+			plugin.getLogger().info("our holder");
 		}
 	}
 	
 	public void inventoryClose(final InventoryCloseEvent event)
 	{
-		if(event.getInventory() instanceof JailInventory)
+		plugin.getLogger().info("inv close");
+		if(event.getInventory().getHolder() instanceof JailInventoryHolder)
 		{
-			//remove player from viewer
-			JailInventory inventory = (JailInventory) event.getInventory();
-			inventory.onClose(event.getPlayer());
+			plugin.getLogger().info("our holder");
 		}
 	}
 
@@ -128,7 +125,7 @@ public class KarmicJailListener implements Listener
 			}
 			case PENDINGFREE:
 			{
-				JailLogic.unjailPlayer(plugin.console, player.getName(), true);
+				JailLogic.freePlayer(plugin.console, player.getName());
 				JailLogic.teleportOut(player.getName());
 				player.sendMessage(ChatColor.GREEN + KarmicJail.prefix
 						+ ChatColor.AQUA + "You have been removed from jail.");

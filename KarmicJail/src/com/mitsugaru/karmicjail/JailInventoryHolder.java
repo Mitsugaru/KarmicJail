@@ -14,17 +14,23 @@ import org.bukkit.inventory.ItemStack;
  */
 public class JailInventoryHolder implements InventoryHolder
 {
-	KarmicJail plugin;
-	
-
-	JailInventory inventory;
+	private KarmicJail plugin;
+	private Inventory inventory;
+	private String target;
 
 	public JailInventoryHolder(KarmicJail plugin, String target)
 	{
-		inventory = new JailInventory(plugin, target);
-		//Import inventory from database
-		final Map<Integer, ItemStack> targetInv = plugin.getDatabaseHandler().getPlayerItems(target);
-		for(Map.Entry<Integer, ItemStack> entry : targetInv.entrySet())
+		this.plugin = plugin;
+		this.target = target;
+	}
+
+	public void setInventory(Inventory inventory)
+	{
+		this.inventory = inventory;
+		// Import inventory from database
+		final Map<Integer, ItemStack> targetInv = plugin.getDatabaseHandler()
+				.getPlayerItems(target);
+		for (Map.Entry<Integer, ItemStack> entry : targetInv.entrySet())
 		{
 			inventory.setItem(entry.getKey().intValue(), entry.getValue());
 		}
@@ -36,7 +42,5 @@ public class JailInventoryHolder implements InventoryHolder
 		// TODO Auto-generated method stub
 		return inventory;
 	}
-	
-	
 
 }
