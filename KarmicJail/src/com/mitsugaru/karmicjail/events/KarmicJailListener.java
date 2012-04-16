@@ -7,6 +7,7 @@
  */
 package com.mitsugaru.karmicjail.events;
 
+import com.mitsugaru.karmicjail.JailInventory;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -17,6 +18,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -36,6 +40,32 @@ public class KarmicJailListener implements Listener
 	}
 	
 	//TODO inventory open / close events for our custom inventory
+	public void inventoryManipulation(final InventoryClickEvent event)
+	{
+		if(event.getInventory() instanceof JailInventory)
+		{
+			plugin.getLogger().info("our inventory");
+		}
+	}
+	
+	public void inventoryOpen(final InventoryOpenEvent event)
+	{
+		if(event.getInventory() instanceof JailInventory)
+		{
+			JailInventory inv = (JailInventory) event.getInventory();
+			inv.onOpen(event.getPlayer());
+		}
+	}
+	
+	public void inventoryClose(final InventoryCloseEvent event)
+	{
+		if(event.getInventory() instanceof JailInventory)
+		{
+			//remove player from viewer
+			JailInventory inventory = (JailInventory) event.getInventory();
+			inventory.onClose(event.getPlayer());
+		}
+	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)
@@ -120,8 +150,11 @@ public class KarmicJailListener implements Listener
 			if (event.getPlayer().getName() != null
 					&& event.getPlayer().getLocation() != null)
 			{
+				if(!JailLogic.playerIsJailed(event.getPlayer().getName()))
+				{
 				JailLogic.setPlayerLastLocation(event.getPlayer().getName(),
 						event.getPlayer().getLocation());
+				}
 			}
 		}
 		//TODO record inventory

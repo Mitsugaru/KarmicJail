@@ -6,7 +6,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import lib.Mitsugaru.SQLibrary.Database.Query;
@@ -18,6 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import com.mitsugaru.karmicjail.DBHandler.Field;
 import com.mitsugaru.karmicjail.DBHandler.Table;
@@ -167,11 +170,12 @@ public class JailLogic
 				statement.setString(5, name);
 				statement.executeUpdate();
 				statement.close();
+				//TODO add to history with same information, colorize
 				sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 						+ " sent to jail.");
 				final PrisonerInfo pi = new PrisonerInfo(name,
 						sender.getName(), date, reason, duration, false);
-				plugin.getFakeCommander().addToCache(name, pi);
+				plugin.getCommander().addToCache(name, pi);
 				// Throw jail event
 				plugin.getServer().getPluginManager()
 						.callEvent(new JailEvent("JailEvent", pi));
@@ -255,7 +259,7 @@ public class JailLogic
 		// Clear other columns
 		// TODO return inventory
 		database.resetPlayer(name);
-		plugin.getFakeCommander().removeFromCache(name);
+		plugin.getCommander().removeFromCache(name);
 		// Check if player is offline:
 		if (player == null)
 		{
@@ -593,6 +597,7 @@ public class JailLogic
 			name = inName;
 		}
 		database.setField(Field.REASON, name, reason, 0, 0);
+		//TODO add to history
 		// broadcast
 		if (config.broadcastReason)
 		{
@@ -1152,13 +1157,63 @@ public class JailLogic
 		}
 		return location;
 	}
-	
+
 	public static void setPlayerInventory(String playername, Inventory inventory)
 	{
-		//TODO iterate through
-		for(int i = 0; i <= 44; i++)
+		Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
+		if (inventory instanceof PlayerInventory)
 		{
-			final ItemStack item = inventory.getItem(i);
+			PlayerInventory inv = (PlayerInventory) inventory;
+			// Get normal inventory
+			for (int i = 0; i < inventory.getSize(); i++)
+			{
+				try
+				{
+					final ItemStack item = inventory.getItem(i);
+					if (item != null)
+					{
+						plugin.getLogger().info(item.toString() + " at " + i);
+						items.put(new Integer(i), item);
+					}
+				}
+				catch (ArrayIndexOutOfBoundsException a)
+				{
+					// Ignore
+				}
+				catch (NullPointerException n)
+				{
+					// Ignore
+				}
+			}
+			ItemStack[] armor = inv.getArmorContents();
+			for (int i = 0; i < armor.length; i++)
+			{
+				try
+				{
+					final ItemStack item = armor[i];
+					if (item != null)
+					{
+						plugin.getLogger().info(item.toString() + " at " + i);
+						items.put(new Integer(i + inv.getSize()), item);
+					}
+				}
+				catch (ArrayIndexOutOfBoundsException a)
+				{
+					// Ignore
+				}
+				catch (NullPointerException n)
+				{
+					// Ignore
+				}
+			}
+			if (database.setPlayerItems(playername, items))
+			{
+				//clear inventory
+				inv.clear();
+				final ItemStack[] clear = new ItemStack[]{null, null, null, null, null};
+				inv.setArmorContents(clear);
+			}
 		}
+
 	}
 }

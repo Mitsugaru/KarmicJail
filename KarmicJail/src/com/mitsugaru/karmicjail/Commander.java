@@ -3,7 +3,9 @@ package com.mitsugaru.karmicjail;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import lib.Mitsugaru.SQLibrary.Database.Query;
@@ -11,9 +13,10 @@ import lib.Mitsugaru.SQLibrary.Database.Query;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Inventory;
 
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -21,7 +24,7 @@ import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 import com.mitsugaru.utils.Config;
 import com.mitsugaru.utils.PermCheck;
 
-public class FakeCommander
+public class Commander implements CommandExecutor
 {
 	private KarmicJail plugin;
 	private PermCheck perm;
@@ -31,13 +34,46 @@ public class FakeCommander
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
 	public static final Map<String, JailInventory> inv = new HashMap<String, JailInventory>();
 
-	public FakeCommander(KarmicJail plugin)
+	public Commander(KarmicJail plugin)
 	{
 		this.plugin = plugin;
 		this.perm = plugin.getPermissions();
 		this.config = plugin.getPluginConfig();
+		// Register listeners
+		plugin.getCommand("jail").setExecutor(this);
+		plugin.getCommand("j").setExecutor(this);
+		plugin.getCommand("unjail").setExecutor(this);
+		plugin.getCommand("setjail").setExecutor(this);
+		plugin.getCommand("setunjail").setExecutor(this);
+		plugin.getCommand("jailstatus").setExecutor(this);
+		plugin.getCommand("jstatus").setExecutor(this);
+		plugin.getCommand("jailhelp").setExecutor(this);
+		plugin.getCommand("jhelp").setExecutor(this);
+		plugin.getCommand("jaillist").setExecutor(this);
+		plugin.getCommand("jlist").setExecutor(this);
+		plugin.getCommand("jailprev").setExecutor(this);
+		plugin.getCommand("jprev").setExecutor(this);
+		plugin.getCommand("jailnext").setExecutor(this);
+		plugin.getCommand("jnext").setExecutor(this);
+		plugin.getCommand("jailmute").setExecutor(this);
+		plugin.getCommand("jmute").setExecutor(this);
+		plugin.getCommand("jailtime").setExecutor(this);
+		plugin.getCommand("jtime").setExecutor(this);
+		plugin.getCommand("jailreason").setExecutor(this);
+		plugin.getCommand("jreason").setExecutor(this);
+		plugin.getCommand("jlast").setExecutor(this);
+		plugin.getCommand("jaillast").setExecutor(this);
+		plugin.getCommand("jinv").setExecutor(this);
+		plugin.getCommand("jailinv").setExecutor(this);
+		plugin.getCommand("jwarp").setExecutor(this);
+		plugin.getCommand("jailwarp").setExecutor(this);
+		plugin.getCommand("jailversion").setExecutor(this);
+		plugin.getCommand("jversion").setExecutor(this);
+		plugin.getCommand("jailreload").setExecutor(this);
+		plugin.getCommand("jreload").setExecutor(this);
 	}
 
+	@Override
 	public boolean onCommand(CommandSender sender, Command cmd,
 			String commandLabel, String[] args)
 	{
@@ -64,7 +100,7 @@ public class FakeCommander
 				int time = 0;
 				StringBuilder sb = new StringBuilder();
 				String reason = "";
-				final Vector<String> players = new Vector<String>();
+				final Set<String> players = new HashSet<String>();
 				try
 				{
 					String first = plugin.expandName(args[0]);
@@ -343,40 +379,28 @@ public class FakeCommander
 					if (args.length > 0)
 					{
 						String name = plugin.expandName(args[0]);
-						if (JailLogic.playerIsJailed(name)
-								|| JailLogic.playerIsPendingJail(name))
+						final Location last = JailLogic
+								.getPlayerLastLocation(name);
+						if (last != null)
 						{
-							final Location last = JailLogic
-									.getPlayerLastLocation(name);
-							if (last != null)
-							{
-								player.teleport(last);
-								sender.sendMessage(ChatColor.GREEN
-										+ KarmicJail.prefix
-										+ " Warp to last location of "
-										+ ChatColor.AQUA + name);
-							}
-							else
-							{
-								sender.sendMessage(ChatColor.RED
-										+ KarmicJail.prefix
-										+ " No last location for "
-										+ ChatColor.AQUA + name);
-							}
+							player.teleport(last);
+							sender.sendMessage(ChatColor.GREEN
+									+ KarmicJail.prefix
+									+ " Warp to last location of "
+									+ ChatColor.AQUA + name);
 						}
 						else
 						{
 							sender.sendMessage(ChatColor.RED
-									+ KarmicJail.prefix + " Player '"
-									+ ChatColor.AQUA + name + ChatColor.RED
-									+ "' not jailed.");
+									+ KarmicJail.prefix
+									+ " No last location for " + ChatColor.AQUA
+									+ name);
 						}
 					}
 					else
 					{
 						sender.sendMessage(ChatColor.RED + "Missing name");
-						sender.sendMessage(ChatColor.RED
-								+ "/jlast <player>");
+						sender.sendMessage(ChatColor.RED + "/jlast <player>");
 					}
 				}
 				else
@@ -399,7 +423,7 @@ public class FakeCommander
 			{
 				if (sender instanceof Player)
 				{
-					//TODO check if they gave a player to warp to jail
+					// TODO check if they gave a player to warp to jail
 					final Player player = (Player) sender;
 					player.teleport(JailLogic.getJailLocation());
 				}
@@ -411,8 +435,7 @@ public class FakeCommander
 			}
 			com = true;
 		}
-		else if (commandLabel.equals("jailinv")
-				|| commandLabel.equals("jinv"))
+		else if (commandLabel.equals("jailinv") || commandLabel.equals("jinv"))
 		{
 			if (!perm.has(sender, "KarmicJail.inventory.view"))
 			{
@@ -426,17 +449,24 @@ public class FakeCommander
 					final Player player = (Player) sender;
 					if (args.length > 0)
 					{
-						String name = plugin.expandName(args[0]);
+						String temp = plugin.expandName(args[0]);
+						String name = JailLogic.getPlayerInDatabase(temp);
+						if (name == null)
+						{
+							name = temp;
+						}
 						if (JailLogic.playerIsJailed(name)
 								|| JailLogic.playerIsPendingJail(name))
 						{
-								sender.sendMessage(ChatColor.GREEN
-										+ KarmicJail.prefix
-										+ " Warp to last location of "
-										+ ChatColor.AQUA + name);
-								final Map<Integer, ItemStack> testItems = new HashMap<Integer, ItemStack>();
-								testItems.put(0, new ItemStack(4, 10));
-								player.openInventory(new JailInventory(plugin, player.getName(), testItems));
+							// TODO implement
+							final Inventory i = plugin.getServer()
+									.createInventory(
+											new JailInventoryHolder(plugin,
+													name), 45);
+							player.openInventory(i);
+							sender.sendMessage(ChatColor.GREEN
+									+ KarmicJail.prefix + " Open inventory of "
+									+ ChatColor.AQUA + name);
 						}
 						else
 						{
@@ -449,8 +479,7 @@ public class FakeCommander
 					else
 					{
 						sender.sendMessage(ChatColor.RED + "Missing name");
-						sender.sendMessage(ChatColor.RED
-								+ "/jinv <player>");
+						sender.sendMessage(ChatColor.RED + "/jinv <player>");
 					}
 				}
 				else

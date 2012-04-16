@@ -2,6 +2,12 @@ package com.mitsugaru.karmicjail;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.inventory.ItemStack;
 
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.utils.Config;
@@ -59,7 +65,7 @@ public class DBHandler
 				plugin.getLogger().info(
 						KarmicJail.prefix + " Created history table");
 				// history table
-				mysql.createTable("CREATE TABLE"
+				mysql.createTable("CREATE TABLE "
 						+ Table.HISTORY.getName()
 						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, history TEXT NOT NULL, PRIMARY KEY(row));");
 			}
@@ -71,7 +77,7 @@ public class DBHandler
 				// inventory table
 				mysql.createTable("CREATE TABLE "
 						+ Table.INVENTORY.getName()
-						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, slot INT NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT, durability TINYTEXT, enchantments TEXT, PRIMARY KEY(row));");
+						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, slot INT NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT NOT NULL, durability TINYTEXT NOT NULL, enchantments TEXT, PRIMARY KEY(row));");
 			}
 		}
 		else
@@ -95,7 +101,7 @@ public class DBHandler
 				plugin.getLogger().info(
 						KarmicJail.prefix + " Created history table");
 				// history table
-				sqlite.createTable("CREATE TABLE"
+				sqlite.createTable("CREATE TABLE "
 						+ Table.HISTORY.getName()
 						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, history TEXT NOT NULL);");
 			}
@@ -107,7 +113,7 @@ public class DBHandler
 				// inventory table
 				mysql.createTable("CREATE TABLE "
 						+ Table.INVENTORY.getName()
-						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT, durability TEXT, enchantments TEXT);");
+						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT NOT NULL, durability TEXT NOT NULL, enchantments TEXT);");
 			}
 		}
 	}
@@ -329,7 +335,8 @@ public class DBHandler
 			standardQuery("UPDATE " + Table.JAILED.getName()
 					+ " SET time='-1',jailer='',date='',reason='' WHERE id='"
 					+ id + "';");
-			// TODO drop inventory table entries of their id
+			// Delete inventory table entries of their id
+			standardQuery("DELETE FROM " + Table.INVENTORY.getName() + " WHERE id='" + id + "';");
 		}
 		else
 		{
@@ -594,6 +601,139 @@ public class DBHandler
 							+ playername + "'");
 		}
 		return out;
+	}
+
+	public boolean setPlayerItems(String playername,
+			Map<Integer, ItemStack> items)
+	{
+		int id = getPlayerId(playername);
+		if (id == -1)
+		{
+			// Unknown player?
+			JailLogic.addPlayerToDatabase(playername);
+		}
+		id = getPlayerId(playername);
+		if (id != -1)
+		{
+			try
+			{
+				PreparedStatement statement = prepare("INSERT INTO "
+						+ Table.INVENTORY.getName()
+						+ " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
+				for (Map.Entry<Integer, ItemStack> item : items.entrySet())
+				{
+					statement.setInt(1, id);
+					statement.setInt(2, item.getKey().intValue());
+					statement.setInt(3, item.getValue().getTypeId());
+					statement.setInt(4, item.getValue().getAmount());
+					statement.setString(5, ""
+							+ item.getValue().getData().getData());
+					statement
+							.setString(6, "" + item.getValue().getDurability());
+					if (!item.getValue().getEnchantments().isEmpty())
+					{
+						StringBuilder sb = new StringBuilder();
+						for (Map.Entry<Enchantment, Integer> e : item
+								.getValue().getEnchantments().entrySet())
+						{
+							sb.append(e.getKey().getId() + "v"
+									+ e.getValue().intValue() + "i");
+						}
+						// Remove trailing comma
+						sb.deleteCharAt(sb.length() - 1);
+						statement.setString(7, sb.toString());
+					}
+					else
+					{
+						statement.setString(7, "");
+					}
+					statement.executeUpdate();
+				}
+				statement.close();
+			}
+			catch (SQLException e)
+			{
+				plugin.getLogger().warning(
+						"SQL Exception on setting inventory for '" + playername
+								+ "'");
+				e.printStackTrace();
+				return false;
+			}
+			return true;
+		}
+		else
+		{
+			plugin.getLogger().warning(
+					"Could not set items for player '" + playername + "'");
+		}
+		return false;
+	}
+
+	public Map<Integer, ItemStack> getPlayerItems(String playername)
+	{
+		Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
+		int id = getPlayerId(playername);
+		if (id == -1)
+		{
+			// Unknown player?
+			JailLogic.addPlayerToDatabase(playername);
+		}
+		id = getPlayerId(playername);
+		if (id != -1)
+		{
+			try
+			{
+				Query query = select("SELECT * FROM "
+						+ Table.INVENTORY.getName() + " WHERE id='" + id + "';");
+				if (query.getResult().next())
+				{
+					do
+					{
+						int itemid = query.getResult().getInt(
+								Field.INV_ITEM.getColumnName());
+						int amount = query.getResult().getInt(
+								Field.INV_AMOUNT.getColumnName());
+						byte data = query.getResult().getByte(
+								Field.INV_DATA.getColumnName());
+						short dur = query.getResult().getShort(
+								Field.INV_DURABILITY.getColumnName());
+						ItemStack add = new ItemStack(itemid, amount, dur, data);
+						String enchantments = query.getResult().getString(
+								Field.INV_ENCHANT.getColumnName());
+						if (!query.getResult().wasNull())
+						{
+							try
+							{
+								String[] cut = enchantments.split("i");
+								for (int s = 0; s < cut.length; s++)
+								{
+									String[] cutter = cut[s].split("v");
+									EnchantmentWrapper e = new EnchantmentWrapper(
+											Integer.parseInt(cutter[0]));
+									add.addUnsafeEnchantment(
+											e.getEnchantment(),
+											Integer.parseInt(cutter[1]));
+								}
+							}
+							catch (ArrayIndexOutOfBoundsException a)
+							{
+								// something went wrong
+							}
+						}
+						items.put(new Integer(query.getResult().getInt(Field.INV_SLOT.getColumnName())), add);
+					} while (query.getResult().next());
+				}
+				query.closeQuery();
+			}
+			catch (SQLException e)
+			{
+				plugin.getLogger().warning(
+						"SQL Exception on getting inventory for '" + playername
+								+ "'");
+				e.printStackTrace();
+			}
+		}
+		return items;
 	}
 
 	public enum Field

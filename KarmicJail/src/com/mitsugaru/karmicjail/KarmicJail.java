@@ -29,7 +29,7 @@ public class KarmicJail extends JavaPlugin {
 	public ConsoleCommandSender console;
 	private PermCheck perm;
 	private DBHandler database;
-	private FakeCommander fakeCommander;
+	private Commander commander;
 	private static final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 
 	@Override
@@ -66,7 +66,7 @@ public class KarmicJail extends JavaPlugin {
 		perm = new PermCheck(this);
 		
 		//Get commander
-		fakeCommander = new FakeCommander(this);
+		commander = new Commander(this);
 		
 		//Initialize logic
 		JailLogic.init(this);
@@ -78,13 +78,6 @@ public class KarmicJail extends JavaPlugin {
 		getLogger().info(
 				prefix + " " + this.getDescription().getName() + " v"
 						+ this.getDescription().getVersion() + " enabled.");
-	}
-	
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd,
-			String commandLabel, String[] args)
-	{
-		return fakeCommander.onCommand(sender, cmd, commandLabel, args);
 	}
 	
 	public PermCheck getPermissions()
@@ -183,9 +176,9 @@ public class KarmicJail extends JavaPlugin {
 		return config;
 	}
 	
-	public FakeCommander getFakeCommander()
+	public Commander getCommander()
 	{
-		return fakeCommander;
+		return commander;
 	}
 	
 	/**
