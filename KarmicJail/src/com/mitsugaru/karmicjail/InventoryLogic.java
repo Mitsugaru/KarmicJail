@@ -1,6 +1,7 @@
 package com.mitsugaru.karmicjail;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,7 +23,8 @@ public class InventoryLogic implements Listener
 		if (!event.isCancelled()
 				&& event.getInventory().getHolder() instanceof JailInventoryHolder)
 		{
-			if(plugin.getPluginConfig().modifyInventory)
+			final Player player = (Player) event.getWhoClicked();
+			if(!plugin.getPluginConfig().modifyInventory || !plugin.getPermissions().has(player, "KarmicJail.inventory.modify"))
 			{
 				event.setCancelled(true);
 				return;
@@ -30,7 +32,7 @@ public class InventoryLogic implements Listener
 			JailInventoryHolder holder = (JailInventoryHolder) event
 					.getInventory().getHolder();
 			final String target = holder.getTarget();
-			plugin.getLogger().info("raw slot: " + event.getRawSlot());
+			//plugin.getLogger().info("raw slot: " + event.getRawSlot());
 			// Determine if they clicked inside, and which half
 			final int rawSlot = event.getRawSlot();
 			boolean inside = false;

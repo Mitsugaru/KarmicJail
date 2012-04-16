@@ -100,7 +100,6 @@ public class KarmicJailListener implements Listener
 			{
 				JailLogic.setPlayerStatus(JailStatus.JAILED, player.getName());
 				jailPlayer(player);
-				// TODO throw inventory into database
 				break;
 			}
 			case JAILED:
@@ -149,6 +148,8 @@ public class KarmicJailListener implements Listener
 		}
 		// Remove viewer
 		Commander.inv.remove(event.getPlayer().getName());
+		// Remove history viewer
+		Commander.historyCache.remove(event.getPlayer().getName());
 		plugin.stopTask(event.getPlayer().getName());
 	}
 

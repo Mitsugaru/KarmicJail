@@ -118,7 +118,8 @@ public class JailLogic
 					// Move to jail
 					player.teleport(config.jailLoc);
 					// Set inventory
-					setPlayerInventory(name, player.getInventory(), config.clearInventory);
+					setPlayerInventory(name, player.getInventory(),
+							config.clearInventory);
 					// Set status to jailed
 					setPlayerStatus(JailStatus.JAILED, name);
 					// Notify player
@@ -173,7 +174,18 @@ public class JailLogic
 				statement.setString(5, name);
 				statement.executeUpdate();
 				statement.close();
-				// TODO add to history with same information, colorize
+				// Add to history with same information
+				StringBuilder sb = new StringBuilder();
+				sb.append(ChatColor.AQUA + name + ChatColor.RED
+						+ " was jailed on " + ChatColor.GREEN + date
+						+ ChatColor.RED + " by " + ChatColor.GOLD + name);
+				if (!reason.equals(""))
+				{
+					sb.append(ChatColor.RED + " for " + ChatColor.GRAY
+							+ plugin.colorizeText(reason));
+				}
+				database.addToHistory(name, sb.toString());
+				// Notify
 				sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA
 						+ " sent to jail.");
 				final PrisonerInfo pi = new PrisonerInfo(name,
@@ -186,7 +198,7 @@ public class JailLogic
 				if (config.broadcastJail)
 				{
 					// Setup broadcast string
-					final StringBuilder sb = new StringBuilder();
+					sb = new StringBuilder();
 					sb.append(ChatColor.AQUA + pi.name + ChatColor.RED
 							+ " was jailed on " + ChatColor.GREEN + pi.date
 							+ ChatColor.RED + " by " + ChatColor.GOLD
@@ -275,7 +287,7 @@ public class JailLogic
 				viewList.add(entry.getKey());
 			}
 		}
-		for(String viewer : viewList)
+		for (String viewer : viewList)
 		{
 			Commander.inv.remove(viewer);
 		}
@@ -319,8 +331,15 @@ public class JailLogic
 			Map<Integer, ItemStack> items = database.getPlayerItems(name);
 			for (Map.Entry<Integer, ItemStack> item : items.entrySet())
 			{
-				player.getInventory().setItem(item.getKey().intValue(),
-						item.getValue());
+				try
+				{
+					player.getInventory().setItem(item.getKey().intValue(),
+							item.getValue());
+				}
+				catch (ArrayIndexOutOfBoundsException e)
+				{
+					// Ignore
+				}
 			}
 			database.resetPlayer(name);
 
@@ -649,7 +668,13 @@ public class JailLogic
 			name = inName;
 		}
 		database.setField(Field.REASON, name, reason, 0, 0);
-		// TODO add to history
+		// Add to history
+		if (!reason.equals(""))
+		{
+			database.addToHistory(name, ChatColor.GOLD + "Reason changed for "
+					+ ChatColor.AQUA + name + ChatColor.RED + " to "
+					+ ChatColor.GRAY + plugin.colorizeText(reason));
+		}
 		// broadcast
 		if (config.broadcastReason)
 		{
@@ -1210,7 +1235,8 @@ public class JailLogic
 		return location;
 	}
 
-	public static void setPlayerInventory(String playername, Inventory inventory, boolean clear)
+	public static void setPlayerInventory(String playername,
+			Inventory inventory, boolean clear)
 	{
 		Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
 		if (inventory instanceof PlayerInventory)
@@ -1226,8 +1252,10 @@ public class JailLogic
 					{
 						if (!item.getType().equals(Material.AIR))
 						{
-							plugin.getLogger().info(
-									item.toString() + " at " + i);
+							/*
+							 * plugin.getLogger().info( item.toString() + " at "
+							 * + i);
+							 */
 							items.put(new Integer(i), item);
 						}
 					}

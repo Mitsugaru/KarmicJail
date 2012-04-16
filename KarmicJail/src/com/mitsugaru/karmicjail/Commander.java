@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -16,7 +17,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -32,6 +32,8 @@ public class Commander implements CommandExecutor
 	private static final String bar = "======================";
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
+	private final Map<String, Integer> historyPage = new HashMap<String, Integer>();
+	public static final Map<String, String> historyCache = new HashMap<String, String>();
 	public static final Map<String, JailInventoryHolder> inv = new HashMap<String, JailInventoryHolder>();
 
 	public Commander(KarmicJail plugin)
@@ -65,6 +67,8 @@ public class Commander implements CommandExecutor
 		plugin.getCommand("jaillast").setExecutor(this);
 		plugin.getCommand("jinv").setExecutor(this);
 		plugin.getCommand("jailinv").setExecutor(this);
+		plugin.getCommand("jhistory").setExecutor(this);
+		plugin.getCommand("jailhistory").setExecutor(this);
 		plugin.getCommand("jwarp").setExecutor(this);
 		plugin.getCommand("jailwarp").setExecutor(this);
 		plugin.getCommand("jailversion").setExecutor(this);
@@ -458,9 +462,21 @@ public class Commander implements CommandExecutor
 						if (JailLogic.playerIsJailed(name)
 								|| JailLogic.playerIsPendingJail(name))
 						{
-							JailInventoryHolder holder = new JailInventoryHolder(plugin, name);
-							holder.setInventory(plugin.getServer()
-									.createInventory(holder, 45, name));
+							JailInventoryHolder holder = null;
+							for (JailInventoryHolder h : inv.values())
+							{
+								if (h.getTarget().equals(name))
+								{
+									holder = h;
+									break;
+								}
+							}
+							if (holder == null)
+							{
+								holder = new JailInventoryHolder(plugin, name);
+								holder.setInventory(plugin.getServer()
+										.createInventory(holder, 45, name));
+							}
 							player.openInventory(holder.getInventory());
 							inv.put(player.getName(), holder);
 							sender.sendMessage(ChatColor.GREEN
@@ -485,6 +501,94 @@ public class Commander implements CommandExecutor
 				{
 					sender.sendMessage(ChatColor.RED
 							+ "Cannot use command as console.");
+				}
+			}
+			com = true;
+		}
+		else if (commandLabel.equals("jailhistory")
+				|| commandLabel.equals("jhistory"))
+		{
+			if (!perm.has(sender, "KarmicJail.inventory.view"))
+			{
+				sender.sendMessage(ChatColor.RED
+						+ "Lack Permission: KarmicJail.history.view");
+			}
+			else
+			{
+				if (args.length > 0)
+				{
+					String hcom = args[0];
+					if (hcom.equalsIgnoreCase("next"))
+					{
+						if (historyCache.containsKey(sender.getName()))
+						{
+							listHistory(sender, 1);
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED
+									+ "No previous record open");
+							sender.sendMessage(ChatColor.RED
+									+ "/jhistory <player>");
+						}
+					}
+					else if (hcom.equalsIgnoreCase("prev"))
+					{
+						if (historyCache.containsKey(sender.getName()))
+						{
+							listHistory(sender, -1);
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED
+									+ "No previous record open");
+							sender.sendMessage(ChatColor.RED
+									+ "/jhistory <player>");
+						}
+					}
+					else if (hcom.equalsIgnoreCase("view"))
+					{
+						String temp = plugin.expandName(args[1]);
+						String name = JailLogic.getPlayerInDatabase(temp);
+						if (name == null)
+						{
+							name = temp;
+						}
+						historyCache.put(sender.getName(), name);
+						listHistory(sender, 0);
+					}
+					else
+					{
+						try
+						{
+							// Attempt to parse argument for page number
+							int pageNum = Integer.parseInt(args[1]);
+							// Set current page to given number
+							historyPage.put(sender.getName(), pageNum - 1);
+							// Show page if possible
+							this.listJailed(sender, 0);
+						}
+						catch (NumberFormatException e)
+						{
+							sender.sendMessage(ChatColor.YELLOW
+									+ KarmicJail.prefix
+									+ " Invalid integer for page number");
+						}
+					}
+
+				}
+				else
+				{
+					if (historyCache.containsKey(sender.getName()))
+					{
+						listHistory(sender, 0);
+					}
+					else
+					{
+						sender.sendMessage(ChatColor.RED
+								+ "No previous record open");
+						sender.sendMessage(ChatColor.RED + "/jhistory <player>");
+					}
 				}
 			}
 			com = true;
@@ -749,6 +853,89 @@ public class Commander implements CommandExecutor
 		}
 		sender.sendMessage(ChatColor.GREEN + "/jailversion" + ChatColor.YELLOW
 				+ " : Plugin version and config info. Alias: /jversion");
+	}
+
+	private void listHistory(CommandSender sender, int pageAdjust)
+	{
+		final String temp = historyCache.get(sender.getName());
+		String name = JailLogic.getPlayerInDatabase(temp);
+		if (name == null)
+		{
+			name = temp;
+		}
+		final List<String> list = plugin.getDatabaseHandler().getPlayerHistory(
+				name);
+		if (list.isEmpty())
+		{
+			sender.sendMessage(ChatColor.RED + KarmicJail.prefix
+					+ " No history for " + ChatColor.AQUA + name);
+			historyCache.remove(sender.getName());
+			return;
+		}
+		if (!historyPage.containsKey(sender.getName()))
+		{
+			historyPage.put(sender.getName(), 0);
+		}
+		else
+		{
+			if (pageAdjust != 0)
+			{
+				int adj = page.get(sender.getName()).intValue() + pageAdjust;
+				page.put(sender.getName(), adj);
+			}
+		}
+		final String[] array = list.toArray(new String[0]);
+		boolean valid = true;
+		// Caluclate amount of pages
+		int num = array.length / 8;
+		double rem = (double) array.length % (double) config.limit;
+		if (rem != 0)
+		{
+			num++;
+		}
+		if (historyPage.get(sender.getName()).intValue() < 0)
+		{
+			// They tried to use /ks prev when they're on page 0
+			sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+					+ " Page does not exist");
+			// reset their current page back to 0
+			historyPage.put(sender.getName(), 0);
+			valid = false;
+		}
+		else if ((historyPage.get(sender.getName()).intValue()) * config.limit > array.length)
+		{
+			// They tried to use /ks next at the end of the list
+			sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+					+ " Page does not exist");
+			// Revert to last page
+			historyPage.put(sender.getName(), num - 1);
+			valid = false;
+		}
+		if (valid)
+		{
+			// Header with amount of pages
+			sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.AQUA
+					+ name + ChatColor.BLUE + "===" + ChatColor.GRAY
+					+ "Page: " + ((historyPage.get(sender.getName()).intValue()) + 1)
+					+ ChatColor.BLUE + " of " + ChatColor.GRAY + num
+					+ ChatColor.BLUE + "===");
+			// list
+			for (int i = ((historyPage.get(sender.getName()).intValue()) * config.limit); i < ((page
+					.get(sender.getName()).intValue()) * config.limit)
+					+ config.limit; i++)
+			{
+				// Don't try to pull something beyond the bounds
+				if (i < array.length)
+				{
+					
+					sender.sendMessage(plugin.colorizeText(array[i]));
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
 	}
 
 	/**

@@ -2,7 +2,6 @@ package com.mitsugaru.utils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,7 +53,7 @@ public class Config
 		defaults.put("unjail.y", 0);
 		defaults.put("unjail.z", 0);
 		defaults.put("unjail.teleport", true);
-		defaults.put("inventory.clearOnJail", false);
+		defaults.put("inventory.clearOnJail", true);
 		defaults.put("inventory.returnOnUnjail", true);
 		defaults.put("inventory.modify", true);
 		defaults.put("broadcast.jail", false);
@@ -118,7 +117,7 @@ public class Config
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		removeGroups = config.getBoolean("removegroups", true);
 		debugUnhandled = config.getBoolean("debug.unhandled", false);
-		clearInventory = config.getBoolean("inventory.clearOnJail", false);
+		clearInventory = config.getBoolean("inventory.clearOnJail", true);
 		returnInventory = config.getBoolean("inventory.returnOnUnjail", true);
 		modifyInventory = config.getBoolean("inventory.modify", true);
 		// Bounds check on the limit
@@ -162,7 +161,7 @@ public class Config
 				.getBoolean("broadcast.ignorePermission", false);
 		broadcastJoin = config.getBoolean("broadcast.onjoin", false);
 		removeGroups = config.getBoolean("removegroups", true);
-		clearInventory = config.getBoolean("inventory.clearOnJail", false);
+		clearInventory = config.getBoolean("inventory.clearOnJail", true);
 		returnInventory = config.getBoolean("inventory.returnOnUnjail", true);
 		modifyInventory = config.getBoolean("inventory.modify", true);
 		// Bounds check on the limit

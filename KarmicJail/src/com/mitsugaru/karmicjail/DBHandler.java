@@ -2,7 +2,9 @@ package com.mitsugaru.karmicjail;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.enchantments.Enchantment;
@@ -321,6 +323,72 @@ public class DBHandler
 		return id;
 	}
 
+	public List<String> getPlayerHistory(String name)
+	{
+		List<String> list = new ArrayList<String>();
+		int id = getPlayerId(name);
+		if (id == -1)
+		{
+			// Unknown player?
+			JailLogic.addPlayerToDatabase(name);
+			id = getPlayerId(name);
+		}
+		if (id != -1)
+		{
+			Query query = select("SELECT * FROM " + Table.HISTORY.getName()
+					+ " WHERE id='" + id + "';");
+			try
+			{
+				if (query.getResult().next())
+				{
+					do
+					{
+						list.add(query.getResult().getString(
+								Field.HISTORY.getColumnName()));
+					} while (query.getResult().next());
+				}
+				query.closeQuery();
+			}
+			catch (SQLException e)
+			{
+				plugin.getLogger().warning(
+						"SQL Exception on grabbing player history:" + name);
+				e.printStackTrace();
+			}
+		}
+		return list;
+	}
+
+	public void addToHistory(String name, String reason)
+	{
+		int id = getPlayerId(name);
+		if (id == -1)
+		{
+			// Unknown player?
+			JailLogic.addPlayerToDatabase(name);
+			id = getPlayerId(name);
+		}
+		if (id != -1)
+		{
+			try
+			{
+				final PreparedStatement statement = prepare("INSERT INTO "
+						+ Table.HISTORY.getName() + " (id,"
+						+ Field.HISTORY.getColumnName() + ") VALUES(?,?);");
+				statement.setInt(1, id);
+				statement.setString(2, reason);
+				statement.executeUpdate();
+				statement.close();
+			}
+			catch (SQLException e)
+			{
+				plugin.getLogger().warning(
+						"SQL Exception on inserting player history:" + name);
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public void resetPlayer(String name)
 	{
 		int id = getPlayerId(name);
@@ -328,8 +396,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(name);
+			id = getPlayerId(name);
 		}
-		id = getPlayerId(name);
 		if (id != -1)
 		{
 			standardQuery("UPDATE " + Table.JAILED.getName()
@@ -353,8 +421,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			try
@@ -432,8 +500,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			switch (field.getType())
@@ -492,8 +560,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			switch (field.getType())
@@ -552,8 +620,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			switch (field.getType())
@@ -612,8 +680,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			try
@@ -678,8 +746,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			try
@@ -756,8 +824,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			try
@@ -811,8 +879,8 @@ public class DBHandler
 		{
 			// Unknown player?
 			JailLogic.addPlayerToDatabase(playername);
+			id = getPlayerId(playername);
 		}
-		id = getPlayerId(playername);
 		if (id != -1)
 		{
 			standardQuery("DELETE FROM " + Table.INVENTORY.getName()
