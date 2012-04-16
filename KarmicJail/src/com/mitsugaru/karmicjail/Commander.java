@@ -528,7 +528,7 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailhistory")
 				|| commandLabel.equals("jhistory"))
 		{
-			if (!perm.has(sender, "KarmicJail.inventory.view"))
+			if (!perm.has(sender, "KarmicJail.history.view"))
 			{
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.history.view");
@@ -579,47 +579,55 @@ public class Commander implements CommandExecutor
 					}
 					else if (hcom.equalsIgnoreCase("add"))
 					{
-						String temp = plugin.expandName(args[1]);
-						String name = JailLogic.getPlayerInDatabase(temp);
-						if (name == null)
+						if (!perm.has(sender, "KarmicJail.history.add"))
 						{
-							name = temp;
-						}
-						final StringBuilder sb = new StringBuilder();
-						for (int i = 1; i < args.length; i++)
-						{
-							sb.append(args[i] + " ");
-						}
-						String reason = "";
-						if (sb.length() > 0)
-						{
-							// Remove all trailing whitespace
-							reason = sb.toString().replaceAll("\\s+$", "");
-							reason = ChatColor.GOLD + sender.getName() + ChatColor.BLUE + " - "
-									+ ChatColor.GRAY + reason;
-						}
-						if (!reason.equals(""))
-						{
-							plugin.getDatabaseHandler().addToHistory(name,
-									reason);
-							sender.sendMessage(ChatColor.GREEN
-									+ "Added comment '" + reason
-									+ ChatColor.GREEN + "' to "
-									+ ChatColor.AQUA + name);
+							sender.sendMessage(ChatColor.RED
+									+ "Lack Permission: KarmicJail.history.add");
 						}
 						else
 						{
-							sender.sendMessage(ChatColor.RED
-									+ KarmicJail.prefix
-									+ " Comment cannot be empty.");
+							String temp = plugin.expandName(args[1]);
+							String name = JailLogic.getPlayerInDatabase(temp);
+							if (name == null)
+							{
+								name = temp;
+							}
+							final StringBuilder sb = new StringBuilder();
+							for (int i = 1; i < args.length; i++)
+							{
+								sb.append(args[i] + " ");
+							}
+							String reason = "";
+							if (sb.length() > 0)
+							{
+								// Remove all trailing whitespace
+								reason = sb.toString().replaceAll("\\s+$", "");
+								reason = ChatColor.GOLD + sender.getName()
+										+ ChatColor.BLUE + " - "
+										+ ChatColor.GRAY + reason;
+							}
+							if (!reason.equals(""))
+							{
+								plugin.getDatabaseHandler().addToHistory(name,
+										reason);
+								sender.sendMessage(ChatColor.GREEN
+										+ "Added comment '" + reason
+										+ ChatColor.GREEN + "' to "
+										+ ChatColor.AQUA + name);
+							}
+							else
+							{
+								sender.sendMessage(ChatColor.RED
+										+ KarmicJail.prefix
+										+ " Comment cannot be empty.");
+							}
 						}
 					}
 					else
 					{
-						
-							sender.sendMessage(ChatColor.YELLOW
-									+ KarmicJail.prefix
-									+ " Invalid command.");
+
+						sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+								+ " Invalid history command.");
 					}
 
 				}

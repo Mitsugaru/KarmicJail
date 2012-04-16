@@ -171,6 +171,12 @@ permissions:
   KarmicJail.warp.last:
     description: Warp to last location
     default: op
+  KarmicJail.history.view:
+    description: View jail history
+    default: op
+  KarmicJail.history.add:
+    description: Add comment to jail history
+    default: op
   KarmicJail.jailstatus:
     description: Gives access to the jailtime command.
     default: true
@@ -191,3 +197,5 @@ permissions:
       KarmicJail.warp.last: true
       KarmicJail.inventory.view: true
       KarmicJail.inventory.modify: true
+      KarmicJail.history.view: true
+      KarmicJail.history.add: true
