@@ -19,7 +19,8 @@ import com.mitsugaru.karmicjail.events.KarmicJailListener;
 import com.mitsugaru.utils.Config;
 import com.mitsugaru.utils.PermCheck;
 
-public class KarmicJail extends JavaPlugin {
+public class KarmicJail extends JavaPlugin
+{
 	// Class Variables
 	public static final String prefix = "[KarmicJail]";
 	public static final long minutesToTicks = 1200;
@@ -31,14 +32,17 @@ public class KarmicJail extends JavaPlugin {
 	private static final Map<String, JailTask> threads = new HashMap<String, JailTask>();
 
 	@Override
-	public void onDisable() {
+	public void onDisable()
+	{
 		// Stop all running threads
 		getLogger().info(prefix + " Stopping all jail threads...");
-		for (JailTask task : threads.values()) {
+		for (JailTask task : threads.values())
+		{
 			task.stop();
 		}
 		// Disconnect from sql database
-		if (database.checkConnection()) {
+		if (database.checkConnection())
+		{
 			// Close connection
 			database.close();
 		}
@@ -48,7 +52,8 @@ public class KarmicJail extends JavaPlugin {
 	}
 
 	@Override
-	public void onEnable() {
+	public void onEnable()
+	{
 		// Get console:
 		console = this.getServer().getConsoleSender();
 
@@ -62,22 +67,24 @@ public class KarmicJail extends JavaPlugin {
 
 		// Get permissions plugin:
 		perm = new PermCheck(this);
-		
-		//Get commander
+
+		// Get commander
 		commander = new Commander(this);
-		
-		//Initialize logic
+
+		// Initialize logic
 		JailLogic.init(this);
 
-		// Setup listener
+		// Setup listeners
 		this.getServer().getPluginManager()
 				.registerEvents(new KarmicJailListener(this), this);
+		this.getServer().getPluginManager()
+				.registerEvents(new InventoryLogic(this), this);
 
 		getLogger().info(
 				prefix + " " + this.getDescription().getName() + " v"
 						+ this.getDescription().getVersion() + " enabled.");
 	}
-	
+
 	public PermCheck getPermissions()
 	{
 		return perm;
@@ -89,15 +96,18 @@ public class KarmicJail extends JavaPlugin {
 	 * @param minutes
 	 * @return String of readable minutes
 	 */
-	public String prettifyMinutes(int minutes) {
-		if (minutes < 1) {
+	public String prettifyMinutes(int minutes)
+	{
+		if (minutes < 1)
+		{
 			return "about less than a minute";
 		}
 		if (minutes == 1)
 			return "about one minute";
 		if (minutes < 60)
 			return "about " + minutes + " minutes";
-		if (minutes % 60 == 0) {
+		if (minutes % 60 == 0)
+		{
 			if (minutes / 60 == 1)
 				return "about one hour";
 			else
@@ -108,7 +118,8 @@ public class KarmicJail extends JavaPlugin {
 		return "about " + h + "h" + m + "m";
 	}
 
-	public DBHandler getDatabaseHandler() {
+	public DBHandler getDatabaseHandler()
+	{
 		return database;
 	}
 
@@ -118,15 +129,19 @@ public class KarmicJail extends JavaPlugin {
 	 * 
 	 * @author Frigid, edited by Raphfrk and petteyg359
 	 */
-	public String expandName(String Name) {
+	public String expandName(String Name)
+	{
 		int m = 0;
 		String Result = "";
-		for (int n = 0; n < this.getServer().getOnlinePlayers().length; n++) {
+		for (int n = 0; n < this.getServer().getOnlinePlayers().length; n++)
+		{
 			String str = this.getServer().getOnlinePlayers()[n].getName();
-			if (str.matches("(?i).*" + Name + ".*")) {
+			if (str.matches("(?i).*" + Name + ".*"))
+			{
 				m++;
 				Result = str;
-				if (m == 2) {
+				if (m == 2)
+				{
 					return null;
 				}
 			}
@@ -135,7 +150,8 @@ public class KarmicJail extends JavaPlugin {
 		}
 		if (m == 1)
 			return Result;
-		if (m > 1) {
+		if (m > 1)
+		{
 			return null;
 		}
 		return Name;
@@ -150,7 +166,8 @@ public class KarmicJail extends JavaPlugin {
 	 * @return String with appropriate Bukkit ChatColor in them
 	 * @author AmberK
 	 */
-	public String colorizeText(String string) {
+	public String colorizeText(String string)
+	{
 		string = string.replaceAll("&0", "" + ChatColor.BLACK);
 		string = string.replaceAll("&1", "" + ChatColor.DARK_BLUE);
 		string = string.replaceAll("&2", "" + ChatColor.DARK_GREEN);
@@ -170,78 +187,94 @@ public class KarmicJail extends JavaPlugin {
 		return string;
 	}
 
-	public Config getPluginConfig() {
+	public Config getPluginConfig()
+	{
 		return config;
 	}
-	
+
 	public Commander getCommander()
 	{
 		return commander;
 	}
-	
+
 	/**
 	 * Creates a new thread for a player to get auto-released
 	 * 
 	 * @param name
 	 *            of player
 	 */
-	public void addThread(String name, long time) {
+	public void addThread(String name, long time)
+	{
 		threads.put(name, new JailTask(this, name, time));
 	}
-	
+
 	/**
 	 * Removes a task
 	 * 
 	 * @param name
 	 */
-	public static void removeTask(String name) {
+	public static void removeTask(String name)
+	{
 		threads.remove(name);
 	}
-	
+
 	/**
 	 * Stops a player's timed task
 	 * 
 	 * @param name
 	 *            of player
 	 */
-	public boolean stopTask(String name) {
-		if (threads.containsKey(name)) {
-			if (config.debugLog && config.debugEvents) {
+	public boolean stopTask(String name)
+	{
+		if (threads.containsKey(name))
+		{
+			if (config.debugLog && config.debugEvents)
+			{
 				this.getLogger().info("Thread found for: " + name);
 			}
 			final boolean stop = threads.get(name).stop();
-			if (config.debugLog && config.debugEvents) {
-				if (stop) {
+			if (config.debugLog && config.debugEvents)
+			{
+				if (stop)
+				{
 					this.getLogger().info("Thread stopped for: " + name);
-				} else {
+				}
+				else
+				{
 					this.getLogger().warning("Thread NOT stopped for: " + name);
 				}
 			}
 			return stop;
-		} else {
-			if (config.debugLog && config.debugEvents) {
+		}
+		else
+		{
+			if (config.debugLog && config.debugEvents)
+			{
 				this.getLogger().warning("Thread NOT found for: " + name);
 			}
 		}
 		return false;
 	}
-	
+
 	public static Map<String, JailTask> getJailThreads()
 	{
 		return threads;
 	}
 
-	public enum JailStatus {
+	public enum JailStatus
+	{
 		JAILED, PENDINGJAIL, PENDINGFREE, FREED;
 	}
 
-	public static class PrisonerInfo {
+	public static class PrisonerInfo
+	{
 		public String name, jailer, date, reason;
 		public long time;
 		public boolean mute;
 
 		public PrisonerInfo(String n, String j, String d, String r, long t,
-				boolean m) {
+				boolean m)
+		{
 			name = n;
 			jailer = j;
 			date = d;
@@ -250,7 +283,8 @@ public class KarmicJail extends JavaPlugin {
 			mute = m;
 		}
 
-		public void updateTime(long t) {
+		public void updateTime(long t)
+		{
 			time = t;
 		}
 	}

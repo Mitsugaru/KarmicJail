@@ -743,6 +743,83 @@ public class DBHandler
 		return items;
 	}
 
+	public boolean setItem(String playername, int slot, ItemStack item)
+	{
+		return setItem(playername, slot, item, item.getAmount());
+	}
+
+	public boolean setItem(String playername, int slot, ItemStack item,
+			int amount)
+	{
+		int id = getPlayerId(playername);
+		if (id == -1)
+		{
+			// Unknown player?
+			JailLogic.addPlayerToDatabase(playername);
+		}
+		id = getPlayerId(playername);
+		if (id != -1)
+		{
+			try
+			{
+				PreparedStatement statement = prepare("INSERT INTO "
+						+ Table.INVENTORY.getName()
+						+ " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
+				statement.setInt(1, id);
+				statement.setInt(2, slot);
+				statement.setInt(3, item.getTypeId());
+				statement.setInt(4, amount);
+				statement.setString(5, "" + item.getData().getData());
+				statement.setString(6, "" + item.getDurability());
+				if (!item.getEnchantments().isEmpty())
+				{
+					StringBuilder sb = new StringBuilder();
+					for (Map.Entry<Enchantment, Integer> e : item
+							.getEnchantments().entrySet())
+					{
+						sb.append(e.getKey().getId() + "v"
+								+ e.getValue().intValue() + "i");
+					}
+					// Remove trailing comma
+					sb.deleteCharAt(sb.length() - 1);
+					statement.setString(7, sb.toString());
+				}
+				else
+				{
+					statement.setString(7, "");
+				}
+				statement.executeUpdate();
+				statement.close();
+				return true;
+			}
+			catch (SQLException e)
+			{
+				plugin.getLogger().warning(
+						"SQL Exception on setting inventory for '" + playername
+								+ "'");
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return false;
+	}
+
+	public void removeItem(String playername, int slot)
+	{
+		int id = getPlayerId(playername);
+		if (id == -1)
+		{
+			// Unknown player?
+			JailLogic.addPlayerToDatabase(playername);
+		}
+		id = getPlayerId(playername);
+		if (id != -1)
+		{
+			standardQuery("DELETE FROM " + Table.INVENTORY.getName()
+					+ " WHERE id='" + id + "' AND slot='" + slot + "';");
+		}
+	}
+
 	public enum Field
 	{
 		PLAYERNAME(Table.JAILED, "playername", Type.STRING), STATUS(

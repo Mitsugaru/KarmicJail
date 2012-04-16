@@ -16,6 +16,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
@@ -31,7 +32,7 @@ public class Commander implements CommandExecutor
 	private static final String bar = "======================";
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-	public static final Map<String, JailInventory> inv = new HashMap<String, JailInventory>();
+	public static final Map<String, Inventory> inv = new HashMap<String, Inventory>();
 
 	public Commander(KarmicJail plugin)
 	{

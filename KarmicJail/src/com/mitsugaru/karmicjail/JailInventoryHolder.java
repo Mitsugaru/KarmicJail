@@ -39,8 +39,11 @@ public class JailInventoryHolder implements InventoryHolder
 	@Override
 	public Inventory getInventory()
 	{
-		// TODO Auto-generated method stub
 		return inventory;
 	}
-
+	
+	public String getTarget()
+	{
+		return target;
+	}
 }
