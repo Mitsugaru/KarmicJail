@@ -99,12 +99,20 @@ public class KarmicJailListener implements Listener
 			case PENDINGJAIL:
 			{
 				JailLogic.setPlayerStatus(JailStatus.JAILED, player.getName());
-				jailPlayer(player);
+				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 120);
+				if(id == -1)
+				{
+					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
+				}
 				break;
 			}
 			case JAILED:
 			{
-				jailPlayer(player);
+				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 120);
+				if(id == -1)
+				{
+					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
+				}
 				break;
 			}
 			case PENDINGFREE:
@@ -119,12 +127,21 @@ public class KarmicJailListener implements Listener
 							"Unjailed '" + player.getName() + "' on login.");
 				}
 			}
+			default:
+			{
+				break;
+			}
 		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(final PlayerQuitEvent event)
 	{
+		if (config.debugLog && config.debugEvents)
+		{
+			plugin.getLogger().info(
+					"Quit Event for: " + event.getPlayer().getName());
+		}
 		// Record location
 		if (event.getPlayer() != null)
 		{
@@ -138,13 +155,11 @@ public class KarmicJailListener implements Listener
 									.getLocation());
 				}
 			}
-		}
-		JailLogic.setPlayerInventory(event.getPlayer().getName(), event
+			if(event.getPlayer().getInventory() != null)
+			{
+				JailLogic.setPlayerInventory(event.getPlayer().getName(), event
 				.getPlayer().getInventory(), false);
-		if (config.debugLog && config.debugEvents)
-		{
-			plugin.getLogger().info(
-					"Quit Event for: " + event.getPlayer().getName());
+			}
 		}
 		// Remove viewer
 		Commander.inv.remove(event.getPlayer().getName());
@@ -152,60 +167,72 @@ public class KarmicJailListener implements Listener
 		Commander.historyCache.remove(event.getPlayer().getName());
 		plugin.stopTask(event.getPlayer().getName());
 	}
-
-	private void jailPlayer(Player player)
+	
+	private class LoginJailTask implements Runnable
 	{
-		if (JailLogic.playerIsTempJailed(player.getName()))
+		private Player player;
+		
+		public LoginJailTask(Player player)
 		{
-			final long time = JailLogic.getPlayerTime(player.getName());
-			if (time > 0)
+			this.player = player;
+		}
+
+		@Override
+		public void run()
+		{
+			if (JailLogic.playerIsTempJailed(player.getName()))
 			{
-				final int minutes = (int) ((time / minutesToTicks));
-				player.sendMessage(ChatColor.RED + KarmicJail.prefix
-						+ ChatColor.AQUA + " You are jailed for "
-						+ plugin.prettifyMinutes(minutes) + ".");
-				plugin.addThread(player.getName(), time);
-				if (config.debugLog && config.debugEvents)
+				final long time = JailLogic.getPlayerTime(player.getName());
+				if (time > 0)
 				{
-					plugin.getLogger().info(
-							"Jailed '" + player.getName()
-									+ "' on login with time: "
-									+ plugin.prettifyMinutes(minutes));
+					final int minutes = (int) ((time / minutesToTicks));
+					player.sendMessage(ChatColor.RED + KarmicJail.prefix
+							+ ChatColor.AQUA + " You are jailed for "
+							+ plugin.prettifyMinutes(minutes) + ".");
+					plugin.addThread(player.getName(), time);
+					if (config.debugLog && config.debugEvents)
+					{
+						plugin.getLogger().info(
+								"Jailed '" + player.getName()
+										+ "' on login with time: "
+										+ plugin.prettifyMinutes(minutes));
+					}
 				}
-			}
-		}
-		else
-		{
-			player.sendMessage(ChatColor.RED + KarmicJail.prefix
-					+ ChatColor.AQUA + " You are jailed.");
-			if (config.debugLog && config.debugEvents)
-			{
-				plugin.getLogger().info(
-						"Jailed '" + player.getName() + "' on login.");
-			}
-		}
-		player.teleport(JailLogic.getJailLocation());
-		if (config.broadcastJoin)
-		{
-			final StringBuilder sb = new StringBuilder();
-			final String reason = JailLogic.getJailReason(player.getName());
-			sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA + " "
-					+ player.getName() + ChatColor.RED + " jailed");
-			if (!reason.equals(""))
-			{
-				sb.append(" for " + ChatColor.GRAY
-						+ plugin.colorizeText(reason));
-			}
-			if (config.broadcastPerms)
-			{
-				plugin.getServer().broadcast(sb.toString(),
-						"KarmicJail.broadcast");
 			}
 			else
 			{
-				plugin.getServer().broadcastMessage(sb.toString());
+				player.sendMessage(ChatColor.RED + KarmicJail.prefix
+						+ ChatColor.AQUA + " You are jailed.");
+				if (config.debugLog && config.debugEvents)
+				{
+					plugin.getLogger().info(
+							"Jailed '" + player.getName() + "' on login.");
+				}
+			}
+			player.teleport(JailLogic.getJailLocation());
+			if (config.broadcastJoin)
+			{
+				final StringBuilder sb = new StringBuilder();
+				final String reason = JailLogic.getJailReason(player.getName());
+				sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA + " "
+						+ player.getName() + ChatColor.RED + " jailed");
+				if (!reason.equals(""))
+				{
+					sb.append(" for " + ChatColor.GRAY
+							+ plugin.colorizeText(reason));
+				}
+				if (config.broadcastPerms)
+				{
+					plugin.getServer().broadcast(sb.toString(),
+							"KarmicJail.broadcast");
+				}
+				else
+				{
+					plugin.getServer().broadcastMessage(sb.toString());
+				}
 			}
 		}
+		
 	}
 
 }
