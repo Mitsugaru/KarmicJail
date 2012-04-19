@@ -39,15 +39,16 @@ public class KarmicJailListener implements Listener
 		this.config = plugin.getPluginConfig();
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	/*@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerMove(final PlayerMoveEvent event)
 	{
+		//No longer necessary
 		if (Commander.inv.containsKey(event.getPlayer().getName()))
 		{
 			event.getPlayer().closeInventory();
 			Commander.inv.remove(event.getPlayer().getName());
 		}
-	}
+	}*/
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)

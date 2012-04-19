@@ -41,7 +41,7 @@ public class Commander implements CommandExecutor
 		this.plugin = plugin;
 		this.perm = plugin.getPermissions();
 		this.config = plugin.getPluginConfig();
-		// Register listeners
+		// Register commands
 		plugin.getCommand("jail").setExecutor(this);
 		plugin.getCommand("j").setExecutor(this);
 		plugin.getCommand("unjail").setExecutor(this);
