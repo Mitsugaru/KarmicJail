@@ -100,7 +100,7 @@ public class KarmicJailListener implements Listener
 			case PENDINGJAIL:
 			{
 				JailLogic.setPlayerStatus(JailStatus.JAILED, player.getName());
-				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 120);
+				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 60);
 				if(id == -1)
 				{
 					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
@@ -109,7 +109,7 @@ public class KarmicJailListener implements Listener
 			}
 			case JAILED:
 			{
-				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 120);
+				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 60);
 				if(id == -1)
 				{
 					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
