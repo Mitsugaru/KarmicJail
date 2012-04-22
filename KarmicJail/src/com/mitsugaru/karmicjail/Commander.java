@@ -662,6 +662,12 @@ public class Commander implements CommandExecutor
 						sender.sendMessage(ChatColor.GREEN
 								+ "/jhistory"
 								+ ChatColor.AQUA
+								+ " page <#>"
+								+ ChatColor.YELLOW
+								+ " : Go to given page number of history");
+						sender.sendMessage(ChatColor.GREEN
+								+ "/jhistory"
+								+ ChatColor.AQUA
 								+ " add <player> <comment...>"
 								+ ChatColor.YELLOW
 								+ " : Add a comment to the history of a given player");
