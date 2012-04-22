@@ -185,7 +185,7 @@ public class JailLogic
 				StringBuilder sb = new StringBuilder();
 				sb.append(ChatColor.AQUA + name + ChatColor.RED
 						+ " was jailed on " + ChatColor.GREEN + date
-						+ ChatColor.RED + " by " + ChatColor.GOLD + name);
+						+ ChatColor.RED + " by " + ChatColor.GOLD + sender.getName());
 				if (!reason.equals(""))
 				{
 					sb.append(ChatColor.RED + " for " + ChatColor.GRAY

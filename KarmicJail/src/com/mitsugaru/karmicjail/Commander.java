@@ -591,7 +591,7 @@ public class Commander implements CommandExecutor
 								name = temp;
 							}
 							final StringBuilder sb = new StringBuilder();
-							for (int i = 1; i < args.length; i++)
+							for (int i = 2; i < args.length; i++)
 							{
 								sb.append(args[i] + " ");
 							}
@@ -618,14 +618,60 @@ public class Commander implements CommandExecutor
 								sender.sendMessage(ChatColor.RED
 										+ KarmicJail.prefix
 										+ " Comment cannot be empty.");
+								sender.sendMessage(ChatColor.RED
+										+ KarmicJail.prefix
+										+ " /jhistory add <player> <comment...>");
 							}
 						}
+					}
+					else if(hcom.equalsIgnoreCase("page"))
+					{
+						if (historyCache.containsKey(sender.getName()))
+						{
+							try
+							{
+								int page = (Integer.parseInt(args[1]) - 1);
+								historyPage.put(sender.getName(), page);
+								listHistory(sender, 0);
+							}
+							catch(NumberFormatException n)
+							{
+								sender.sendMessage(ChatColor.RED + KarmicJail.prefix + " Invalid page number given");
+							}
+							listHistory(sender, 0);
+						}
+						else
+						{
+							sender.sendMessage(ChatColor.RED
+									+ "No previous record open, try /jhistory help");
+						}
+					}
+					else if (hcom.equalsIgnoreCase("help"))
+					{
+						sender.sendMessage(ChatColor.GREEN + "/jhistory"
+								+ ChatColor.YELLOW
+								+ " : Show currently open history");
+						sender.sendMessage(ChatColor.GREEN + "/jhistory"
+								+ ChatColor.AQUA + " <prev | next>"
+								+ ChatColor.YELLOW
+								+ " : Go to previous or next page of history");
+						sender.sendMessage(ChatColor.GREEN + "/jhistory"
+								+ ChatColor.AQUA + " view <player>"
+								+ ChatColor.YELLOW
+								+ " : View history of given player");
+						sender.sendMessage(ChatColor.GREEN
+								+ "/jhistory"
+								+ ChatColor.AQUA
+								+ " add <player> <comment...>"
+								+ ChatColor.YELLOW
+								+ " : Add a comment to the history of a given player");
 					}
 					else
 					{
 
-						sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
-								+ " Invalid history command.");
+						sender.sendMessage(ChatColor.YELLOW
+								+ KarmicJail.prefix
+								+ " Invalid history command, use /jhistory help.");
 					}
 
 				}
@@ -638,8 +684,7 @@ public class Commander implements CommandExecutor
 					else
 					{
 						sender.sendMessage(ChatColor.RED
-								+ "No previous record open");
-						sender.sendMessage(ChatColor.RED + "/jhistory <player>");
+								+ "No previous record open, try /jhistory help");
 					}
 				}
 			}
@@ -865,14 +910,6 @@ public class Commander implements CommandExecutor
 					+ " : Jails player(s)");
 			sender.sendMessage(ChatColor.YELLOW
 					+ "Note - Names auto-complete if player is online. Alias: /j");
-		}
-		if (perm.has(sender, "KarmicJail.unjail"))
-		{
-			sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
-					+ " <player>" + ChatColor.YELLOW + " : Unjail player");
-		}
-		if (perm.has(sender, "KarmicJail.jail"))
-		{
 			sender.sendMessage(ChatColor.GREEN + "/jailtime" + ChatColor.AQUA
 					+ " <player> <time>" + ChatColor.YELLOW
 					+ " : Sets time for jailed player. Alias: /jtime");
@@ -880,6 +917,11 @@ public class Commander implements CommandExecutor
 					+ " <player> " + ChatColor.LIGHT_PURPLE + "[reason]"
 					+ ChatColor.YELLOW
 					+ " : Sets jail reason for player. Alias: /jreason");
+		}
+		if (perm.has(sender, "KarmicJail.unjail"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
+					+ " <player>" + ChatColor.YELLOW + " : Unjail player");
 		}
 		if (perm.has(sender, "KarmicJail.mute"))
 		{
@@ -896,6 +938,24 @@ public class Commander implements CommandExecutor
 					+ " : Previous page. Alias: /jprev");
 			sender.sendMessage(ChatColor.GREEN + "/jailnext" + ChatColor.YELLOW
 					+ " : Next page. Alias: /jnext");
+		}
+		if (perm.has(sender, "KarmicJail.history.view"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jailhistory"
+					+ ChatColor.LIGHT_PURPLE + " [args]" + ChatColor.YELLOW
+					+ " : Jail history command. Alias: /jhistory");
+		}
+		if (perm.has(sender, "KarmicJail.inventory.view"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jailinv" + ChatColor.AQUA
+					+ " <player>" + ChatColor.YELLOW
+					+ " : Open inventory of jailed player. Alias: /jinv");
+		}
+		if (perm.has(sender, "KarmicJail.warp.last"))
+		{
+			sender.sendMessage(ChatColor.GREEN + "/jaillast" + ChatColor.AQUA
+					+ " <player>" + ChatColor.YELLOW
+					+ " : Warp to last known postion of player");
 		}
 		if (perm.has(sender, "KarmicJail.setjail"))
 		{
