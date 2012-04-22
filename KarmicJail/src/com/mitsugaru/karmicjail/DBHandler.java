@@ -335,7 +335,7 @@ public class DBHandler
 		if (id != -1)
 		{
 			Query query = select("SELECT * FROM " + Table.HISTORY.getName()
-					+ " WHERE id='" + id + "';");
+					+ " WHERE id='" + id + "' ORDER BY row DESC;");
 			try
 			{
 				if (query.getResult().next())

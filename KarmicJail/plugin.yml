@@ -168,6 +168,9 @@ permissions:
   KarmicJail.inventory.modify:
     description: View inventory of jailed players
     default: op
+  KarmicJail.warp.joinignore:
+    description: Ignore jail warp on join, if enabled.
+    default: false
   KarmicJail.warp.jail:
     description: Warp to jail
     default: op

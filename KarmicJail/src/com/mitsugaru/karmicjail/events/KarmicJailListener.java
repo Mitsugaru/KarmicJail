@@ -100,7 +100,7 @@ public class KarmicJailListener implements Listener
 			case PENDINGJAIL:
 			{
 				JailLogic.setPlayerStatus(JailStatus.JAILED, player.getName());
-				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 60);
+				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 30);
 				if(id == -1)
 				{
 					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
@@ -109,7 +109,7 @@ public class KarmicJailListener implements Listener
 			}
 			case JAILED:
 			{
-				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 60);
+				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 30);
 				if(id == -1)
 				{
 					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
@@ -130,6 +130,18 @@ public class KarmicJailListener implements Listener
 			}
 			default:
 			{
+				if(config.warpAllOnJoin)
+				{
+					if(!plugin.getPermissions().has(player, "KarmicJail.warp.joinignore"))
+					{
+						//Warp them to jail location
+						int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginWarpTask(player), 30);
+						if(id == -1)
+						{
+							plugin.getLogger().severe("Could not warp player '" + player.getName() +  "' to jail on login!");
+						}
+					}
+				}
 				break;
 			}
 		}
@@ -167,6 +179,22 @@ public class KarmicJailListener implements Listener
 		// Remove history viewer
 		Commander.historyCache.remove(event.getPlayer().getName());
 		plugin.stopTask(event.getPlayer().getName());
+	}
+	
+	private class LoginWarpTask implements Runnable
+	{
+		private Player player;
+		
+		public LoginWarpTask(Player player)
+		{
+			this.player = player;
+		}
+		
+		@Override
+		public void run()
+		{
+			player.teleport(JailLogic.getJailLocation());
+		}
 	}
 	
 	private class LoginJailTask implements Runnable
