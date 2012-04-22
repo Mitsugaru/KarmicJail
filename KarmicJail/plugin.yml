@@ -201,6 +201,7 @@ permissions:
       KarmicJail.mute: true
       KarmicJail.broadcast: true
       KarmicJail.warp.jail: true
+      KarmicJail.warp.joinignore: true
       KarmicJail.warp.last: true
       KarmicJail.inventory.view: true
       KarmicJail.inventory.modify: true
