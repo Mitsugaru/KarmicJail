@@ -21,8 +21,6 @@ import org.bukkit.entity.Player;
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
-import com.mitsugaru.utils.Config;
-import com.mitsugaru.utils.PermCheck;
 
 public class Commander implements CommandExecutor
 {
@@ -650,12 +648,23 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailtime")
 				|| commandLabel.equals("jtime"))
 		{
+			boolean hasPerm = true;
 			if (!perm.has(sender, "KarmicJail.jail"))
 			{
 				sender.sendMessage(ChatColor.RED
 						+ "Lack Permission: KarmicJail.jail");
+				hasPerm = false;
 			}
-			else
+			if (config.timePerm)
+			{
+				if (!perm.has(sender, "KarmicJail.jailtime"))
+				{
+					sender.sendMessage(ChatColor.RED
+							+ "Lack Permission: KarmicJail.timed");
+					hasPerm = false;
+				}
+			}
+			if (hasPerm)
 			{
 				boolean done = false;
 				int time = 0;

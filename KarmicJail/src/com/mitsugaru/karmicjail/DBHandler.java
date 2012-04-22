@@ -12,7 +12,6 @@ import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
-import com.mitsugaru.utils.Config;
 
 import lib.Mitsugaru.SQLibrary.Database.Query;
 import lib.Mitsugaru.SQLibrary.MySQL;

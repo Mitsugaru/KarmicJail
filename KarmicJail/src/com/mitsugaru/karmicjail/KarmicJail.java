@@ -16,8 +16,6 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
-import com.mitsugaru.utils.Config;
-import com.mitsugaru.utils.PermCheck;
 
 public class KarmicJail extends JavaPlugin
 {

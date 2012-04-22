@@ -1,4 +1,4 @@
-package com.mitsugaru.utils;
+package com.mitsugaru.karmicjail;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -15,7 +15,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
-import com.mitsugaru.karmicjail.KarmicJail;
+
 
 public class Config
 {
@@ -25,7 +25,7 @@ public class Config
 	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL,
 			unjailTeleport, removeGroups, broadcastJail, broadcastUnjail,
 			broadcastReason, broadcastPerms, broadcastJoin, debugUnhandled,
-			clearInventory, returnInventory, modifyInventory;
+			clearInventory, returnInventory, modifyInventory, timePerm;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup;
 	public int limit;
@@ -40,6 +40,7 @@ public class Config
 		ConfigurationSection config = plugin.getConfig();
 		final Map<String, Object> defaults = new LinkedHashMap<String, Object>();
 		defaults.put("jailgroup", "Jailed");
+		defaults.put("timedJailNeedsPermission", false);
 		defaults.put("removegroups", true);
 		defaults.put("entrylimit", 10);
 		defaults.put("jail.world", plugin.getServer().getWorlds().get(0)
@@ -120,6 +121,7 @@ public class Config
 		clearInventory = config.getBoolean("inventory.clearOnJail", true);
 		returnInventory = config.getBoolean("inventory.returnOnUnjail", true);
 		modifyInventory = config.getBoolean("inventory.modify", true);
+		timePerm = config.getBoolean("timedJailNeedsPermission", false);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{
@@ -164,6 +166,7 @@ public class Config
 		clearInventory = config.getBoolean("inventory.clearOnJail", true);
 		returnInventory = config.getBoolean("inventory.returnOnUnjail", true);
 		modifyInventory = config.getBoolean("inventory.modify", true);
+		timePerm = config.getBoolean("timedJailNeedsPermission", false);
 		// Bounds check on the limit
 		if (limit <= 0 || limit > 16)
 		{

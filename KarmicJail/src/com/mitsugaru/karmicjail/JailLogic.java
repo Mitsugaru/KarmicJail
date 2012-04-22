@@ -30,8 +30,6 @@ import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 import com.mitsugaru.karmicjail.events.JailEvent;
-import com.mitsugaru.utils.Config;
-import com.mitsugaru.utils.PermCheck;
 import com.platymuus.bukkit.permissions.Group;
 import com.platymuus.bukkit.permissions.PermissionsPlugin;
 
@@ -66,7 +64,7 @@ public class JailLogic
 	 * @param boolean to determine of player has a timed release
 	 */
 	public static void jailPlayer(CommandSender sender, String inName,
-			String reason, int minutes, boolean timed)
+			String reason, int minutes, boolean timedCom)
 	{
 		// Check if player is already jailed:
 		if (playerIsJailed(inName) || playerIsPendingJail(inName))
@@ -101,6 +99,15 @@ public class JailLogic
 
 			// Grab duration
 			long duration = 0;
+			boolean timed = timedCom;
+			if(config.timePerm)
+			{
+				if(!perm.has(sender, "KarmicJail.timed"))
+				{
+					timed = false;
+					sender.sendMessage(ChatColor.RED + "Cannot put time on jailed player. Lack Permission: KarmicJail.timed");
+				}
+			}
 			if (timed)
 			{
 				duration = minutes * KarmicJail.minutesToTicks;

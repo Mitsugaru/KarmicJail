@@ -8,10 +8,10 @@
 package com.mitsugaru.karmicjail.events;
 
 import com.mitsugaru.karmicjail.Commander;
+import com.mitsugaru.karmicjail.Config;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
-import com.mitsugaru.utils.Config;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
