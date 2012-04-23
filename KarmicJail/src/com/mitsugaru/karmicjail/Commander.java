@@ -875,33 +875,34 @@ public class Commander implements CommandExecutor
 	public void showVersion(CommandSender sender)
 	{
 		// Version
-		sender.sendMessage(ChatColor.BLUE + bar + "==========");
-		sender.sendMessage(ChatColor.GREEN + "KarmicJail v"
-				+ plugin.getDescription().getVersion());
-		sender.sendMessage(ChatColor.GREEN + "Coded by Mitsugaru");
-		sender.sendMessage(ChatColor.AQUA
-				+ "Fork of imjake9's SimpleJail project");
-		sender.sendMessage(ChatColor.BLUE + "==============" + ChatColor.GRAY
-				+ "Config" + ChatColor.BLUE + "=============");
+		sender.sendMessage(ChatColor.BLUE + "==================" + ChatColor.GREEN + "KarmicJail v"
+				+ plugin.getDescription().getVersion() + ChatColor.BLUE + "=================");
+		sender.sendMessage(ChatColor.GREEN + "Coded by Mitsugaru"+ChatColor.WHITE
+				+ " - " + ChatColor.AQUA +"Fork of imjake9's SimpleJail project");
+		sender.sendMessage(ChatColor.WHITE
+				+ "Shout outs: " + ChatColor.GOLD + "@khanjal");
+		sender.sendMessage(ChatColor.BLUE + bar + ChatColor.GRAY
+				+ "Config" + ChatColor.BLUE + bar);
 		DecimalFormat twoDForm = new DecimalFormat("#.##");
 		sender.sendMessage(ChatColor.LIGHT_PURPLE + "Jail: " + ChatColor.GRAY
-				+ config.jailLoc.getWorld().getName() + ChatColor.BLUE + ":("
-				+ ChatColor.GOLD
+				+ config.jailLoc.getWorld().getName() + ChatColor.BLUE + " : ("
+				+ ChatColor.WHITE
 				+ Double.valueOf(twoDForm.format(config.jailLoc.getX()))
-				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ ChatColor.BLUE + ", " + ChatColor.WHITE
 				+ Double.valueOf(twoDForm.format(config.jailLoc.getY()))
-				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ ChatColor.BLUE + ", " + ChatColor.WHITE
 				+ Double.valueOf(twoDForm.format(config.jailLoc.getZ()))
 				+ ChatColor.BLUE + ")");
 		sender.sendMessage(ChatColor.LIGHT_PURPLE + "UnJail: " + ChatColor.GRAY
-				+ config.unjailLoc.getWorld().getName() + ChatColor.BLUE + ":("
-				+ ChatColor.GOLD
+				+ config.unjailLoc.getWorld().getName() + ChatColor.BLUE + " : ("
+				+ ChatColor.WHITE
 				+ Double.valueOf(twoDForm.format(config.unjailLoc.getX()))
-				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ ChatColor.BLUE + ", " + ChatColor.WHITE
 				+ Double.valueOf(twoDForm.format(config.unjailLoc.getY()))
-				+ ChatColor.BLUE + "," + ChatColor.GOLD
+				+ ChatColor.BLUE + ", " + ChatColor.WHITE
 				+ Double.valueOf(twoDForm.format(config.unjailLoc.getZ()))
 				+ ChatColor.BLUE + ")");
+		//TODO show other config options here too
 	}
 
 	public void showHelp(CommandSender sender)
