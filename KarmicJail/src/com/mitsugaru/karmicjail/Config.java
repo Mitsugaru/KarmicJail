@@ -39,6 +39,7 @@ public class Config
 		// Init config files:
 		ConfigurationSection config = plugin.getConfig();
 		final Map<String, Object> defaults = new LinkedHashMap<String, Object>();
+		//TODO player settings to put jailgroup and event cancelling (such as building/destroying)
 		defaults.put("jailgroup", "Jailed");
 		defaults.put("timedJailNeedsPermission", false);
 		defaults.put("removegroups", true);
