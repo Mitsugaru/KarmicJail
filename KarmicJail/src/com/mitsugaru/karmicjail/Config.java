@@ -22,7 +22,7 @@ public class Config
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
 	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL,
-			unjailTeleport, jailTeleport, removeGroups, broadcastJail,
+			unjailTeleport, jailTeleport, jailTeleportRespawn, removeGroups, broadcastJail,
 			broadcastUnjail, broadcastReason, broadcastPerms, broadcastJoin,
 			debugUnhandled, clearInventory, returnInventory, modifyInventory,
 			timePerm, warpAllOnJoin;
@@ -50,6 +50,7 @@ public class Config
 		defaults.put("jail.z", 0);
 		defaults.put("jail.warpAllOnJoin", false);
 		defaults.put("jail.teleport", true);
+		defaults.put("jail.teleportRespawn", true);
 		defaults.put("unjail.world", plugin.getServer().getWorlds().get(0)
 				.getName());
 		defaults.put("unjail.x", 0);
@@ -131,6 +132,7 @@ public class Config
 		debugUnhandled = config.getBoolean("debug.unhandled", false);
 		limit = config.getInt("entrylimit", 10);
 		jailTeleport = config.getBoolean("unjail.teleport", true);
+		jailTeleportRespawn = config.getBoolean("jail.teleportRespawn", true);
 		unjailTeleport = config.getBoolean("unjail.teleport", true);
 		broadcastJail = config.getBoolean("broadcast.jail", false);
 		broadcastUnjail = config.getBoolean("broadcast.unjail", false);

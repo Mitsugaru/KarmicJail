@@ -74,12 +74,16 @@ public class KarmicJailListener implements Listener
 
 		if (!JailLogic.playerIsJailed(player.getName()))
 			return;
-		if (config.debugLog && config.debugEvents)
+
+		if (config.jailTeleportRespawn)
 		{
-			plugin.getLogger().info(
-					"Respawned '" + player.getName() + "' to jail.");
+			event.setRespawnLocation(JailLogic.getJailLocation());
+			if (config.debugLog && config.debugEvents)
+			{
+				plugin.getLogger().info(
+						"Respawned '" + player.getName() + "' to jail.");
+			}
 		}
-		event.setRespawnLocation(JailLogic.getJailLocation());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
