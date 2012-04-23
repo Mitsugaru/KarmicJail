@@ -49,6 +49,7 @@ public class Config
 		defaults.put("jail.y", 0);
 		defaults.put("jail.z", 0);
 		defaults.put("jail.warpAllOnJoin", false);
+		//TODO separate this for login and command as well instead of both
 		defaults.put("jail.teleport", true);
 		defaults.put("jail.teleportRespawn", true);
 		defaults.put("unjail.world", plugin.getServer().getWorlds().get(0)
