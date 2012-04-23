@@ -22,7 +22,7 @@ import org.bukkit.event.Listener;
 // import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-//import org.bukkit.event.player.PlayerMoveEvent;
+// import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
@@ -39,16 +39,13 @@ public class KarmicJailListener implements Listener
 		this.config = plugin.getPluginConfig();
 	}
 
-	/*@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerMove(final PlayerMoveEvent event)
-	{
-		//No longer necessary
-		if (Commander.inv.containsKey(event.getPlayer().getName()))
-		{
-			event.getPlayer().closeInventory();
-			Commander.inv.remove(event.getPlayer().getName());
-		}
-	}*/
+	/*
+	 * @EventHandler(priority = EventPriority.MONITOR) public void
+	 * onPlayerMove(final PlayerMoveEvent event) { //No longer necessary if
+	 * (Commander.inv.containsKey(event.getPlayer().getName())) {
+	 * event.getPlayer().closeInventory();
+	 * Commander.inv.remove(event.getPlayer().getName()); } }
+	 */
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)
@@ -100,19 +97,31 @@ public class KarmicJailListener implements Listener
 			case PENDINGJAIL:
 			{
 				JailLogic.setPlayerStatus(JailStatus.JAILED, player.getName());
-				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 30);
-				if(id == -1)
+				int id = plugin
+						.getServer()
+						.getScheduler()
+						.scheduleSyncDelayedTask(plugin,
+								new LoginJailTask(player), 30);
+				if (id == -1)
 				{
-					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
+					plugin.getLogger().severe(
+							"Could not jail player '" + player.getName()
+									+ "' on login!");
 				}
 				break;
 			}
 			case JAILED:
 			{
-				int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(player), 30);
-				if(id == -1)
+				int id = plugin
+						.getServer()
+						.getScheduler()
+						.scheduleSyncDelayedTask(plugin,
+								new LoginJailTask(player), 30);
+				if (id == -1)
 				{
-					plugin.getLogger().severe("Could not jail player '" + player.getName() +  "' on login!");
+					plugin.getLogger().severe(
+							"Could not jail player '" + player.getName()
+									+ "' on login!");
 				}
 				break;
 			}
@@ -130,15 +139,23 @@ public class KarmicJailListener implements Listener
 			}
 			default:
 			{
-				if(config.warpAllOnJoin)
+				if (config.warpAllOnJoin)
 				{
-					if(!plugin.getPermissions().has(player, "KarmicJail.warp.joinignore"))
+					if (!plugin.getPermissions().has(player,
+							"KarmicJail.warp.joinignore"))
 					{
-						//Warp them to jail location
-						int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginWarpTask(player), 30);
-						if(id == -1)
+						// Warp them to jail location
+						int id = plugin
+								.getServer()
+								.getScheduler()
+								.scheduleSyncDelayedTask(plugin,
+										new LoginWarpTask(player), 30);
+						if (id == -1)
 						{
-							plugin.getLogger().severe("Could not warp player '" + player.getName() +  "' to jail on login!");
+							plugin.getLogger().severe(
+									"Could not warp player '"
+											+ player.getName()
+											+ "' to jail on login!");
 						}
 					}
 				}
@@ -168,10 +185,10 @@ public class KarmicJailListener implements Listener
 									.getLocation());
 				}
 			}
-			if(event.getPlayer().getInventory() != null)
+			if (event.getPlayer().getInventory() != null)
 			{
 				JailLogic.setPlayerInventory(event.getPlayer().getName(), event
-				.getPlayer().getInventory(), false);
+						.getPlayer().getInventory(), false);
 			}
 		}
 		// Remove viewer
@@ -180,27 +197,27 @@ public class KarmicJailListener implements Listener
 		Commander.historyCache.remove(event.getPlayer().getName());
 		plugin.stopTask(event.getPlayer().getName());
 	}
-	
+
 	private class LoginWarpTask implements Runnable
 	{
 		private Player player;
-		
+
 		public LoginWarpTask(Player player)
 		{
 			this.player = player;
 		}
-		
+
 		@Override
 		public void run()
 		{
 			player.teleport(JailLogic.getJailLocation());
 		}
 	}
-	
+
 	private class LoginJailTask implements Runnable
 	{
 		private Player player;
-		
+
 		public LoginJailTask(Player player)
 		{
 			this.player = player;
@@ -238,13 +255,16 @@ public class KarmicJailListener implements Listener
 							"Jailed '" + player.getName() + "' on login.");
 				}
 			}
-			player.teleport(JailLogic.getJailLocation());
+			if (config.jailTeleport)
+			{
+				player.teleport(JailLogic.getJailLocation());
+			}
 			if (config.broadcastJoin)
 			{
 				final StringBuilder sb = new StringBuilder();
 				final String reason = JailLogic.getJailReason(player.getName());
-				sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA + " "
-						+ player.getName() + ChatColor.RED + " jailed");
+				sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA
+						+ " " + player.getName() + ChatColor.RED + " jailed");
 				if (!reason.equals(""))
 				{
 					sb.append(" for " + ChatColor.GRAY
@@ -261,7 +281,7 @@ public class KarmicJailListener implements Listener
 				}
 			}
 		}
-		
+
 	}
 
 }

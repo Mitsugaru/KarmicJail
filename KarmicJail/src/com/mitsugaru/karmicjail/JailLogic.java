@@ -100,12 +100,13 @@ public class JailLogic
 			// Grab duration
 			long duration = 0;
 			boolean timed = timedCom;
-			if(config.timePerm)
+			if (config.timePerm)
 			{
-				if(!perm.has(sender, "KarmicJail.timed"))
+				if (!perm.has(sender, "KarmicJail.timed"))
 				{
 					timed = false;
-					sender.sendMessage(ChatColor.RED + "Cannot put time on jailed player. Lack Permission: KarmicJail.timed");
+					sender.sendMessage(ChatColor.RED
+							+ "Cannot put time on jailed player. Lack Permission: KarmicJail.timed");
 				}
 			}
 			if (timed)
@@ -123,7 +124,10 @@ public class JailLogic
 					// Set previous location
 					setPlayerLastLocation(name, player.getLocation());
 					// Move to jail
-					player.teleport(config.jailLoc);
+					if (config.jailTeleport)
+					{
+						player.teleport(config.jailLoc);
+					}
 					// Set inventory
 					setPlayerInventory(name, player.getInventory(),
 							config.clearInventory);
@@ -185,7 +189,8 @@ public class JailLogic
 				StringBuilder sb = new StringBuilder();
 				sb.append(ChatColor.AQUA + name + ChatColor.RED
 						+ " was jailed on " + ChatColor.GREEN + date
-						+ ChatColor.RED + " by " + ChatColor.GOLD + sender.getName());
+						+ ChatColor.RED + " by " + ChatColor.GOLD
+						+ sender.getName());
 				if (!reason.equals(""))
 				{
 					sb.append(ChatColor.RED + " for " + ChatColor.GRAY
