@@ -305,6 +305,7 @@ public class DBHandler
 		int id = -1;
 		try
 		{
+			//TODO make this a prepared statement
 			final Query query = select("SELECT * FROM "
 					+ Table.JAILED.getName() + " WHERE playername='"
 					+ playername + "';");
