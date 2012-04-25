@@ -339,18 +339,21 @@ public class JailLogic
 		Player player = plugin.getServer().getPlayer(name);
 		if (player != null)
 		{
-			//Return items if any
-			Map<Integer, ItemStack> items = database.getPlayerItems(name);
-			for (Map.Entry<Integer, ItemStack> item : items.entrySet())
+			// Return items if any
+			if (config.returnInventory)
 			{
-				try
+				Map<Integer, ItemStack> items = database.getPlayerItems(name);
+				for (Map.Entry<Integer, ItemStack> item : items.entrySet())
 				{
-					player.getInventory().setItem(item.getKey().intValue(),
-							item.getValue());
-				}
-				catch (ArrayIndexOutOfBoundsException e)
-				{
-					// Ignore
+					try
+					{
+						player.getInventory().setItem(item.getKey().intValue(),
+								item.getValue());
+					}
+					catch (ArrayIndexOutOfBoundsException e)
+					{
+						// Ignore
+					}
 				}
 			}
 			// Clear other columns
