@@ -452,18 +452,20 @@ public class DBHandler
 					{
 						statement.setInt(1, i);
 						execute = true;
+						break;
 					}
 					case DOUBLE:
 					{
 						statement.setDouble(1, d);
 						execute = true;
+						break;
 					}
 					default:
 					{
 						if (config.debugUnhandled)
 						{
 							plugin.getLogger().warning(
-									"Unhandled getStringField for field "
+									"Unhandled setField for field "
 											+ field);
 						}
 						break;
@@ -530,6 +532,7 @@ public class DBHandler
 										+ playername + "'");
 						e.printStackTrace();
 					}
+					break;
 				}
 				default:
 				{
@@ -590,6 +593,7 @@ public class DBHandler
 										+ playername + "'");
 						e.printStackTrace();
 					}
+					break;
 				}
 				default:
 				{
@@ -650,6 +654,7 @@ public class DBHandler
 										+ playername + "'");
 						e.printStackTrace();
 					}
+					break;
 				}
 				default:
 				{
@@ -865,7 +870,6 @@ public class DBHandler
 						"SQL Exception on setting inventory for '" + playername
 								+ "'");
 				e.printStackTrace();
-				return false;
 			}
 		}
 		return false;

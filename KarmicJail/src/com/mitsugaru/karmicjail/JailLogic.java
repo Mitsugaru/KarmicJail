@@ -339,7 +339,7 @@ public class JailLogic
 		Player player = plugin.getServer().getPlayer(name);
 		if (player != null)
 		{
-			// Clear other columns
+			//Return items if any
 			Map<Integer, ItemStack> items = database.getPlayerItems(name);
 			for (Map.Entry<Integer, ItemStack> item : items.entrySet())
 			{
@@ -353,6 +353,7 @@ public class JailLogic
 					// Ignore
 				}
 			}
+			// Clear other columns
 			database.resetPlayer(name);
 
 			// Move player out of jail
@@ -1008,7 +1009,7 @@ public class JailLogic
 					+ ChatColor.GREEN + date + ChatColor.RED + " by "
 					+ ChatColor.GOLD + jailer);
 		}
-		if (!reason.equals(""))
+		if (!reason.equals("UNKOWN"))
 		{
 			sb.append(ChatColor.RED + " for " + ChatColor.GRAY
 					+ plugin.colorizeText(reason));

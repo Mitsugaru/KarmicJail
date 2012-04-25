@@ -14,6 +14,7 @@ import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -132,9 +133,26 @@ public class KarmicJailListener implements Listener
 			case PENDINGFREE:
 			{
 				JailLogic.freePlayer(plugin.console, player.getName());
-				JailLogic.teleportOut(player.getName());
-				player.sendMessage(ChatColor.GREEN + KarmicJail.prefix
-						+ ChatColor.AQUA + "You have been removed from jail.");
+				// Warp them to unjail location
+				int id = plugin
+						.getServer()
+						.getScheduler()
+						.scheduleSyncDelayedTask(
+								plugin,
+								new LoginWarpTask(player, JailLogic
+										.getUnjailLocation()), 30);
+				if (id == -1)
+				{
+					plugin.getLogger().severe(
+							"Could not warp player '" + player.getName()
+									+ "' out jail on login!");
+				}
+				else
+				{
+					player.sendMessage(ChatColor.GREEN + KarmicJail.prefix
+							+ ChatColor.AQUA
+							+ "You have been removed from jail.");
+				}
 				if (config.debugLog && config.debugEvents)
 				{
 					plugin.getLogger().info(
@@ -152,8 +170,10 @@ public class KarmicJailListener implements Listener
 						int id = plugin
 								.getServer()
 								.getScheduler()
-								.scheduleSyncDelayedTask(plugin,
-										new LoginWarpTask(player), 30);
+								.scheduleSyncDelayedTask(
+										plugin,
+										new LoginWarpTask(player, JailLogic
+												.getJailLocation()), 30);
 						if (id == -1)
 						{
 							plugin.getLogger().severe(
@@ -205,16 +225,18 @@ public class KarmicJailListener implements Listener
 	private class LoginWarpTask implements Runnable
 	{
 		private Player player;
+		private Location location;
 
-		public LoginWarpTask(Player player)
+		public LoginWarpTask(Player player, Location location)
 		{
 			this.player = player;
+			this.location = location;
 		}
 
 		@Override
 		public void run()
 		{
-			player.teleport(JailLogic.getJailLocation());
+			player.teleport(location);
 		}
 	}
 
