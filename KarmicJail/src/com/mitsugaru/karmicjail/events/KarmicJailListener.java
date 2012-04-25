@@ -19,11 +19,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-// import org.bukkit.event.inventory.InventoryCloseEvent;
-// import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-// import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
@@ -39,14 +36,6 @@ public class KarmicJailListener implements Listener
 		this.plugin = plugin;
 		this.config = plugin.getPluginConfig();
 	}
-
-	/*
-	 * @EventHandler(priority = EventPriority.MONITOR) public void
-	 * onPlayerMove(final PlayerMoveEvent event) { //No longer necessary if
-	 * (Commander.inv.containsKey(event.getPlayer().getName())) {
-	 * event.getPlayer().closeInventory();
-	 * Commander.inv.remove(event.getPlayer().getName()); } }
-	 */
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)

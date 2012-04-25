@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.karmicjail.events;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -6,14 +6,33 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 
-public class InventoryLogic implements Listener
+import com.mitsugaru.karmicjail.Commander;
+import com.mitsugaru.karmicjail.JailInventoryHolder;
+import com.mitsugaru.karmicjail.KarmicJail;
+
+public class InventoryListener implements Listener
 {
 	private static KarmicJail plugin;
 
-	public InventoryLogic(KarmicJail plugin)
+	public InventoryListener(KarmicJail plugin)
 	{
-		InventoryLogic.plugin = plugin;
+		InventoryListener.plugin = plugin;
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerCloseJailInventory(final InventoryCloseEvent event)
+	{
+		if(event.getInventory().getHolder() instanceof JailInventoryHolder)
+		{
+			Commander.inv.remove(event.getPlayer().getName());
+			if (plugin.getPluginConfig().debugLog && plugin.getPluginConfig().debugEvents)
+			{
+				plugin.getLogger().info(
+						"'" + event.getPlayer().getName() + "' closed JailInventory view");
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL)

@@ -15,6 +15,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.mitsugaru.karmicjail.events.InventoryListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
 
 public class KarmicJail extends JavaPlugin
@@ -76,7 +77,7 @@ public class KarmicJail extends JavaPlugin
 		this.getServer().getPluginManager()
 				.registerEvents(new KarmicJailListener(this), this);
 		this.getServer().getPluginManager()
-				.registerEvents(new InventoryLogic(this), this);
+				.registerEvents(new InventoryListener(this), this);
 
 		getLogger().info(
 				prefix + " " + this.getDescription().getName() + " v"
