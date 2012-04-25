@@ -222,6 +222,8 @@ public class KarmicJail extends JavaPlugin
 	 * 
 	 * @param name
 	 *            of player
+	 * @return true if the player's task was stopped. If unsucessful or if
+	 *         player did not have a timed task, then it returns false.
 	 */
 	public boolean stopTask(String name)
 	{
