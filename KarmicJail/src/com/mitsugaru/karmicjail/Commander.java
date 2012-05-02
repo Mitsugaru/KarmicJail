@@ -566,6 +566,8 @@ public class Commander implements CommandExecutor
 					}
 					else if (hcom.equalsIgnoreCase("view"))
 					{
+						//TODO catch array index our of bounds
+						//IF exception, show current
 						String temp = plugin.expandName(args[1]);
 						String name = JailLogic.getPlayerInDatabase(temp);
 						if (name == null)
