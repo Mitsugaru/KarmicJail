@@ -59,19 +59,16 @@ public class KarmicJailListener implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerRespawn(final PlayerRespawnEvent event)
 	{
-
-		final Player player = event.getPlayer();
-
-		if (!JailLogic.playerIsJailed(player.getName()))
-			return;
-
-		if (config.jailTeleportRespawn)
+		//Grab name
+		final String name = event.getPlayer().getName();
+		//Check if they're in the cache
+		if (config.jailTeleportRespawn && JailLogic.playerCache.contains(name))
 		{
 			event.setRespawnLocation(JailLogic.getJailLocation());
 			if (config.debugLog && config.debugEvents)
 			{
 				plugin.getLogger().info(
-						"Respawned '" + player.getName() + "' to jail.");
+						"Respawned '" + name + "' to jail.");
 			}
 		}
 	}
@@ -188,20 +185,30 @@ public class KarmicJailListener implements Listener
 		// Record location
 		if (event.getPlayer() != null)
 		{
-			if (event.getPlayer().getName() != null
+			final String name = event.getPlayer().getName();
+			if (name != null
 					&& event.getPlayer().getLocation() != null)
 			{
-				if (!JailLogic.playerIsJailed(event.getPlayer().getName()))
+				if (!JailLogic.playerIsJailed(name))
 				{
 					JailLogic.setPlayerLastLocation(
-							event.getPlayer().getName(), event.getPlayer()
+							name, event.getPlayer()
 									.getLocation());
 				}
 			}
 			if (event.getPlayer().getInventory() != null)
 			{
-				JailLogic.setPlayerInventory(event.getPlayer().getName(), event
+				JailLogic.setPlayerInventory(name, event
 						.getPlayer().getInventory(), false);
+			}
+			//Remove from cache
+			try
+			{
+				JailLogic.playerCache.remove(name);
+			}
+			catch(Exception e)
+			{
+				//IGNORE
 			}
 		}
 		// Remove viewer
@@ -241,16 +248,20 @@ public class KarmicJailListener implements Listener
 		@Override
 		public void run()
 		{
-			if (JailLogic.playerIsTempJailed(player.getName()))
+			//Get name
+			final String playerName = player.getName();
+			//Add to cache
+			JailLogic.playerCache.add(playerName);
+			if (JailLogic.playerIsTempJailed(playerName))
 			{
-				final long time = JailLogic.getPlayerTime(player.getName());
+				final long time = JailLogic.getPlayerTime(playerName);
 				if (time > 0)
 				{
 					final int minutes = (int) ((time / minutesToTicks));
 					player.sendMessage(ChatColor.RED + KarmicJail.prefix
 							+ ChatColor.AQUA + " You are jailed for "
 							+ plugin.prettifyMinutes(minutes) + ".");
-					plugin.addThread(player.getName(), time);
+					plugin.addThread(playerName, time);
 					if (config.debugLog && config.debugEvents)
 					{
 						plugin.getLogger().info(
@@ -267,7 +278,7 @@ public class KarmicJailListener implements Listener
 				if (config.debugLog && config.debugEvents)
 				{
 					plugin.getLogger().info(
-							"Jailed '" + player.getName() + "' on login.");
+							"Jailed '" + playerName + "' on login.");
 				}
 			}
 			if (config.jailTeleport)
@@ -279,7 +290,7 @@ public class KarmicJailListener implements Listener
 				final StringBuilder sb = new StringBuilder();
 				final String reason = JailLogic.getJailReason(player.getName());
 				sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA
-						+ " " + player.getName() + ChatColor.RED + " jailed");
+						+ " " + playerName + ChatColor.RED + " jailed");
 				if (!reason.equals(""))
 				{
 					sb.append(" for " + ChatColor.GRAY

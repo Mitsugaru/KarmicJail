@@ -41,6 +41,7 @@ public class JailLogic
 	private static DBHandler database;
 	private final static DateFormat dateFormat = new SimpleDateFormat(
 			"MM-dd-yyyy 'at' HH:mm z");
+	public final static Set<String> playerCache = new HashSet<String>();
 
 	public static void init(KarmicJail plugin)
 	{
@@ -121,6 +122,8 @@ public class JailLogic
 			{
 				if (player.isOnline())
 				{
+					// Add to cache
+					playerCache.add(name);
 					// Set previous location
 					setPlayerLastLocation(name, player.getLocation());
 					// Move to jail
