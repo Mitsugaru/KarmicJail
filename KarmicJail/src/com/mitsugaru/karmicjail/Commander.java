@@ -566,6 +566,8 @@ public class Commander implements CommandExecutor
 					}
 					else if (hcom.equalsIgnoreCase("view"))
 					{
+						//TODO catch array index our of bounds
+						//IF exception, show current
 						String temp = plugin.expandName(args[1]);
 						String name = JailLogic.getPlayerInDatabase(temp);
 						if (name == null)
@@ -1081,6 +1083,7 @@ public class Commander implements CommandExecutor
 		// Update cache of jailed players
 		try
 		{
+			//TODO order by date
 			Query rs = plugin.getDatabaseHandler().select(
 					"SELECT * FROM " + Table.JAILED.getName()
 							+ " WHERE status='" + JailStatus.JAILED
