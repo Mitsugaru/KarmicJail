@@ -18,7 +18,7 @@ import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 
 public class Config
 {
-
+	//Class variables
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
 	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL,
@@ -30,6 +30,7 @@ public class Config
 	public String jailGroup;
 	public int limit;
 
+	//TODO configuration files per jail location
 	/**
 	 * Loads config from yaml file
 	 */
