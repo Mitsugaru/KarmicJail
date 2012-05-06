@@ -9,8 +9,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import com.mitsugaru.karmicjail.Commander;
-import com.mitsugaru.karmicjail.JailInventoryHolder;
 import com.mitsugaru.karmicjail.KarmicJail;
+import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 
 public class InventoryListener implements Listener
 {

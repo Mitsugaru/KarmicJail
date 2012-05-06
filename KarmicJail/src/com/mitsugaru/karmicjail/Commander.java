@@ -21,6 +21,8 @@ import org.bukkit.entity.Player;
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
+import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
+import com.mitsugaru.karmicjail.permissions.PermCheck;
 
 public class Commander implements CommandExecutor
 {

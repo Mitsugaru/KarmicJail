@@ -17,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.mitsugaru.karmicjail.events.InventoryListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
+import com.mitsugaru.karmicjail.permissions.PermCheck;
 
 public class KarmicJail extends JavaPlugin
 {

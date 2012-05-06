@@ -1,10 +1,12 @@
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.karmicjail.inventory;
 
 import java.util.Map;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+
+import com.mitsugaru.karmicjail.KarmicJail;
 
 /**
  * Displays a jailed user's inventory.

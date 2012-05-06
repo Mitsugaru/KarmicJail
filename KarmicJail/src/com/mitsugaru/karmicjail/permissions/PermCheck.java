@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.karmicjail.permissions;
 
 import net.milkbowl.vault.permission.Permission;
 
@@ -8,6 +8,8 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+
+import com.mitsugaru.karmicjail.KarmicJail;
 
 
 import ru.tehkode.permissions.PermissionGroup;
