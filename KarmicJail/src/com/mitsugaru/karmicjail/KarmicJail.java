@@ -167,6 +167,9 @@ public class KarmicJail extends JavaPlugin
 	 */
 	public String colorizeText(String string)
 	{
+		/**
+		 * Colors
+		 */
 		string = string.replaceAll("&0", "" + ChatColor.BLACK);
 		string = string.replaceAll("&1", "" + ChatColor.DARK_BLUE);
 		string = string.replaceAll("&2", "" + ChatColor.DARK_GREEN);
@@ -183,6 +186,15 @@ public class KarmicJail extends JavaPlugin
 		string = string.replaceAll("&d", "" + ChatColor.LIGHT_PURPLE);
 		string = string.replaceAll("&e", "" + ChatColor.YELLOW);
 		string = string.replaceAll("&f", "" + ChatColor.WHITE);
+		/**
+		 * Formatting
+		 */
+		string = string.replaceAll("&k", "" + ChatColor.MAGIC);
+		string = string.replaceAll("&l", "" + ChatColor.BOLD);
+		string = string.replaceAll("&m", "" + ChatColor.STRIKETHROUGH);
+		string = string.replaceAll("&n", "" + ChatColor.UNDERLINE);
+		string = string.replaceAll("&o", "" + ChatColor.ITALIC);
+		string = string.replaceAll("&r", "" + ChatColor.RESET);
 		return string;
 	}
 
