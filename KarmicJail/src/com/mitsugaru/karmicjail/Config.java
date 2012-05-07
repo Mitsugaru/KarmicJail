@@ -373,13 +373,16 @@ public class Config
 			}
 
 		}
-		if (ver < 0.423)
+		if (ver < 0.43)
 		{
 			// Update config
-			set("group.jail.group", jailGroup);
-			set("jailgroup", null);
-			set("group.removeOnJail", removeGroups);
-			set("removegroups", null);
+			plugin.getLogger().info("Updating config");
+			jailGroup = plugin.getConfig().getString("jailgroup", "Jailed");
+			plugin.getConfig().set("group.jail.group", jailGroup);
+			plugin.getConfig().set("jailgroup", null);
+			removeGroups = plugin.getConfig().getBoolean("removegroups", true);
+			plugin.getConfig().set("group.removeOnJail", removeGroups);
+			plugin.getConfig().set("removegroups", null);
 		}
 		// Update version number in config.yml
 		plugin.getConfig().set("version", plugin.getDescription().getVersion());
