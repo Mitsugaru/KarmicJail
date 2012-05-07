@@ -846,6 +846,11 @@ public class JailLogic
 		{
 			sb.deleteCharAt(sb.length() - 1);
 		}
+		if (config.debugGroups)
+		{
+			plugin.getLogger().info(
+					"Group string for '" + name + "': " + sb.toString());
+		}
 		database.setField(Field.GROUPS, name, sb.toString(), 0, 0);
 	}
 

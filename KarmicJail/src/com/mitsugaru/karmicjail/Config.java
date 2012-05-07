@@ -21,7 +21,7 @@ public class Config
 	//Class variables
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
-	public boolean useMySQL, debugLog, debugEvents, debugTime, importSQL,
+	public boolean useMySQL, debugLog, debugEvents, debugTime, debugGroups, importSQL,
 			unjailTeleport, jailTeleport, jailTeleportRespawn, removeGroups, broadcastJail,
 			broadcastUnjail, broadcastReason, broadcastPerms, broadcastJoin,
 			debugUnhandled, clearInventory, returnInventory, modifyInventory,
@@ -78,6 +78,7 @@ public class Config
 		defaults.put("mysql.import", false);
 		defaults.put("debug.logToConsole", false);
 		defaults.put("debug.events", false);
+		defaults.put("debug.groups", false);
 		defaults.put("debug.time", false);
 		defaults.put("debug.unhandled", false);
 		defaults.put("version", plugin.getDescription().getVersion());
@@ -131,6 +132,7 @@ public class Config
 		jailGroup = config.getString("jailgroup", "Jailed");
 		debugLog = config.getBoolean("debug.logToConsole", false);
 		debugEvents = config.getBoolean("debug.events", false);
+		debugGroups = config.getBoolean("debug.groups", false);
 		debugTime = config.getBoolean("debug.time", false);
 		debugUnhandled = config.getBoolean("debug.unhandled", false);
 		limit = config.getInt("entrylimit", 10);
