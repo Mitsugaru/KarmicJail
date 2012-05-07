@@ -13,9 +13,11 @@ import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.mitsugaru.karmicjail.events.InventoryListener;
+import com.mitsugaru.karmicjail.events.JailedListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 
@@ -45,10 +47,8 @@ public class KarmicJail extends JavaPlugin
 		{
 			// Close connection
 			database.close();
+			getLogger().info(prefix + " Disconnected from database.");
 		}
-		getLogger().info(
-				prefix + " " + this.getDescription().getName() + " v"
-						+ this.getDescription().getVersion() + " disabled.");
 	}
 
 	@Override
@@ -75,14 +75,10 @@ public class KarmicJail extends JavaPlugin
 		JailLogic.init(this);
 
 		// Setup listeners
-		this.getServer().getPluginManager()
-				.registerEvents(new KarmicJailListener(this), this);
-		this.getServer().getPluginManager()
-				.registerEvents(new InventoryListener(this), this);
-
-		getLogger().info(
-				prefix + " " + this.getDescription().getName() + " v"
-						+ this.getDescription().getVersion() + " enabled.");
+		final PluginManager pm = this.getServer().getPluginManager();
+		pm.registerEvents(new KarmicJailListener(this), this);
+		pm.registerEvents(new InventoryListener(this), this);
+		pm.registerEvents(new JailedListener(this), this);
 	}
 
 	public PermCheck getPermissions()

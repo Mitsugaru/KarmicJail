@@ -97,9 +97,11 @@ public class JailLogic
 				removePlayerGroups(name);
 			}
 			// Add to jail group
-			perm.playerAddGroup(config.jailLoc.getWorld().getName(), name,
-					config.jailGroup);
-
+			if (config.useJailGroup)
+			{
+				perm.playerAddGroup(config.jailLoc.getWorld().getName(), name,
+						config.jailGroup);
+			}
 			// Grab duration
 			long duration = 0;
 			boolean timed = timedCom;
@@ -280,9 +282,17 @@ public class JailLogic
 		// Grab player if on server
 		Player player = plugin.getServer().getPlayer(name);
 		// Remove jail group
-		perm.playerRemoveGroup(config.jailLoc.getWorld(), name,
-				config.jailGroup);
-		if (config.removeGroups)
+		if (config.useJailGroup)
+		{
+			perm.playerRemoveGroup(config.jailLoc.getWorld(), name,
+					config.jailGroup);
+		}
+		if (config.useUnjailGroup)
+		{
+			perm.playerAddGroup(config.jailLoc.getWorld().getName(), name,
+					config.unjailGroup);
+		}
+		if (config.returnGroups)
 		{
 			// Return previous groups
 			returnGroups(name);
@@ -308,7 +318,8 @@ public class JailLogic
 		{
 			Commander.inv.remove(viewer);
 		}
-
+		//Remove from cache
+		playerCache.remove(name);
 		plugin.getCommander().removeFromCache(name);
 		// Check if player is offline:
 		if (player == null)

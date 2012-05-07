@@ -1,0 +1,201 @@
+package com.mitsugaru.karmicjail.events;
+
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+
+import com.mitsugaru.karmicjail.Config;
+import com.mitsugaru.karmicjail.JailLogic;
+import com.mitsugaru.karmicjail.KarmicJail;
+
+public class JailedListener implements Listener
+{
+	//private KarmicJail plugin;
+	private Config config;
+
+	public JailedListener(KarmicJail plugin)
+	{
+		//this.plugin = plugin;
+		this.config = plugin.getPluginConfig();
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void chatValid(final PlayerChatEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyChat
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void commandValid(final PlayerCommandPreprocessEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyCommands
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void interactValid(final PlayerInteractEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyInteract
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void interactEntityValid(final PlayerInteractEntityEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyInteract
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void moveValid(final PlayerMoveEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyMove
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void blockPlaceValid(final BlockPlaceEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyBlockPlace
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void blockDestroyValid(final BlockBreakEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyBlockBreak
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void craftItemValid(final CraftItemEvent event)
+	{
+		if (!event.isCancelled() && event.getWhoClicked() != null)
+		{
+			if (config.denyItemCraft
+					&& JailLogic.playerCache.contains(event.getWhoClicked()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void enchantItemValid(final EnchantItemEvent event)
+	{
+		if (!event.isCancelled() && event.getEnchanter() != null)
+		{
+			if (config.denyItemEnchant
+					&& JailLogic.playerCache.contains(event.getEnchanter()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void itemPickupValid(final PlayerPickupItemEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyItemPickup
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void itemDropValid(final PlayerDropItemEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (config.denyItemDrop
+					&& JailLogic.playerCache.contains(event.getPlayer()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void inventoryClick(final InventoryClickEvent event)
+	{
+		if (!event.isCancelled() && event.getWhoClicked() != null)
+		{
+			if (config.denyInventory
+					&& JailLogic.playerCache.contains(event.getWhoClicked()
+							.getName()))
+			{
+				event.setCancelled(true);
+			}
+		}
+	}
+}

@@ -18,19 +18,22 @@ import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 
 public class Config
 {
-	//Class variables
+	// Class variables
 	private KarmicJail plugin;
 	public String host, port, database, user, password, tablePrefix;
-	public boolean useMySQL, debugLog, debugEvents, debugTime, debugGroups, importSQL,
-			unjailTeleport, jailTeleport, jailTeleportRespawn, removeGroups, broadcastJail,
-			broadcastUnjail, broadcastReason, broadcastPerms, broadcastJoin,
-			debugUnhandled, clearInventory, returnInventory, modifyInventory,
-			timePerm, warpAllOnJoin;
+	public boolean useMySQL, debugLog, debugEvents, debugTime, debugGroups,
+			importSQL, unjailTeleport, jailTeleport, jailTeleportRespawn,
+			removeGroups, returnGroups, broadcastJail, broadcastUnjail,
+			broadcastReason, broadcastPerms, broadcastJoin, debugUnhandled,
+			clearInventory, returnInventory, modifyInventory, timePerm,
+			warpAllOnJoin, useJailGroup, useUnjailGroup, denyBlockPlace,
+			denyBlockBreak, denyInteract, denyInventory, denyItemPickup,
+			denyItemDrop, denyItemCraft, denyItemEnchant, denyChat, denyCommands, denyMove;
 	public Location jailLoc, unjailLoc;
-	public String jailGroup;
+	public String jailGroup, unjailGroup;
 	public int limit;
 
-	//TODO configuration files per jail location
+	// TODO configuration files per jail location
 	/**
 	 * Loads config from yaml file
 	 */
@@ -40,18 +43,34 @@ public class Config
 		// Init config files:
 		ConfigurationSection config = plugin.getConfig();
 		final Map<String, Object> defaults = new LinkedHashMap<String, Object>();
-		//TODO player settings to put jailgroup and event cancelling (such as building/destroying)
-		defaults.put("jailgroup", "Jailed");
+		// TODO player settings to put jailgroup and event cancelling (such as
+		// building/destroying)
 		defaults.put("timedJailNeedsPermission", false);
-		defaults.put("removegroups", true);
 		defaults.put("entrylimit", 10);
+		defaults.put("deny.block.break", true);
+		defaults.put("deny.block.place", true);
+		defaults.put("deny.chat", false);
+		defaults.put("deny.commands", true);
+		defaults.put("deny.interact", true);
+		defaults.put("deny.inventory", false);
+		defaults.put("deny.item.craft", true);
+		defaults.put("deny.item.drop", true);
+		defaults.put("deny.item.enchant", true);
+		defaults.put("deny.item.pickup", true);
+		defaults.put("deny.move", false);
+		defaults.put("group.removeOnJail", true);
+		defaults.put("group.returnOnUnjail", true);
+		defaults.put("group.jail.group", "Jailed");
+		defaults.put("group.jail.use", true);
+		defaults.put("group.unjail.group", "Default");
+		defaults.put("group.unjail.use", false);
 		defaults.put("jail.world", plugin.getServer().getWorlds().get(0)
 				.getName());
 		defaults.put("jail.x", 0);
 		defaults.put("jail.y", 0);
 		defaults.put("jail.z", 0);
 		defaults.put("jail.warpAllOnJoin", false);
-		//TODO separate this for login and command as well instead of both
+		// TODO separate this for login and command as well instead of both
 		defaults.put("jail.teleport", true);
 		defaults.put("jail.teleportRespawn", true);
 		defaults.put("unjail.world", plugin.getServer().getWorlds().get(0)
@@ -129,7 +148,10 @@ public class Config
 				config.getString("unjail.world", plugin.getServer().getWorlds()
 						.get(0).getName())), config.getInt("unjail.x", 0),
 				config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
-		jailGroup = config.getString("jailgroup", "Jailed");
+		jailGroup = config.getString("group.jail.group", "Jailed");
+		useJailGroup = config.getBoolean("group.jail.use", true);
+		unjailGroup = config.getString("group.unjail.group", "Default");
+		useUnjailGroup = config.getBoolean("group.unjail.use", false);
 		debugLog = config.getBoolean("debug.logToConsole", false);
 		debugEvents = config.getBoolean("debug.events", false);
 		debugGroups = config.getBoolean("debug.groups", false);
@@ -145,12 +167,24 @@ public class Config
 		broadcastPerms = !config
 				.getBoolean("broadcast.ignorePermission", false);
 		broadcastJoin = config.getBoolean("broadcast.onjoin", false);
-		removeGroups = config.getBoolean("removegroups", true);
+		removeGroups = config.getBoolean("group.removeOnJail", true);
+		returnGroups = config.getBoolean("group.returnOnUnjail", true);
 		clearInventory = config.getBoolean("inventory.clearOnJail", true);
 		returnInventory = config.getBoolean("inventory.returnOnUnjail", true);
 		modifyInventory = config.getBoolean("inventory.modify", true);
 		timePerm = config.getBoolean("timedJailNeedsPermission", false);
 		warpAllOnJoin = config.getBoolean("jail.warpAllOnJoin", false);
+		denyBlockBreak = config.getBoolean("deny.block.break", true);
+		denyBlockPlace = config.getBoolean("deny.block.place", true);
+		denyChat = config.getBoolean("deny.chat", false);
+		denyCommands = config.getBoolean("deny.commands", true);
+		denyInteract = config.getBoolean("deny.interact", true);
+		denyInventory = config.getBoolean("deny.inventory", false);
+		denyItemCraft = config.getBoolean("deny.item.craft", true);
+		denyItemDrop = config.getBoolean("deny.item.drop", true);
+		denyItemEnchant = config.getBoolean("deny.item.enchant", true);
+		denyItemPickup = config.getBoolean("deny.item.pickup", true);
+		denyMove = config.getBoolean("deny.move", false);
 	}
 
 	private void boundsCheck()
@@ -338,6 +372,14 @@ public class Config
 				e.printStackTrace();
 			}
 
+		}
+		if (ver < 0.423)
+		{
+			// Update config
+			set("group.jail.group", jailGroup);
+			set("jailgroup", null);
+			set("group.removeOnJail", removeGroups);
+			set("removegroups", null);
 		}
 		// Update version number in config.yml
 		plugin.getConfig().set("version", plugin.getDescription().getVersion());
