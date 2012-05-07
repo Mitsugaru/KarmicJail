@@ -29,7 +29,7 @@ import com.mitsugaru.karmicjail.DBHandler.Field;
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
-import com.mitsugaru.karmicjail.events.JailEvent;
+import com.mitsugaru.karmicjail.events.KarmicJailEvent;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.platymuus.bukkit.permissions.Group;
@@ -212,7 +212,7 @@ public class JailLogic
 				plugin.getCommander().addToCache(name, pi);
 				// Throw jail event
 				plugin.getServer().getPluginManager()
-						.callEvent(new JailEvent("JailEvent", pi));
+						.callEvent(new KarmicJailEvent("JailEvent", pi));
 				// Broadcast if necessary
 				if (config.broadcastJail)
 				{

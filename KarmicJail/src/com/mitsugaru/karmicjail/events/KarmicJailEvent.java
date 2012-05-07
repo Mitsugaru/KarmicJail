@@ -5,12 +5,12 @@ import org.bukkit.event.HandlerList;
 
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 
-public class JailEvent extends Event {
+public class KarmicJailEvent extends Event {
 	private static final HandlerList handlers = new HandlerList();
 	private String name, date,jailer,reason;
 	private long duration;
 
-	public JailEvent(String event, PrisonerInfo pi)
+	public KarmicJailEvent(String event, PrisonerInfo pi)
 	{
 		super();
 		name = pi.name;
