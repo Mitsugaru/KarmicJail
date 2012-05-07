@@ -1,5 +1,7 @@
 package com.mitsugaru.karmicjail.events;
 
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,12 +24,12 @@ import com.mitsugaru.karmicjail.KarmicJail;
 
 public class JailedListener implements Listener
 {
-	//private KarmicJail plugin;
+	// private KarmicJail plugin;
 	private Config config;
 
 	public JailedListener(KarmicJail plugin)
 	{
-		//this.plugin = plugin;
+		// this.plugin = plugin;
 		this.config = plugin.getPluginConfig();
 	}
 
@@ -41,6 +43,7 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
@@ -55,10 +58,11 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void interactValid(final PlayerInteractEvent event)
 	{
@@ -69,10 +73,11 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void interactEntityValid(final PlayerInteractEntityEvent event)
 	{
@@ -83,10 +88,11 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void moveValid(final PlayerMoveEvent event)
 	{
@@ -97,10 +103,11 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void blockPlaceValid(final BlockPlaceEvent event)
 	{
@@ -111,10 +118,11 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void blockDestroyValid(final BlockBreakEvent event)
 	{
@@ -125,38 +133,43 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void craftItemValid(final CraftItemEvent event)
 	{
 		if (!event.isCancelled() && event.getWhoClicked() != null)
 		{
 			if (config.denyItemCraft
+					&& event.getWhoClicked() instanceof Player
 					&& JailLogic.playerCache.contains(event.getWhoClicked()
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage((Player) event.getWhoClicked());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void enchantItemValid(final EnchantItemEvent event)
 	{
 		if (!event.isCancelled() && event.getEnchanter() != null)
 		{
 			if (config.denyItemEnchant
+					&& event.getEnchanter() instanceof Player
 					&& JailLogic.playerCache.contains(event.getEnchanter()
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage((Player) event.getEnchanter());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void itemPickupValid(final PlayerPickupItemEvent event)
 	{
@@ -167,10 +180,11 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void itemDropValid(final PlayerDropItemEvent event)
 	{
@@ -181,21 +195,30 @@ public class JailedListener implements Listener
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage(event.getPlayer());
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void inventoryClick(final InventoryClickEvent event)
 	{
 		if (!event.isCancelled() && event.getWhoClicked() != null)
 		{
 			if (config.denyInventory
+					&& event.getWhoClicked() instanceof Player
 					&& JailLogic.playerCache.contains(event.getWhoClicked()
 							.getName()))
 			{
 				event.setCancelled(true);
+				sendDenyJailMessage((Player) event.getWhoClicked());
 			}
 		}
+	}
+
+	private void sendDenyJailMessage(Player player)
+	{
+		player.sendMessage(ChatColor.RED + KarmicJail.prefix
+				+ " Cannot do that while jailed.");
 	}
 }
