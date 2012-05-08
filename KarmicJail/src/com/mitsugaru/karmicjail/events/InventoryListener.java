@@ -329,7 +329,7 @@ public class InventoryListener implements Listener
 		}
 		catch (NullPointerException n)
 		{
-
+			//IGNORE
 		}
 	}
 }
