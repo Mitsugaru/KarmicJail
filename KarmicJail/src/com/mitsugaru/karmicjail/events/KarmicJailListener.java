@@ -40,15 +40,15 @@ public class KarmicJailListener implements Listener
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerChat(final PlayerChatEvent event)
 	{
-		final Player player = event.getPlayer();
-		if (JailLogic.playerIsJailed(player.getName()))
+		final String name = event.getPlayer().getName();
+		if (JailLogic.playerCache.contains(name))
 		{
-			if (JailLogic.playerIsMuted(player.getName()))
+			if (JailLogic.playerIsMuted(name))
 			{
 				if (config.debugLog && config.debugEvents)
 				{
 					plugin.getLogger().info(
-							"Muted '" + player.getName() + "' with message: "
+							"Muted '" + name + "' with message: "
 									+ event.getMessage());
 				}
 				event.setCancelled(true);

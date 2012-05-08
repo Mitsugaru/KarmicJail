@@ -20,18 +20,30 @@ public class InventoryListener implements Listener
 	{
 		InventoryListener.plugin = plugin;
 	}
-	
+
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerCloseJailInventory(final InventoryCloseEvent event)
 	{
-		if(event.getInventory().getHolder() instanceof JailInventoryHolder)
+		try
 		{
-			Commander.inv.remove(event.getPlayer().getName());
-			if (plugin.getPluginConfig().debugLog && plugin.getPluginConfig().debugEvents)
+			if (event.getInventory().getHolder() != null)
 			{
-				plugin.getLogger().info(
-						"'" + event.getPlayer().getName() + "' closed JailInventory view");
+				if (event.getInventory().getHolder() instanceof JailInventoryHolder)
+				{
+					Commander.inv.remove(event.getPlayer().getName());
+					if (plugin.getPluginConfig().debugLog
+							&& plugin.getPluginConfig().debugEvents)
+					{
+						plugin.getLogger().info(
+								"'" + event.getPlayer().getName()
+										+ "' closed JailInventory view");
+					}
+				}
 			}
+		}
+		catch (NullPointerException n)
+		{
+			// IGNORE
 		}
 	}
 
@@ -43,7 +55,9 @@ public class InventoryListener implements Listener
 				&& event.getInventory().getHolder() instanceof JailInventoryHolder)
 		{
 			final Player player = (Player) event.getWhoClicked();
-			if(!plugin.getPluginConfig().modifyInventory || !plugin.getPermissions().has(player, "KarmicJail.inventory.modify"))
+			if (!plugin.getPluginConfig().modifyInventory
+					|| !plugin.getPermissions().has(player,
+							"KarmicJail.inventory.modify"))
 			{
 				event.setCancelled(true);
 				return;
@@ -51,19 +65,19 @@ public class InventoryListener implements Listener
 			JailInventoryHolder holder = (JailInventoryHolder) event
 					.getInventory().getHolder();
 			final String target = holder.getTarget();
-			//plugin.getLogger().info("raw slot: " + event.getRawSlot());
+			// plugin.getLogger().info("raw slot: " + event.getRawSlot());
 			// Determine if they clicked inside, and which half
 			final int rawSlot = event.getRawSlot();
 			boolean inside = false;
 			boolean fromInventory = false;
-			//boolean armor = false;
+			// boolean armor = false;
 			boolean invalid = false;
 			// TODO differentiate between regular inventory section and armor
 			// section 36 -> 39
 			// and ignore the other sections
-			if(rawSlot < 0)
+			if (rawSlot < 0)
 			{
-				//Ignore
+				// Ignore
 			}
 			else if (rawSlot >= 0 && rawSlot <= 35)
 			{
@@ -229,9 +243,9 @@ public class InventoryListener implements Listener
 										.equals(Material.AIR))
 								{
 									/*
-									 * If cursor is air and item is not air
-									 * they are taking half of the stack,
-									 * with the larger half given to cursor
+									 * If cursor is air and item is not air they
+									 * are taking half of the stack, with the
+									 * larger half given to cursor
 									 */
 									// Calculate "half"
 									int half = event.getCurrentItem()
@@ -242,15 +256,14 @@ public class InventoryListener implements Listener
 									{
 										half++;
 									}
-									plugin.getDatabaseHandler().setItem(
-											target, rawSlot,
-											event.getCurrentItem(),
+									plugin.getDatabaseHandler().setItem(target,
+											rawSlot, event.getCurrentItem(),
 											half);
 								}
 								else if (!event.getCursor().getType()
 										.equals(Material.AIR))
 								{
-									//Only give one
+									// Only give one
 									final int itemAmount = event
 											.getCurrentItem().getAmount();
 									int newAmount = itemAmount - 1;
@@ -260,9 +273,8 @@ public class InventoryListener implements Listener
 										newAmount = event.getCurrentItem()
 												.getMaxStackSize();
 									}
-									plugin.getDatabaseHandler().setItem(
-											target, rawSlot,
-											event.getCurrentItem(),
+									plugin.getDatabaseHandler().setItem(target,
+											rawSlot, event.getCurrentItem(),
 											newAmount);
 								}
 							}
@@ -270,20 +282,19 @@ public class InventoryListener implements Listener
 					}
 					else
 					{
-						//TODO not sure about the logic here... how would I know what slot it would go to?
+						// TODO not sure about the logic here... how would I
+						// know what slot it would go to?
 						// Clicked in own inventory, only need to bother with
 						// shift click
 						if (event.isShiftClick())
 						{
 							event.setCancelled(true);
-							/*if (event.isLeftClick())
-							{
-								// Handle shift left click to inventory
-							}
-							else if (event.isRightClick())
-							{
-								// Handle right left click to inventory
-							}*/
+							/*
+							 * if (event.isLeftClick()) { // Handle shift left
+							 * click to inventory } else if
+							 * (event.isRightClick()) { // Handle right left
+							 * click to inventory }
+							 */
 						}
 					}
 				}
@@ -292,7 +303,7 @@ public class InventoryListener implements Listener
 					e.printStackTrace();
 				}
 			}
-			else if(invalid)
+			else if (invalid)
 			{
 				event.setCancelled(true);
 			}
