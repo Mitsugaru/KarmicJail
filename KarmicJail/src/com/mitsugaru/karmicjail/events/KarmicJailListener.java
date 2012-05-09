@@ -12,6 +12,7 @@ import com.mitsugaru.karmicjail.Config;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -150,7 +151,7 @@ public class KarmicJailListener implements Listener
 				if (config.warpAllOnJoin)
 				{
 					if (!plugin.getPermissions().has(player,
-							"KarmicJail.warp.joinignore"))
+							PermissionNode.WARP_JOINIGNORE))
 					{
 						// Warp them to jail location
 						int id = plugin
@@ -299,7 +300,7 @@ public class KarmicJailListener implements Listener
 				if (config.broadcastPerms)
 				{
 					plugin.getServer().broadcast(sb.toString(),
-							"KarmicJail.broadcast");
+							PermissionNode.BROADCAST.getNode());
 				}
 				else
 				{

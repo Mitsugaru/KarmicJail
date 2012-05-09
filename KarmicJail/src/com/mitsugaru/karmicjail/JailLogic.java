@@ -32,6 +32,7 @@ import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 import com.mitsugaru.karmicjail.events.KarmicJailEvent;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
+import com.mitsugaru.karmicjail.permissions.PermissionNode;
 import com.platymuus.bukkit.permissions.Group;
 import com.platymuus.bukkit.permissions.PermissionsPlugin;
 
@@ -89,6 +90,15 @@ public class JailLogic
 				addPlayerToDatabase(inName);
 				name = inName;
 			}
+			// Check to see if the name is exempt
+			if (perm.has(name, PermissionNode.EXEMPT))
+			{
+				// Player is exempt
+				sender.sendMessage(ChatColor.RED + KarmicJail.prefix + " '"
+						+ ChatColor.GOLD + name + ChatColor.RED
+						+ "' is exempt from being jailed!");
+				return;
+			}
 			if (config.removeGroups)
 			{
 				// Save groups
@@ -107,7 +117,7 @@ public class JailLogic
 			boolean timed = timedCom;
 			if (config.timePerm)
 			{
-				if (!perm.has(sender, "KarmicJail.timed"))
+				if (!perm.has(sender, PermissionNode.TIMED))
 				{
 					timed = false;
 					sender.sendMessage(ChatColor.RED
@@ -318,7 +328,7 @@ public class JailLogic
 		{
 			Commander.inv.remove(viewer);
 		}
-		//Remove from cache
+		// Remove from cache
 		playerCache.remove(name);
 		plugin.getCommander().removeFromCache(name);
 		// Check if player is offline:

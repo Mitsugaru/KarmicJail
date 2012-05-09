@@ -11,6 +11,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import com.mitsugaru.karmicjail.Commander;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
+import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
 public class InventoryListener implements Listener
 {
@@ -59,7 +60,7 @@ public class InventoryListener implements Listener
 				final Player player = (Player) event.getWhoClicked();
 				if (!plugin.getPluginConfig().modifyInventory
 						|| !plugin.getPermissions().has(player,
-								"KarmicJail.inventory.modify"))
+								PermissionNode.INVENTORY_MODIFY))
 				{
 					event.setCancelled(true);
 					return;

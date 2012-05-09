@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 
 import ru.tehkode.permissions.PermissionGroup;
@@ -57,11 +58,26 @@ public class PermCheck
 
 	}
 
+	public boolean has(CommandSender sender, PermissionNode permission)
+	{
+		return has(sender, permission.getNode());
+	}
+
+	public boolean has(String name, PermissionNode permission)
+	{
+		if (hasVault)
+		{
+			return perm.has(JailLogic.getJailLocation().getWorld(), name,
+					permission.getNode());
+		}
+		return false;
+	}
+
 	/**
 	 * 
 	 * @param CommandSender
 	 *            that sent command
-	 * @param Permission
+	 * @param PermissionNode
 	 *            node to check, as String
 	 * @return true if sender has the node, else false
 	 */

@@ -1,7 +1,7 @@
 name: KarmicJail
 main: com.mitsugaru.karmicjail.KarmicJail
 description: Jail plugin for Mine-RP
-version: 0.431
+version: 0.432
 author: Original - imjake9 ... Fork - Mitsugaru
 depend: [Vault]
 
@@ -170,7 +170,7 @@ permissions:
     default: op
   KarmicJail.warp.joinignore:
     description: Ignore jail warp on join, if enabled.
-    default: false
+    default: op
   KarmicJail.warp.jail:
     description: Warp to jail
     default: op
@@ -189,6 +189,9 @@ permissions:
   KarmicJail.broadcast:
     description: Allows player to receive the broadcast messages
     default: false
+  KarmicJail.exempt:
+    description: Exmpts player from being jailed.
+    default: op
   KarmicJail.*:
     description: Gives access to all KarmicJail commands.
     children:
@@ -207,3 +210,4 @@ permissions:
       KarmicJail.inventory.modify: true
       KarmicJail.history.view: true
       KarmicJail.history.add: true
+      KarmicJail.exempt: true

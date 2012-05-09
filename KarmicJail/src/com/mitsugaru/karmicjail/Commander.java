@@ -23,6 +23,7 @@ import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
+import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
 public class Commander implements CommandExecutor
 {
@@ -90,10 +91,10 @@ public class Commander implements CommandExecutor
 		if (commandLabel.equalsIgnoreCase("jail")
 				|| commandLabel.equalsIgnoreCase("j"))
 		{
-			if (!perm.has(sender, "KarmicJail.jail"))
+			if (!perm.has(sender, PermissionNode.JAIL))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.jail");
+						+ "Lack Permission: " + PermissionNode.JAIL.getNode());
 				com = true;
 			}
 			else
@@ -172,10 +173,10 @@ public class Commander implements CommandExecutor
 		}
 		else if (commandLabel.equalsIgnoreCase("unjail"))
 		{
-			if (!perm.has(sender, "KarmicJail.unjail"))
+			if (!perm.has(sender, PermissionNode.UNJAIL))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.unjail");
+						+ "Lack Permission: " + PermissionNode.UNJAIL.getNode());
 			}
 			else
 			{
@@ -209,10 +210,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equalsIgnoreCase("setjail")
 				&& (args.length == 0 || args.length == 4))
 		{
-			if (!perm.has(sender, "KarmicJail.setjail"))
+			if (!perm.has(sender, PermissionNode.SETJAIL))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.setjail");
+						+ "Lack Permission: " + PermissionNode.SETJAIL.getNode());
 			}
 			else
 			{
@@ -223,10 +224,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equalsIgnoreCase("setunjail")
 				&& (args.length == 0 || args.length == 4))
 		{
-			if (!perm.has(sender, "KarmicJail.setjail"))
+			if (!perm.has(sender, PermissionNode.SETJAIL))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.setjail");
+						+ "Lack Permission: " + PermissionNode.SETJAIL.getNode());
 			}
 			else
 			{
@@ -239,10 +240,10 @@ public class Commander implements CommandExecutor
 				|| commandLabel.equalsIgnoreCase("jailcheck") || commandLabel
 					.equalsIgnoreCase("jcheck")) && args.length <= 1)
 		{
-			if (!perm.has(sender, "KarmicJail.jailstatus"))
+			if (!perm.has(sender, PermissionNode.JAILSTATUS))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.jailstatus");
+						+ "Lack Permission: " + PermissionNode.JAILSTATUS.getNode());
 			}
 			else
 			{
@@ -265,10 +266,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equalsIgnoreCase("jaillist")
 				|| commandLabel.equalsIgnoreCase("jlist"))
 		{
-			if (!perm.has(sender, "KarmicJail.list"))
+			if (!perm.has(sender, PermissionNode.LIST))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.list");
+						+ "Lack Permission: " + PermissionNode.LIST.getNode());
 			}
 			else
 			{
@@ -302,10 +303,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailprev")
 				|| commandLabel.equals("jprev"))
 		{
-			if (!perm.has(sender, "KarmicJail.list"))
+			if (!perm.has(sender, PermissionNode.LIST))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.list");
+						+ "Lack Permission: " + PermissionNode.LIST.getNode());
 			}
 			else
 			{
@@ -318,10 +319,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailnext")
 				|| commandLabel.equals("jnext"))
 		{
-			if (!perm.has(sender, "KarmicJail.list"))
+			if (!perm.has(sender, PermissionNode.LIST))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.list");
+						+ "Lack Permission: " + PermissionNode.LIST.getNode());
 			}
 			else
 			{
@@ -333,10 +334,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailmute")
 				|| commandLabel.equals("jmute"))
 		{
-			if (!perm.has(sender, "KarmicJail.mute"))
+			if (!perm.has(sender, PermissionNode.MUTE))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.mute");
+						+ "Lack Permission: " + PermissionNode.MUTE.getNode());
 			}
 			else
 			{
@@ -370,10 +371,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jaillast")
 				|| commandLabel.equals("jlast"))
 		{
-			if (!perm.has(sender, "KarmicJail.warp.last"))
+			if (!perm.has(sender, PermissionNode.WARP_LAST))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.warp.last");
+						+ "Lack Permission: " + PermissionNode.WARP_LAST.getNode());
 			}
 			else
 			{
@@ -418,10 +419,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailwarp")
 				|| commandLabel.equals("jwarp"))
 		{
-			if (!perm.has(sender, "KarmicJail.warp.jail"))
+			if (!perm.has(sender, PermissionNode.WARP_JAIL))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.warp.jail");
+						+ "Lack Permission: " + PermissionNode.WARP_JAIL);
 			}
 			else
 			{
@@ -461,10 +462,10 @@ public class Commander implements CommandExecutor
 		}
 		else if (commandLabel.equals("jailinv") || commandLabel.equals("jinv"))
 		{
-			if (!perm.has(sender, "KarmicJail.inventory.view"))
+			if (!perm.has(sender, PermissionNode.INVENTORY_VIEW))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.inventory.view");
+						+ "Lack Permission: " + PermissionNode.INVENTORY_VIEW);
 			}
 			else
 			{
@@ -528,10 +529,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailhistory")
 				|| commandLabel.equals("jhistory"))
 		{
-			if (!perm.has(sender, "KarmicJail.history.view"))
+			if (!perm.has(sender, PermissionNode.HISTORY_VIEW))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.history.view");
+						+ "Lack Permission: " + PermissionNode.HISTORY_VIEW.getNode());
 			}
 			else
 			{
@@ -581,10 +582,10 @@ public class Commander implements CommandExecutor
 					}
 					else if (hcom.equalsIgnoreCase("add"))
 					{
-						if (!perm.has(sender, "KarmicJail.history.add"))
+						if (!perm.has(sender, PermissionNode.HISTORY_ADD))
 						{
 							sender.sendMessage(ChatColor.RED
-									+ "Lack Permission: KarmicJail.history.add");
+									+ "Lack Permission: " + PermissionNode.HISTORY_ADD.getNode());
 						}
 						else
 						{
@@ -704,18 +705,18 @@ public class Commander implements CommandExecutor
 				|| commandLabel.equals("jtime"))
 		{
 			boolean hasPerm = true;
-			if (!perm.has(sender, "KarmicJail.jail"))
+			if (!perm.has(sender, PermissionNode.JAIL))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.jail");
+						+ "Lack Permission: " + PermissionNode.JAIL.getNode());
 				hasPerm = false;
 			}
 			if (config.timePerm)
 			{
-				if (!perm.has(sender, "KarmicJail.jailtime"))
+				if (!perm.has(sender, PermissionNode.TIMED))
 				{
 					sender.sendMessage(ChatColor.RED
-							+ "Lack Permission: KarmicJail.timed");
+							+ "Lack Permission: " + PermissionNode.TIMED.getNode());
 					hasPerm = false;
 				}
 			}
@@ -765,9 +766,9 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailreload")
 				|| commandLabel.equals("jreload"))
 		{
-			if (perm.has(sender, "KarmicJail.jail")
-					|| perm.has(sender, "KarmicJail.unjail")
-					|| perm.has(sender, "KarmicJail.setjail"))
+			if (perm.has(sender, PermissionNode.JAIL)
+					|| perm.has(sender, PermissionNode.UNJAIL)
+					|| perm.has(sender, PermissionNode.SETJAIL))
 			{
 				config.reload();
 				sender.sendMessage(ChatColor.GREEN + KarmicJail.prefix
@@ -782,10 +783,10 @@ public class Commander implements CommandExecutor
 		else if (commandLabel.equals("jailreason")
 				|| commandLabel.equals("jreason"))
 		{
-			if (!perm.has(sender, "KarmicJail.jail"))
+			if (!perm.has(sender, PermissionNode.JAIL))
 			{
 				sender.sendMessage(ChatColor.RED
-						+ "Lack Permission: KarmicJail.jail");
+						+ "Lack Permission: " + PermissionNode.JAIL.getNode());
 			}
 			else
 			{
@@ -830,6 +831,8 @@ public class Commander implements CommandExecutor
 		}
 		else
 		{
+			//TODO don't think this is necessary at all...
+			//Honestly, this section probably is for unrecognized commands
 			if (!perm.has(sender, "KarmicJail.jail"))
 				com = true;
 			if (!perm.has(sender, "KarmicJail.unjail"))
@@ -913,7 +916,7 @@ public class Commander implements CommandExecutor
 	{
 		sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN
 				+ "KarmicJail" + ChatColor.BLUE + "=====");
-		if (perm.has(sender, "KarmicJail.jail"))
+		if (perm.has(sender, PermissionNode.JAIL))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/jail " + ChatColor.AQUA
 					+ "<player> " + ChatColor.LIGHT_PURPLE
@@ -929,18 +932,18 @@ public class Commander implements CommandExecutor
 					+ ChatColor.YELLOW
 					+ " : Sets jail reason for player. Alias: /jreason");
 		}
-		if (perm.has(sender, "KarmicJail.unjail"))
+		if (perm.has(sender, PermissionNode.UNJAIL))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA
 					+ " <player>" + ChatColor.YELLOW + " : Unjail player");
 		}
-		if (perm.has(sender, "KarmicJail.mute"))
+		if (perm.has(sender, PermissionNode.MUTE))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/jailmute" + ChatColor.AQUA
 					+ " <player>" + ChatColor.YELLOW
 					+ " : Toggle mute for a player. Alias: /jmute");
 		}
-		if (perm.has(sender, "KarmicJail.list"))
+		if (perm.has(sender, PermissionNode.LIST))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/jaillist"
 					+ ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
@@ -950,25 +953,25 @@ public class Commander implements CommandExecutor
 			sender.sendMessage(ChatColor.GREEN + "/jailnext" + ChatColor.YELLOW
 					+ " : Next page. Alias: /jnext");
 		}
-		if (perm.has(sender, "KarmicJail.history.view"))
+		if (perm.has(sender, PermissionNode.HISTORY_VIEW))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/jailhistory"
 					+ ChatColor.LIGHT_PURPLE + " [args]" + ChatColor.YELLOW
 					+ " : Jail history command. Alias: /jhistory");
 		}
-		if (perm.has(sender, "KarmicJail.inventory.view"))
+		if (perm.has(sender, PermissionNode.INVENTORY_VIEW))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/jailinv" + ChatColor.AQUA
 					+ " <player>" + ChatColor.YELLOW
 					+ " : Open inventory of jailed player. Alias: /jinv");
 		}
-		if (perm.has(sender, "KarmicJail.warp.last"))
+		if (perm.has(sender, PermissionNode.WARP_LAST))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/jaillast" + ChatColor.AQUA
 					+ " <player>" + ChatColor.YELLOW
 					+ " : Warp to last known postion of player");
 		}
-		if (perm.has(sender, "KarmicJail.setjail"))
+		if (perm.has(sender, PermissionNode.SETJAIL))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/setjail"
 					+ ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]"
@@ -979,7 +982,7 @@ public class Commander implements CommandExecutor
 					+ ChatColor.YELLOW
 					+ " : Set unjail teleport to current pos or given pos");
 		}
-		if (perm.has(sender, "KarmicJail.jailstatus"))
+		if (perm.has(sender, PermissionNode.JAILSTATUS))
 		{
 			sender.sendMessage(ChatColor.GREEN + "/jailstatus"
 					+ ChatColor.LIGHT_PURPLE + " [player]" + ChatColor.YELLOW
