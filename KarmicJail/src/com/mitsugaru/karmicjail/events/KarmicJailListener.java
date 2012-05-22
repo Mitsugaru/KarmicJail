@@ -60,16 +60,15 @@ public class KarmicJailListener implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerRespawn(final PlayerRespawnEvent event)
 	{
-		//Grab name
+		// Grab name
 		final String name = event.getPlayer().getName();
-		//Check if they're in the cache
+		// Check if they're in the cache
 		if (config.jailTeleportRespawn && JailLogic.playerCache.contains(name))
 		{
 			event.setRespawnLocation(JailLogic.getJailLocation());
 			if (config.debugLog && config.debugEvents)
 			{
-				plugin.getLogger().info(
-						"Respawned '" + name + "' to jail.");
+				plugin.getLogger().info("Respawned '" + name + "' to jail.");
 			}
 		}
 	}
@@ -187,29 +186,27 @@ public class KarmicJailListener implements Listener
 		if (event.getPlayer() != null)
 		{
 			final String name = event.getPlayer().getName();
-			if (name != null
-					&& event.getPlayer().getLocation() != null)
+			if (name != null && event.getPlayer().getLocation() != null)
 			{
 				if (!JailLogic.playerIsJailed(name))
 				{
-					JailLogic.setPlayerLastLocation(
-							name, event.getPlayer()
-									.getLocation());
+					JailLogic.setPlayerLastLocation(name, event.getPlayer()
+							.getLocation());
 				}
 			}
 			if (event.getPlayer().getInventory() != null)
 			{
-				JailLogic.setPlayerInventory(name, event
-						.getPlayer().getInventory(), false);
+				JailLogic.setPlayerInventory(name, event.getPlayer()
+						.getInventory(), false);
 			}
-			//Remove from cache
+			// Remove from cache
 			try
 			{
 				JailLogic.playerCache.remove(name);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
-				//IGNORE
+				// IGNORE
 			}
 		}
 		// Remove viewer
@@ -249,9 +246,9 @@ public class KarmicJailListener implements Listener
 		@Override
 		public void run()
 		{
-			//Get name
+			// Get name
 			final String playerName = player.getName();
-			//Add to cache
+			// Add to cache
 			JailLogic.playerCache.add(playerName);
 			if (JailLogic.playerIsTempJailed(playerName))
 			{
@@ -281,6 +278,10 @@ public class KarmicJailListener implements Listener
 					plugin.getLogger().info(
 							"Jailed '" + playerName + "' on login.");
 				}
+			}
+			if (config.clearInventory)
+			{
+				player.getInventory().clear();
 			}
 			if (config.jailTeleport)
 			{

@@ -691,6 +691,10 @@ public class DBHandler
 		{
 			try
 			{
+				//Remove old items
+				standardQuery("DELETE FROM " + Table.INVENTORY.getName()
+						+ " WHERE id='" + id + "';");
+				//Add in items
 				PreparedStatement statement = prepare("INSERT INTO "
 						+ Table.INVENTORY.getName()
 						+ " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
