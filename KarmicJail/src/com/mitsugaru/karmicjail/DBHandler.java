@@ -12,6 +12,7 @@ import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.inventory.Item;
 
 import lib.Mitsugaru.SQLibrary.Database.Query;
 import lib.Mitsugaru.SQLibrary.MySQL;
@@ -305,7 +306,7 @@ public class DBHandler
 		int id = -1;
 		try
 		{
-			//TODO make this a prepared statement
+			// TODO make this a prepared statement
 			final Query query = select("SELECT * FROM "
 					+ Table.JAILED.getName() + " WHERE playername='"
 					+ playername + "';");
@@ -466,8 +467,7 @@ public class DBHandler
 						if (config.debugUnhandled)
 						{
 							plugin.getLogger().warning(
-									"Unhandled setField for field "
-											+ field);
+									"Unhandled setField for field " + field);
 						}
 						break;
 					}
@@ -691,10 +691,10 @@ public class DBHandler
 		{
 			try
 			{
-				//Remove old items
+				// Remove old items
 				standardQuery("DELETE FROM " + Table.INVENTORY.getName()
 						+ " WHERE id='" + id + "';");
-				//Add in items
+				// Add in items
 				PreparedStatement statement = prepare("INSERT INTO "
 						+ Table.INVENTORY.getName()
 						+ " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
@@ -775,36 +775,48 @@ public class DBHandler
 								Field.INV_DATA.getColumnName());
 						short dur = query.getResult().getShort(
 								Field.INV_DURABILITY.getColumnName());
-						ItemStack add = new ItemStack(itemid, amount, dur, data);
+						ItemStack add = null;
+						if (Item.isTool(itemid))
+						{
+							add = new ItemStack(itemid, amount, dur);
+						}
+						else
+						{
+							add = new ItemStack(itemid, amount, dur, data);
+						}
 						String enchantments = query.getResult().getString(
 								Field.INV_ENCHANT.getColumnName());
-						if (!query.getResult().wasNull())
+						if (add != null)
 						{
-							if (enchantments.contains("i")
-									|| enchantments.contains("v"))
+							if (!query.getResult().wasNull())
 							{
-								try
+								if (enchantments.contains("i")
+										|| enchantments.contains("v"))
 								{
-									String[] cut = enchantments.split("i");
-									for (int s = 0; s < cut.length; s++)
+									try
 									{
-										String[] cutter = cut[s].split("v");
-										EnchantmentWrapper e = new EnchantmentWrapper(
-												Integer.parseInt(cutter[0]));
-										add.addUnsafeEnchantment(
-												e.getEnchantment(),
-												Integer.parseInt(cutter[1]));
+										String[] cut = enchantments.split("i");
+										for (int s = 0; s < cut.length; s++)
+										{
+											String[] cutter = cut[s].split("v");
+											EnchantmentWrapper e = new EnchantmentWrapper(
+													Integer.parseInt(cutter[0]));
+											add.addUnsafeEnchantment(
+													e.getEnchantment(),
+													Integer.parseInt(cutter[1]));
+										}
+									}
+									catch (ArrayIndexOutOfBoundsException a)
+									{
+										// something went wrong
 									}
 								}
-								catch (ArrayIndexOutOfBoundsException a)
-								{
-									// something went wrong
-								}
 							}
+							items.put(
+									new Integer(query.getResult().getInt(
+											Field.INV_SLOT.getColumnName())),
+									add);
 						}
-						items.put(
-								new Integer(query.getResult().getInt(
-										Field.INV_SLOT.getColumnName())), add);
 					} while (query.getResult().next());
 				}
 				query.closeQuery();
