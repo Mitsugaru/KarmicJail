@@ -6,7 +6,6 @@ import org.anjocaido.groupmanager.GroupManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import com.mitsugaru.karmicjail.JailLogic;
@@ -83,23 +82,6 @@ public class PermCheck
 	 */
 	public boolean has(CommandSender sender, String node)
 	{
-		// Pex specific supercedes vault
-		if (Bukkit.getServer().getPluginManager()
-				.isPluginEnabled("PermissionsEx"))
-		{
-			// Pex only supports player check, no CommandSender objects
-			if (sender instanceof Player)
-			{
-				final Player p = (Player) sender;
-				final PermissionManager permissions = PermissionsEx
-						.getPermissionManager();
-				// Handle pex check
-				if (permissions.has(p, node))
-				{
-					return true;
-				}
-			}
-		}
 		// Use vault if we have it
 		if (hasVault)
 		{
