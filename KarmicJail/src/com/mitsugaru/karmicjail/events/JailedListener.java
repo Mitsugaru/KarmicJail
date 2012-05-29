@@ -218,7 +218,7 @@ public class JailedListener implements Listener
 
 	private void sendDenyJailMessage(Player player)
 	{
-		player.sendMessage(ChatColor.RED + KarmicJail.prefix
+		player.sendMessage(ChatColor.RED + KarmicJail.TAG
 				+ " Cannot do that while jailed.");
 	}
 }

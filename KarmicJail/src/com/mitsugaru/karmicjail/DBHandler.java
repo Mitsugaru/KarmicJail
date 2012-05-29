@@ -48,14 +48,14 @@ public class DBHandler
 		if (useMySQL)
 		{
 			// Connect to mysql database
-			mysql = new MySQL(plugin.getLogger(), KarmicJail.prefix,
+			mysql = new MySQL(plugin.getLogger(), KarmicJail.TAG,
 					config.host, config.port, config.database, config.user,
 					config.password);
 			// Check if jailed table exists
 			if (!mysql.checkTable(Table.JAILED.getName()))
 			{
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Created jailed table");
+						KarmicJail.TAG + " Created jailed table");
 				// Jail table
 				mysql.createTable("CREATE TABLE "
 						+ Table.JAILED.getName()
@@ -65,7 +65,7 @@ public class DBHandler
 			if (!mysql.checkTable(Table.HISTORY.getName()))
 			{
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Created history table");
+						KarmicJail.TAG + " Created history table");
 				// history table
 				mysql.createTable("CREATE TABLE "
 						+ Table.HISTORY.getName()
@@ -75,7 +75,7 @@ public class DBHandler
 			if (!mysql.checkTable(Table.INVENTORY.getName()))
 			{
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Created inventory table");
+						KarmicJail.TAG + " Created inventory table");
 				// inventory table
 				mysql.createTable("CREATE TABLE "
 						+ Table.INVENTORY.getName()
@@ -85,13 +85,13 @@ public class DBHandler
 		else
 		{
 			// Connect to sql database
-			sqlite = new SQLite(plugin.getLogger(), KarmicJail.prefix, "jail",
+			sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail",
 					plugin.getDataFolder().getAbsolutePath());
 			// Check if jailed table exists
 			if (!sqlite.checkTable(Table.JAILED.getName()))
 			{
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Created jailed table");
+						KarmicJail.TAG + " Created jailed table");
 				// Jail table
 				sqlite.createTable("CREATE TABLE "
 						+ Table.JAILED.getName()
@@ -101,7 +101,7 @@ public class DBHandler
 			if (!sqlite.checkTable(Table.HISTORY.getName()))
 			{
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Created history table");
+						KarmicJail.TAG + " Created history table");
 				// history table
 				sqlite.createTable("CREATE TABLE "
 						+ Table.HISTORY.getName()
@@ -111,7 +111,7 @@ public class DBHandler
 			if (!sqlite.checkTable(Table.INVENTORY.getName()))
 			{
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Created inventory table");
+						KarmicJail.TAG + " Created inventory table");
 				// inventory table
 				sqlite.createTable("CREATE TABLE "
 						+ Table.INVENTORY.getName()
@@ -126,7 +126,7 @@ public class DBHandler
 		try
 		{
 			// Grab local SQLite database
-			sqlite = new SQLite(plugin.getLogger(), KarmicJail.prefix, "jail",
+			sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail",
 					plugin.getDataFolder().getAbsolutePath());
 			// Copy items
 			Query rs = sqlite.select("SELECT * FROM " + config.tablePrefix
@@ -134,7 +134,7 @@ public class DBHandler
 			if (rs.getResult().next())
 			{
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Importing jailed players...");
+						KarmicJail.TAG + " Importing jailed players...");
 				PreparedStatement statement = mysql
 						.prepare("INSERT INTO "
 								+ config.tablePrefix
@@ -207,7 +207,7 @@ public class DBHandler
 					catch (SQLException e)
 					{
 						plugin.getLogger().warning(
-								KarmicJail.prefix + " SQL Exception on Import");
+								KarmicJail.TAG + " SQL Exception on Import");
 						e.printStackTrace();
 					}
 				} while (rs.getResult().next());
@@ -216,12 +216,12 @@ public class DBHandler
 			rs.closeQuery();
 			// TODO import inventory
 			plugin.getLogger().info(
-					KarmicJail.prefix + " Done importing SQLite into MySQL");
+					KarmicJail.TAG + " Done importing SQLite into MySQL");
 		}
 		catch (SQLException e)
 		{
 			plugin.getLogger().warning(
-					KarmicJail.prefix + " SQL Exception on Import");
+					KarmicJail.TAG + " SQL Exception on Import");
 			e.printStackTrace();
 		}
 

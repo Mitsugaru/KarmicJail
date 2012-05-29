@@ -94,7 +94,7 @@ public class JailLogic
 			if (perm.has(name, PermissionNode.EXEMPT))
 			{
 				// Player is exempt
-				sender.sendMessage(ChatColor.RED + KarmicJail.prefix + " '"
+				sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " '"
 						+ ChatColor.GOLD + name + ChatColor.RED
 						+ "' is exempt from being jailed!");
 				return;
@@ -575,7 +575,7 @@ public class JailLogic
 		}
 		catch (SQLException e)
 		{
-			plugin.getLogger().warning(KarmicJail.prefix + " SQL Exception");
+			plugin.getLogger().warning(KarmicJail.TAG + " SQL Exception");
 			e.printStackTrace();
 		}
 		return has;
@@ -617,7 +617,7 @@ public class JailLogic
 		}
 		catch (SQLException e)
 		{
-			plugin.getLogger().warning(KarmicJail.prefix + " SQL Exception");
+			plugin.getLogger().warning(KarmicJail.TAG + " SQL Exception");
 			e.printStackTrace();
 		}
 	}

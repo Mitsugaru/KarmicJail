@@ -137,7 +137,7 @@ public class PermCheck
 					catch (IndexOutOfBoundsException e)
 					{
 						this.plugin.getLogger().warning(
-								KarmicJail.prefix
+								KarmicJail.TAG
 										+ " Cannot grab default group.");
 						return def;
 					}

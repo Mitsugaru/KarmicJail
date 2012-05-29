@@ -288,7 +288,7 @@ public class Commander implements CommandExecutor
 					}
 					catch (NumberFormatException e)
 					{
-						sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+						sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG
 								+ " Invalid integer for page number");
 					}
 				}
@@ -390,14 +390,14 @@ public class Commander implements CommandExecutor
 						{
 							player.teleport(last);
 							sender.sendMessage(ChatColor.GREEN
-									+ KarmicJail.prefix
+									+ KarmicJail.TAG
 									+ " Warp to last location of "
 									+ ChatColor.AQUA + name);
 						}
 						else
 						{
 							sender.sendMessage(ChatColor.RED
-									+ KarmicJail.prefix
+									+ KarmicJail.TAG
 									+ " No last location for " + ChatColor.AQUA
 									+ name);
 						}
@@ -501,13 +501,13 @@ public class Commander implements CommandExecutor
 							player.openInventory(holder.getInventory());
 							inv.put(player.getName(), holder);
 							sender.sendMessage(ChatColor.GREEN
-									+ KarmicJail.prefix + " Open inventory of "
+									+ KarmicJail.TAG + " Open inventory of "
 									+ ChatColor.AQUA + name);
 						}
 						else
 						{
 							sender.sendMessage(ChatColor.RED
-									+ KarmicJail.prefix + " Player '"
+									+ KarmicJail.TAG + " Player '"
 									+ ChatColor.AQUA + name + ChatColor.RED
 									+ "' not jailed.");
 						}
@@ -621,10 +621,10 @@ public class Commander implements CommandExecutor
 							else
 							{
 								sender.sendMessage(ChatColor.RED
-										+ KarmicJail.prefix
+										+ KarmicJail.TAG
 										+ " Comment cannot be empty.");
 								sender.sendMessage(ChatColor.RED
-										+ KarmicJail.prefix
+										+ KarmicJail.TAG
 										+ " /jhistory add <player> <comment...>");
 							}
 						}
@@ -641,7 +641,7 @@ public class Commander implements CommandExecutor
 							}
 							catch(NumberFormatException n)
 							{
-								sender.sendMessage(ChatColor.RED + KarmicJail.prefix + " Invalid page number given");
+								sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " Invalid page number given");
 							}
 							listHistory(sender, 0);
 						}
@@ -681,7 +681,7 @@ public class Commander implements CommandExecutor
 					{
 
 						sender.sendMessage(ChatColor.YELLOW
-								+ KarmicJail.prefix
+								+ KarmicJail.TAG
 								+ " Invalid history command, use /jhistory help.");
 					}
 
@@ -771,7 +771,7 @@ public class Commander implements CommandExecutor
 					|| perm.has(sender, PermissionNode.SETJAIL))
 			{
 				config.reload();
-				sender.sendMessage(ChatColor.GREEN + KarmicJail.prefix
+				sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG
 						+ " Config reloaded.");
 			}
 			else
@@ -808,14 +808,14 @@ public class Commander implements CommandExecutor
 							|| JailLogic.playerIsPendingJail(name))
 					{
 						JailLogic.setPlayerReason(name, reason);
-						sender.sendMessage(ChatColor.GREEN + KarmicJail.prefix
+						sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG
 								+ " Set reason for " + ChatColor.AQUA + name
 								+ ChatColor.GREEN + " to: " + ChatColor.GRAY
 								+ reason);
 					}
 					else
 					{
-						sender.sendMessage(ChatColor.RED + KarmicJail.prefix
+						sender.sendMessage(ChatColor.RED + KarmicJail.TAG
 								+ " Player '" + ChatColor.AQUA + name
 								+ ChatColor.RED + "' not jailed.");
 					}
@@ -865,7 +865,7 @@ public class Commander implements CommandExecutor
 	private void debugTime(CommandSender sender, long time)
 	{
 		time = System.nanoTime() - time;
-		sender.sendMessage("[Debug]" + KarmicJail.prefix + "Process time: "
+		sender.sendMessage("[Debug]" + KarmicJail.TAG + "Process time: "
 				+ time);
 	}
 
@@ -1004,7 +1004,7 @@ public class Commander implements CommandExecutor
 				name);
 		if (list.isEmpty())
 		{
-			sender.sendMessage(ChatColor.RED + KarmicJail.prefix
+			sender.sendMessage(ChatColor.RED + KarmicJail.TAG
 					+ " No history for " + ChatColor.AQUA + name);
 			historyCache.remove(sender.getName());
 			return;
@@ -1033,7 +1033,7 @@ public class Commander implements CommandExecutor
 		if (historyPage.get(sender.getName()).intValue() < 0)
 		{
 			// They tried to use /ks prev when they're on page 0
-			sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+			sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG
 					+ " Page does not exist");
 			// reset their current page back to 0
 			historyPage.put(sender.getName(), 0);
@@ -1042,7 +1042,7 @@ public class Commander implements CommandExecutor
 		else if ((historyPage.get(sender.getName()).intValue()) * config.limit > array.length)
 		{
 			// They tried to use /ks next at the end of the list
-			sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+			sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG
 					+ " Page does not exist");
 			// Revert to last page
 			historyPage.put(sender.getName(), num - 1);
@@ -1143,12 +1143,12 @@ public class Commander implements CommandExecutor
 		}
 		catch (SQLException e)
 		{
-			plugin.getLogger().warning(KarmicJail.prefix + " SQL Exception");
+			plugin.getLogger().warning(KarmicJail.TAG + " SQL Exception");
 			e.printStackTrace();
 		}
 		if (cache.isEmpty())
 		{
-			sender.sendMessage(ChatColor.RED + KarmicJail.prefix
+			sender.sendMessage(ChatColor.RED + KarmicJail.TAG
 					+ " No jailed players");
 			return;
 		}
@@ -1176,7 +1176,7 @@ public class Commander implements CommandExecutor
 		if (page.get(sender.getName()).intValue() < 0)
 		{
 			// They tried to use /ks prev when they're on page 0
-			sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+			sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG
 					+ " Page does not exist");
 			// reset their current page back to 0
 			page.put(sender.getName(), 0);
@@ -1185,7 +1185,7 @@ public class Commander implements CommandExecutor
 		else if ((page.get(sender.getName()).intValue()) * config.limit > array.length)
 		{
 			// They tried to use /ks next at the end of the list
-			sender.sendMessage(ChatColor.YELLOW + KarmicJail.prefix
+			sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG
 					+ " Page does not exist");
 			// Revert to last page
 			page.put(sender.getName(), num - 1);

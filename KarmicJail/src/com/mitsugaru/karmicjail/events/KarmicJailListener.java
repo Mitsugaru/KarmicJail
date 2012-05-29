@@ -135,7 +135,7 @@ public class KarmicJailListener implements Listener
 				}
 				else
 				{
-					player.sendMessage(ChatColor.GREEN + KarmicJail.prefix
+					player.sendMessage(ChatColor.GREEN + KarmicJail.TAG
 							+ ChatColor.AQUA
 							+ "You have been removed from jail.");
 				}
@@ -256,7 +256,7 @@ public class KarmicJailListener implements Listener
 				if (time > 0)
 				{
 					final int minutes = (int) ((time / minutesToTicks));
-					player.sendMessage(ChatColor.RED + KarmicJail.prefix
+					player.sendMessage(ChatColor.RED + KarmicJail.TAG
 							+ ChatColor.AQUA + " You are jailed for "
 							+ plugin.prettifyMinutes(minutes) + ".");
 					plugin.addThread(playerName, time);
@@ -271,7 +271,7 @@ public class KarmicJailListener implements Listener
 			}
 			else
 			{
-				player.sendMessage(ChatColor.RED + KarmicJail.prefix
+				player.sendMessage(ChatColor.RED + KarmicJail.TAG
 						+ ChatColor.AQUA + " You are jailed.");
 				if (config.debugLog && config.debugEvents)
 				{
@@ -291,7 +291,7 @@ public class KarmicJailListener implements Listener
 			{
 				final StringBuilder sb = new StringBuilder();
 				final String reason = JailLogic.getJailReason(player.getName());
-				sb.append(ChatColor.RED + KarmicJail.prefix + ChatColor.AQUA
+				sb.append(ChatColor.RED + KarmicJail.TAG + ChatColor.AQUA
 						+ " " + playerName + ChatColor.RED + " jailed");
 				if (!reason.equals(""))
 				{

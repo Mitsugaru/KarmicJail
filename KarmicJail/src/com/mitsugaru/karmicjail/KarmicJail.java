@@ -24,7 +24,7 @@ import com.mitsugaru.karmicjail.permissions.PermCheck;
 public class KarmicJail extends JavaPlugin
 {
 	// Class Variables
-	public static final String prefix = "[KarmicJail]";
+	public static final String TAG = "[KarmicJail]";
 	public static final long minutesToTicks = 1200;
 	private Config config;
 	public ConsoleCommandSender console;
@@ -37,7 +37,7 @@ public class KarmicJail extends JavaPlugin
 	public void onDisable()
 	{
 		// Stop all running threads
-		getLogger().info(prefix + " Stopping all jail threads...");
+		getLogger().info("Stopping all jail threads...");
 		for (JailTask task : threads.values())
 		{
 			task.stop();
@@ -47,7 +47,7 @@ public class KarmicJail extends JavaPlugin
 		{
 			// Close connection
 			database.close();
-			getLogger().info(prefix + " Disconnected from database.");
+			getLogger().info("Disconnected from database.");
 		}
 	}
 

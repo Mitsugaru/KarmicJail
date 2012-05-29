@@ -196,7 +196,7 @@ public class Config
 		{
 			plugin.getLogger()
 					.warning(
-							KarmicJail.prefix
+							KarmicJail.TAG
 									+ " Entry limit is <= 0 || > 16. Reverting to default: 10");
 			limit = 10;
 			config.set("entrylimit", 10);
@@ -215,7 +215,7 @@ public class Config
 		{
 			// Update to latest version
 			plugin.getLogger().info(
-					KarmicJail.prefix + " Updating to v"
+					KarmicJail.TAG + " Updating to v"
 							+ plugin.getDescription().getVersion());
 			update();
 		}
@@ -243,12 +243,12 @@ public class Config
 		{
 			// Drop newly created tables
 			plugin.getLogger().info(
-					KarmicJail.prefix + " Dropping empty tables.");
+					KarmicJail.TAG + " Dropping empty tables.");
 			plugin.getDatabaseHandler().standardQuery(
 					"DROP TABLE " + tablePrefix + "jailed;");
 			// Update tables to have prefix
 			plugin.getLogger().info(
-					KarmicJail.prefix + " Renaming jailed table to '"
+					KarmicJail.TAG + " Renaming jailed table to '"
 							+ tablePrefix + "jailed'.");
 			query = "ALTER TABLE jailed RENAME TO " + tablePrefix + "jailed;";
 			plugin.getDatabaseHandler().standardQuery(query);
@@ -260,7 +260,7 @@ public class Config
 			{
 				final Set<PointThreeObject> entries = new HashSet<PointThreeObject>();
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Converting table '"
+						KarmicJail.TAG + " Converting table '"
 								+ Table.JAILED.getName() + "' ...");
 				// Grab old entries
 				final Query rs = plugin.getDatabaseHandler().select(
@@ -355,20 +355,20 @@ public class Config
 						catch (SQLException s)
 						{
 							plugin.getLogger().warning(
-									KarmicJail.prefix + " SQLException");
+									KarmicJail.TAG + " SQLException");
 							s.printStackTrace();
 						}
 					}
 					statement.close();
 				}
 				plugin.getLogger().info(
-						KarmicJail.prefix + " Conversion of table '"
+						KarmicJail.TAG + " Conversion of table '"
 								+ Table.JAILED.getName() + "' finished.");
 			}
 			catch (SQLException e)
 			{
 				plugin.getLogger().warning(
-						KarmicJail.prefix + " SQL Exception on 0.4 update");
+						KarmicJail.TAG + " SQL Exception on 0.4 update");
 				e.printStackTrace();
 			}
 
