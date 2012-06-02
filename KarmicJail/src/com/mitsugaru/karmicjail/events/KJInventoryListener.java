@@ -13,13 +13,13 @@ import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
-public class InventoryListener implements Listener
+public class KJInventoryListener implements Listener
 {
 	private static KarmicJail plugin;
 
-	public InventoryListener(KarmicJail plugin)
+	public KJInventoryListener(KarmicJail plugin)
 	{
-		InventoryListener.plugin = plugin;
+		KJInventoryListener.plugin = plugin;
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)

@@ -16,7 +16,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.mitsugaru.karmicjail.events.InventoryListener;
+import com.mitsugaru.karmicjail.events.KJInventoryListener;
 import com.mitsugaru.karmicjail.events.JailedListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
@@ -77,7 +77,7 @@ public class KarmicJail extends JavaPlugin
 		// Setup listeners
 		final PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(new KarmicJailListener(this), this);
-		pm.registerEvents(new InventoryListener(this), this);
+		pm.registerEvents(new KJInventoryListener(this), this);
 		pm.registerEvents(new JailedListener(this), this);
 	}
 
