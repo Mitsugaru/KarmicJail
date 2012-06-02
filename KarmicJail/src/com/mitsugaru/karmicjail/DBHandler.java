@@ -48,9 +48,8 @@ public class DBHandler
 		if (useMySQL)
 		{
 			// Connect to mysql database
-			mysql = new MySQL(plugin.getLogger(), KarmicJail.TAG,
-					config.host, config.port, config.database, config.user,
-					config.password);
+			mysql = new MySQL(plugin.getLogger(), KarmicJail.TAG, config.host,
+					config.port, config.database, config.user, config.password);
 			// Check if jailed table exists
 			if (!mysql.checkTable(Table.JAILED.getName()))
 			{
@@ -862,6 +861,7 @@ public class DBHandler
 				statement.setString(6, "" + item.getDurability());
 				if (!item.getEnchantments().isEmpty())
 				{
+					//TODO fix this to be ordered
 					StringBuilder sb = new StringBuilder();
 					for (Map.Entry<Enchantment, Integer> e : item
 							.getEnchantments().entrySet())

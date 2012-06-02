@@ -22,14 +22,14 @@ import com.mitsugaru.karmicjail.Config;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 
-public class JailedListener implements Listener
+public class KJPlayerListener implements Listener
 {
-	// private KarmicJail plugin;
+	//private KarmicJail plugin;
 	private Config config;
 
-	public JailedListener(KarmicJail plugin)
+	public KJPlayerListener(KarmicJail plugin)
 	{
-		// this.plugin = plugin;
+		//this.plugin = plugin;
 		this.config = plugin.getPluginConfig();
 	}
 
@@ -200,8 +200,21 @@ public class JailedListener implements Listener
 		}
 	}
 
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void itemDrop(final PlayerDropItemEvent event)
+	{
+		if (!event.isCancelled() && event.getPlayer() != null)
+		{
+			if (JailLogic.playerCache.contains(event.getPlayer().getName()))
+			{
+				// They are jailed and dropped an item
+				// TODO update thier inventory in the database
+			}
+		}
+	}
+
 	@EventHandler(priority = EventPriority.LOWEST)
-	public void inventoryClick(final InventoryClickEvent event)
+	public void inventoryClickValid(final InventoryClickEvent event)
 	{
 		if (!event.isCancelled() && event.getWhoClicked() != null)
 		{
