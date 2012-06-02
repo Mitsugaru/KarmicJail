@@ -74,6 +74,7 @@ public class KJInventoryListener implements Listener
 				boolean inside = false;
 				boolean fromInventory = false;
 				// boolean armor = false;
+				boolean invalid = false;
 				// TODO differentiate between regular inventory section and
 				// armor
 				// section 36 -> 39
@@ -90,6 +91,10 @@ public class KJInventoryListener implements Listener
 				else if (rawSlot >= 45 && rawSlot <= 80)
 				{
 					inside = true;
+				}
+				else
+				{
+					invalid = true;
 				}
 				// They clicked inside, handle changes
 				if (inside)
@@ -316,6 +321,10 @@ public class KJInventoryListener implements Listener
 					{
 						e.printStackTrace();
 					}
+				}
+				else if (invalid)
+				{
+					event.setCancelled(true);
 				}
 			}
 		}
