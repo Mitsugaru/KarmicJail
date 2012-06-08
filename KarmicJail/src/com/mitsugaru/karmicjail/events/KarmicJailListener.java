@@ -296,7 +296,7 @@ public class KarmicJailListener implements Listener
 				if (!reason.equals(""))
 				{
 					sb.append(" for " + ChatColor.GRAY
-							+ plugin.colorizeText(reason));
+							+ ChatColor.translateAlternateColorCodes('&', reason));
 				}
 				if (config.broadcastPerms)
 				{

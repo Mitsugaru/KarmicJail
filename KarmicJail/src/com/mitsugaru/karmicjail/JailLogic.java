@@ -162,7 +162,7 @@ public class JailLogic
 						player.sendMessage(ChatColor.RED + "Jailed by "
 								+ ChatColor.AQUA + sender.getName()
 								+ ChatColor.RED + " for: " + ChatColor.GRAY
-								+ plugin.colorizeText(reason));
+								+ ChatColor.translateAlternateColorCodes('&', reason));
 					}
 					if (timed)
 					{
@@ -211,7 +211,7 @@ public class JailLogic
 				if (!reason.equals(""))
 				{
 					sb.append(ChatColor.RED + " for " + ChatColor.GRAY
-							+ plugin.colorizeText(reason));
+							+ ChatColor.translateAlternateColorCodes('&', reason));
 				}
 				database.addToHistory(name, sb.toString());
 				// Notify
@@ -235,7 +235,7 @@ public class JailLogic
 					if (!pi.reason.equals(""))
 					{
 						sb.append(ChatColor.RED + " for " + ChatColor.GRAY
-								+ plugin.colorizeText(pi.reason));
+								+ ChatColor.translateAlternateColorCodes('&', pi.reason));
 					}
 					if (pi.mute)
 					{
@@ -715,13 +715,13 @@ public class JailLogic
 		{
 			database.addToHistory(name, ChatColor.GOLD + "Reason changed for "
 					+ ChatColor.AQUA + name + ChatColor.RED + " to "
-					+ ChatColor.GRAY + plugin.colorizeText(reason));
+					+ ChatColor.GRAY + ChatColor.translateAlternateColorCodes('&', reason));
 		}
 		// broadcast
 		if (config.broadcastReason)
 		{
 			final String out = ChatColor.AQUA + name + ChatColor.RED + " for "
-					+ ChatColor.GRAY + plugin.colorizeText(reason);
+					+ ChatColor.GRAY + ChatColor.translateAlternateColorCodes('&', reason);
 			if (config.broadcastPerms)
 			{
 				plugin.getServer().broadcast(out, "KarmicJail.broadcast");
@@ -1046,7 +1046,7 @@ public class JailLogic
 		if (!reason.equals("UNKOWN"))
 		{
 			sb.append(ChatColor.RED + " for " + ChatColor.GRAY
-					+ plugin.colorizeText(reason));
+					+ ChatColor.translateAlternateColorCodes('&', reason));
 		}
 		if (muted)
 		{

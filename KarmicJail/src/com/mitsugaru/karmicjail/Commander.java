@@ -1065,7 +1065,7 @@ public class Commander implements CommandExecutor
 				if (i < array.length)
 				{
 
-					sender.sendMessage(plugin.colorizeText(array[i]));
+					sender.sendMessage(ChatColor.translateAlternateColorCodes('&', array[i]));
 				}
 				else
 				{
@@ -1247,7 +1247,7 @@ public class Commander implements CommandExecutor
 					if (!array[i].reason.equals(""))
 					{
 						sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY
-								+ plugin.colorizeText(array[i].reason));
+								+ ChatColor.translateAlternateColorCodes('&', array[i].reason));
 					}
 					// Grab if muted
 					if (array[i].mute)
