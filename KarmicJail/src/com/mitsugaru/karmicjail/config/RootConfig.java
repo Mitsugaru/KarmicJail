@@ -13,7 +13,8 @@ public class RootConfig
 {
 	// Class variables
 	private KarmicJail plugin;
-	public String host, port, database, user, password, tablePrefix;
+	public String host, port, database, user, password;
+	public static String tablePrefix;
 	public boolean useMySQL, debugLog, debugEvents, debugTime, debugGroups,
 			importSQL, unjailTeleport, jailTeleport, jailTeleportRespawn,
 			removeGroups, returnGroups, broadcastJail, broadcastUnjail,

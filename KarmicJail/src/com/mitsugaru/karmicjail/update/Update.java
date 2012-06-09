@@ -5,13 +5,13 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-import lib.Mitsugaru.SQLibrary.Database.Query;
 
 import org.bukkit.configuration.ConfigurationSection;
 
 import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.DBHandler.Table;
+import com.mitsugaru.karmicjail.database.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
 import com.mitsugaru.karmicjail.update.holders.PointThreeObject;
 
 public class Update

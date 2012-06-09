@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import lib.Mitsugaru.SQLibrary.Database.Query;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,10 +17,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.mitsugaru.karmicjail.DBHandler.Table;
+import com.mitsugaru.karmicjail.database.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;

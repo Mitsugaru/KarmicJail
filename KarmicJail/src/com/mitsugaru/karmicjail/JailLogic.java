@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import lib.Mitsugaru.SQLibrary.Database.Query;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -25,11 +24,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import com.mitsugaru.karmicjail.DBHandler.Field;
-import com.mitsugaru.karmicjail.DBHandler.Table;
+import com.mitsugaru.karmicjail.database.DBHandler;
+import com.mitsugaru.karmicjail.database.Field;
+import com.mitsugaru.karmicjail.database.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
 import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
 import com.mitsugaru.karmicjail.events.KarmicJailEvent;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
@@ -541,8 +542,8 @@ public class JailLogic
 		{
 			name = player;
 		}
-		database.standardQuery("UPDATE " + config.tablePrefix
-				+ "jailed SET time='" + duration + "' WHERE playername='"
+		database.standardQuery("UPDATE " + Table.JAILED.getName()
+				+ " SET time='" + duration + "' WHERE playername='"
 				+ name + "';");
 	}
 
@@ -594,7 +595,7 @@ public class JailLogic
 		{
 			boolean has = false;
 			Query rs = database.select("SELECT COUNT(*) FROM "
-					+ config.tablePrefix + "jailed WHERE playername='" + name
+					+ Table.JAILED.getName() + " WHERE playername='" + name
 					+ "';");
 			if (rs.getResult().next())
 			{
@@ -611,8 +612,8 @@ public class JailLogic
 			if (!has)
 			{
 				// Add to database
-				database.standardQuery("INSERT INTO " + config.tablePrefix
-						+ "jailed (playername,status,time) VALUES ('" + name
+				database.standardQuery("INSERT INTO " + Table.JAILED.getName()
+						+ " (playername,status,time) VALUES ('" + name
 						+ "', '" + JailStatus.FREED + "', '-1');");
 			}
 		}

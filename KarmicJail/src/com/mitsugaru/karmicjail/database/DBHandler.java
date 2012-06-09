@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.karmicjail.database;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -11,13 +11,15 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
+import com.mitsugaru.karmicjail.JailLogic;
+import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.database.SQLibrary.MySQL;
+import com.mitsugaru.karmicjail.database.SQLibrary.SQLite;
+import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
 import com.mitsugaru.karmicjail.inventory.Item;
 
-import lib.Mitsugaru.SQLibrary.Database.Query;
-import lib.Mitsugaru.SQLibrary.MySQL;
-import lib.Mitsugaru.SQLibrary.SQLite;
 
 public class DBHandler
 {
@@ -129,16 +131,16 @@ public class DBHandler
 			sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail",
 					plugin.getDataFolder().getAbsolutePath());
 			// Copy items
-			Query rs = sqlite.select("SELECT * FROM " + config.tablePrefix
-					+ "jailed;");
+			Query rs = sqlite.select("SELECT * FROM " + Table.JAILED.getName()
+					+ ";");
 			if (rs.getResult().next())
 			{
 				plugin.getLogger().info(
 						KarmicJail.TAG + " Importing jailed players...");
 				PreparedStatement statement = mysql
 						.prepare("INSERT INTO "
-								+ config.tablePrefix
-								+ "jailed (playername, status, time, groups, jailer, date, reason, muted, lastpos) VALUES(?,?,?,?,?,?,?,?,?);");
+								+ Table.JAILED.getName()
+								+ " (playername, status, time, groups, jailer, date, reason, muted, lastpos) VALUES(?,?,?,?,?,?,?,?,?);");
 				do
 				{
 					String name = rs.getResult().getString("playername");
@@ -215,6 +217,7 @@ public class DBHandler
 			}
 			rs.closeQuery();
 			// TODO import inventory
+			// TODO import history
 			plugin.getLogger().info(
 					KarmicJail.TAG + " Done importing SQLite into MySQL");
 		}
@@ -517,7 +520,7 @@ public class DBHandler
 								+ id + "'");
 						if (query.getResult().next())
 						{
-							out = query.getResult().getString(field.columnname);
+							out = query.getResult().getString(field.getColumnName());
 							if (query.getResult().wasNull())
 							{
 								out = "";
@@ -578,7 +581,7 @@ public class DBHandler
 								+ id + "'");
 						if (query.getResult().next())
 						{
-							out = query.getResult().getInt(field.columnname);
+							out = query.getResult().getInt(field.getColumnName());
 							if (query.getResult().wasNull())
 							{
 								out = -1;
@@ -639,7 +642,7 @@ public class DBHandler
 								+ id + "'");
 						if (query.getResult().next())
 						{
-							out = query.getResult().getDouble(field.columnname);
+							out = query.getResult().getDouble(field.getColumnName());
 							if (query.getResult().wasNull())
 							{
 								out = -1;
@@ -906,70 +909,6 @@ public class DBHandler
 		{
 			standardQuery("DELETE FROM " + Table.INVENTORY.getName()
 					+ " WHERE id='" + id + "' AND slot='" + slot + "';");
-		}
-	}
-
-	public enum Field
-	{
-		PLAYERNAME(Table.JAILED, "playername", Type.STRING), STATUS(
-				Table.JAILED, "status", Type.STRING), TIME(Table.JAILED,
-				"time", Type.DOUBLE), GROUPS(Table.JAILED, "groups",
-				Type.STRING), JAILER(Table.JAILED, "jailer", Type.STRING), DATE(
-				Table.JAILED, "date", Type.STRING), REASON(Table.JAILED,
-				"reason", Type.STRING), MUTE(Table.JAILED, "muted", Type.INT), LAST_POSITION(
-				Table.JAILED, "lastpos", Type.STRING), HISTORY(Table.HISTORY,
-				"history", Type.STRING), INV_SLOT(Table.INVENTORY, "slot",
-				Type.INT), INV_ITEM(Table.INVENTORY, "itemid", Type.INT), INV_AMOUNT(
-				Table.INVENTORY, "amount", Type.INT), INV_DATA(Table.INVENTORY,
-				"data", Type.STRING), INV_DURABILITY(Table.INVENTORY,
-				"durability", Type.STRING), INV_ENCHANT(Table.INVENTORY,
-				"enchantments", Type.STRING);
-		private final Table table;
-		private final Type type;
-		private final String columnname;
-
-		private Field(Table table, String column, Type type)
-		{
-			this.table = table;
-			this.columnname = column;
-			this.type = type;
-		}
-
-		public Table getTable()
-		{
-			return table;
-		}
-
-		public String getColumnName()
-		{
-			return columnname;
-		}
-
-		public Type getType()
-		{
-			return type;
-		}
-	}
-
-	public enum Type
-	{
-		STRING, INT, DOUBLE;
-	}
-
-	public enum Table
-	{
-		JAILED(config.tablePrefix + "jailed"), INVENTORY(config.tablePrefix
-				+ "inventory"), HISTORY(config.tablePrefix + "history");
-		private final String table;
-
-		private Table(String table)
-		{
-			this.table = table;
-		}
-
-		public String getName()
-		{
-			return table;
 		}
 	}
 }

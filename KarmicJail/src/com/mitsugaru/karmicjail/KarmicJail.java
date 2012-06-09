@@ -16,6 +16,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.events.KJInventoryListener;
 import com.mitsugaru.karmicjail.events.KJPlayerListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
