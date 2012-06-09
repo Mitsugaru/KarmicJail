@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
+import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
@@ -29,7 +30,7 @@ public class Commander implements CommandExecutor
 {
 	private KarmicJail plugin;
 	private PermCheck perm;
-	private Config config;
+	private RootConfig config;
 	private static final String bar = "======================";
 	private final Map<String, Integer> page = new HashMap<String, Integer>();
 	private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();

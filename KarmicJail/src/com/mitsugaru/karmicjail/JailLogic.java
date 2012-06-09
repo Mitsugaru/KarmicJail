@@ -29,6 +29,7 @@ import com.mitsugaru.karmicjail.DBHandler.Field;
 import com.mitsugaru.karmicjail.DBHandler.Table;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
 import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
+import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.events.KarmicJailEvent;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
@@ -39,7 +40,7 @@ import com.platymuus.bukkit.permissions.PermissionsPlugin;
 public class JailLogic
 {
 	private static KarmicJail plugin;
-	private static Config config;
+	private static RootConfig config;
 	private static PermCheck perm;
 	private static DBHandler database;
 	private final static DateFormat dateFormat = new SimpleDateFormat(

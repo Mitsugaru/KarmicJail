@@ -12,6 +12,7 @@ import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.inventory.Item;
 
 import lib.Mitsugaru.SQLibrary.Database.Query;
@@ -22,12 +23,12 @@ public class DBHandler
 {
 	// Class Variables
 	private KarmicJail plugin;
-	private static Config config;
+	private static RootConfig config;
 	private SQLite sqlite;
 	private MySQL mysql;
 	private boolean useMySQL;
 
-	public DBHandler(KarmicJail ks, Config conf)
+	public DBHandler(KarmicJail ks, RootConfig conf)
 	{
 		plugin = ks;
 		config = conf;

@@ -15,17 +15,19 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.events.KJInventoryListener;
 import com.mitsugaru.karmicjail.events.KJPlayerListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
+import com.mitsugaru.karmicjail.update.Update;
 
 public class KarmicJail extends JavaPlugin
 {
 	// Class Variables
 	public static final String TAG = "[KarmicJail]";
 	public static final long minutesToTicks = 1200;
-	private Config config;
+	private RootConfig config;
 	public ConsoleCommandSender console;
 	private PermCheck perm;
 	private DBHandler database;
@@ -57,12 +59,13 @@ public class KarmicJail extends JavaPlugin
 		console = this.getServer().getConsoleSender();
 
 		// Grab config
-		config = new Config(this);
+		config = new RootConfig(this);
 		// Grab database
 		database = new DBHandler(this, config);
 
 		// Check if any updates are necessary
-		config.checkUpdate();
+		Update.init(this);
+		Update.checkUpdate();
 
 		// Get permissions plugin:
 		perm = new PermCheck(this);
@@ -152,7 +155,7 @@ public class KarmicJail extends JavaPlugin
 		return Name;
 	}
 
-	public Config getPluginConfig()
+	public RootConfig getPluginConfig()
 	{
 		return config;
 	}

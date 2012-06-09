@@ -8,10 +8,10 @@
 package com.mitsugaru.karmicjail.events;
 
 import com.mitsugaru.karmicjail.Commander;
-import com.mitsugaru.karmicjail.Config;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
 import org.bukkit.ChatColor;
@@ -29,7 +29,7 @@ public class KarmicJailListener implements Listener
 {
 	// Class variables
 	private final KarmicJail plugin;
-	private final Config config;
+	private final RootConfig config;
 	private static final long minutesToTicks = 1200;
 
 	public KarmicJailListener(KarmicJail plugin)
