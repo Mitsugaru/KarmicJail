@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.karmicjail.commands;
 
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -17,9 +17,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.mitsugaru.karmicjail.JailLogic;
+import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.database.Table;
-import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
-import com.mitsugaru.karmicjail.KarmicJail.PrisonerInfo;
+import com.mitsugaru.karmicjail.jail.JailStatus;
+import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;

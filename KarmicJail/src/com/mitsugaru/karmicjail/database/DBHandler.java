@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.SQLibrary.MySQL;
 import com.mitsugaru.karmicjail.database.SQLibrary.SQLite;

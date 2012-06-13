@@ -10,7 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.database.Table;
-import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
 import com.mitsugaru.karmicjail.update.holders.PointThreeObject;
 

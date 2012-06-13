@@ -7,10 +7,10 @@
  */
 package com.mitsugaru.karmicjail.events;
 
-import com.mitsugaru.karmicjail.Commander;
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.KarmicJail.JailStatus;
+import com.mitsugaru.karmicjail.jail.JailStatus;
+import com.mitsugaru.karmicjail.commands.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 

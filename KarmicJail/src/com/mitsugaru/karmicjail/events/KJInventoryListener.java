@@ -8,8 +8,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-import com.mitsugaru.karmicjail.Commander;
 import com.mitsugaru.karmicjail.KarmicJail;
+import com.mitsugaru.karmicjail.commands.Commander;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
