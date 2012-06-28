@@ -23,6 +23,7 @@ public class RootConfig
 			warpAllOnJoin, useJailGroup, useUnjailGroup, denyBlockPlace,
 			denyBlockBreak, denyInteract, denyInventory, denyItemPickup,
 			denyItemDrop, denyItemCraft, denyItemEnchant, denyChat, denyCommands, denyMove;
+	public static boolean debugDatabase;
 	public Location jailLoc, unjailLoc;
 	public String jailGroup, unjailGroup;
 	public int limit;
@@ -90,6 +91,7 @@ public class RootConfig
 		defaults.put("mysql.tablePrefix", "kj_");
 		defaults.put("mysql.import", false);
 		defaults.put("debug.logToConsole", false);
+		defaults.put("debug.database", false);
 		defaults.put("debug.events", false);
 		defaults.put("debug.groups", false);
 		defaults.put("debug.time", false);
@@ -147,6 +149,7 @@ public class RootConfig
 		unjailGroup = config.getString("group.unjail.group", "Default");
 		useUnjailGroup = config.getBoolean("group.unjail.use", false);
 		debugLog = config.getBoolean("debug.logToConsole", false);
+		debugDatabase = config.getBoolean("debug.database", false);
 		debugEvents = config.getBoolean("debug.events", false);
 		debugGroups = config.getBoolean("debug.groups", false);
 		debugTime = config.getBoolean("debug.time", false);

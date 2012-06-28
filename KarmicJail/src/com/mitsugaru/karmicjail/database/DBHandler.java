@@ -17,7 +17,7 @@ import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.SQLibrary.MySQL;
 import com.mitsugaru.karmicjail.database.SQLibrary.SQLite;
-import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
+import com.mitsugaru.karmicjail.database.SQLibrary.Query;
 import com.mitsugaru.karmicjail.inventory.Item;
 
 

@@ -32,7 +32,7 @@ public class SQLite extends Database {
 	public String location;
 	public String name;
 	private File sqlFile;
-	private final int timeout = 1000;
+	private static final int timeout = 1000;
 	private int count;
 
 	public SQLite(Logger log, String prefix, String name, String location) {
@@ -43,37 +43,17 @@ public class SQLite extends Database {
 		if (this.name.contains("/") ||
 				this.name.contains("\\") ||
 				this.name.endsWith(".db")) {
-			this.writeError("The database name can not contain: /, \\, or .db", true);
+			this.writeError("The database name can not contain: /, \\, or .db", true, null);
 		}
 		if (!folder.exists()) {
 			if(!folder.mkdir())
 			{
-				this.writeError(" Could not create folder @ '" + folder.getAbsolutePath(), true);
+				this.writeError(" Could not create folder @ '" + folder.getAbsolutePath(), true, null);
 			}
 		}
 
 		sqlFile = new File(folder.getAbsolutePath() + File.separator + name + ".db");
 		count = 0;
-	}
-
-	/*@Override
-	public void writeInfo(String toWrite) {
-		if (toWrite != null) {
-			this.log.info(this.PREFIX + this.DATABASE_PREFIX + toWrite);
-		}
-	}*/
-
-	@Override
-	public void writeError(String toWrite, boolean severe) {
-		if (severe) {
-			if (toWrite != null) {
-				this.log.severe(this.PREFIX + this.DATABASE_PREFIX + toWrite);
-			}
-		} else {
-			if (toWrite != null) {
-				this.log.warning(this.PREFIX + this.DATABASE_PREFIX + toWrite);
-			}
-		}
 	}
 
 	@Override
@@ -83,7 +63,7 @@ public class SQLite extends Database {
 
 		  return true;
 		} catch (ClassNotFoundException e) {
-		  this.writeError("You need the SQLite library " + e, true);
+		  this.writeError("You need the SQLite library " + e, true, e);
 		  return false;
 		}
 	}
@@ -95,7 +75,7 @@ public class SQLite extends Database {
 			  return DriverManager.getConnection("jdbc:sqlite:" +
 					  	   sqlFile.getAbsolutePath());
 			} catch (SQLException e) {
-			  this.writeError("SQLite exception on initialize " + e, true);
+			  this.writeError("SQLite exception on initialize " + e, true, e);
 			}
 		}
 		return null;
@@ -108,7 +88,7 @@ public class SQLite extends Database {
 			try {
 				connection.close();
 			} catch (SQLException ex) {
-				this.writeError("Error on Connection close: " + ex, true);
+				this.writeError("Error on Connection close: " + ex.getMessage(), true, ex);
 			}
 	}
 
@@ -151,7 +131,7 @@ public class SQLite extends Database {
 				return retryResult(query);
 				//this.writeError("",false);
 			} else {
-				this.writeError("Error at SQL Query: " + ex.getMessage(), false);
+				this.writeError("Error at SQL Query: " + ex.getMessage(), false, ex);
 			}
 
 		}
@@ -167,7 +147,8 @@ public class SQLite extends Database {
 		while (!passed && count < timeout) {
 			try {
 				statement = connection.createStatement();
-				statement.executeQuery(query);
+				final ResultSet rs = statement.executeQuery(query);
+				rs.close();
 				statement.close();
 				connection.close();
 				passed = true;
@@ -175,16 +156,16 @@ public class SQLite extends Database {
 				if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked")) {
 					passed = false;
 					count++;
-					this.writeError("Locked",false);
+					this.writeError("Locked",false, ex);
 				} else {
 					if(!(ex.toString().contains("not return ResultSet")))
-						this.writeError("Error at SQL Query: " + ex.getMessage(), false);
+						this.writeError("Error at SQL Query: " + ex.getMessage(), false, ex);
 				}
 			}
 		}
 		if(count >= timeout)
 		{
-			this.writeError("Failed to write to SQLite database. Timed out.",true);
+			this.writeError("Failed to write to SQLite database. Timed out.",true, null);
 		}
 	}
 
@@ -195,7 +176,8 @@ public class SQLite extends Database {
 		try {
 			connection = this.open();
 			statement = connection.createStatement();
-			statement.executeQuery(query);
+			final ResultSet rs = statement.executeQuery(query);
+			rs.close();
 			statement.close();
 			connection.close();
 			}
@@ -205,7 +187,7 @@ public class SQLite extends Database {
 				retryQuery(query);
 			} else {
 				if(!(ex.toString().contains("not return ResultSet")))
-					this.writeError("Error at SQL Query: " + ex.getMessage(), false);
+					this.writeError("Error at SQL Query: " + ex.getMessage(), false, ex);
 			}
 		}
 	}
@@ -221,7 +203,7 @@ public class SQLite extends Database {
 	        return ps;
 	    } catch(SQLException e) {
 	        if(!e.toString().contains("not return ResultSet"))
-	        	this.writeError("Error in SQL prepare() query: " + e.getMessage(), false);
+	        	this.writeError("Error in SQL prepare() query: " + e.getMessage(), false, e);
 	    }
 	    return ps;
 	}
@@ -231,14 +213,14 @@ public class SQLite extends Database {
 		try {
 			if(query == null)
 			{
-				this.writeError("SQL Create Table query null", true);
+				this.writeError("SQL Create Table query null", true, null);
 				return false;
 			}
 			if (query.equals("") || query == null) {
-				this.writeError("SQL Create Table query empty.", true);
+				this.writeError("SQL Create Table query empty.", true, null);
 				return false;
 			}
-			Connection connection = open();
+			final Connection connection = open();
 			Statement statement = null;
 			statement = connection.createStatement();
 			statement.execute(query);
@@ -246,7 +228,7 @@ public class SQLite extends Database {
 			connection.close();
 			return true;
 		} catch (SQLException ex){
-			this.writeError(ex.getMessage(), true);
+			this.writeError(ex.getMessage(), true, ex);
 			return false;
 		}
 	}
@@ -265,68 +247,29 @@ public class SQLite extends Database {
 			tables.close();
 			return has;
 		} catch (SQLException e) {
-			this.writeError("Failed to check if table \"" + table + "\" exists: " + e.getMessage(), true);
+			this.writeError("Failed to check if table \"" + table + "\" exists: " + e.getMessage(), true, e);
 			return false;
 		}
 	}
 
 	@Override
 	public boolean wipeTable(String table) {
-		Connection connection = open();
-		Statement statement = null;
-		String query = null;
 		try {
 			if (!this.checkTable(table)) {
-				this.writeError("Error at Wipe Table: table, " + table + ", does not exist", true);
+				this.writeError("Error at Wipe Table: table, " + table + ", does not exist", true, null);
 				return false;
 			}
-			statement = connection.createStatement();
-			query = "DELETE FROM " + table + ";";
-			statement.executeQuery(query);
+			final PreparedStatement statement = prepare("DELETE FROM ?;");
+			statement.setString(1, table);
+			statement.execute();
+			statement.close();
 			return true;
 		} catch (SQLException ex) {
 			if (!(ex.getMessage().toLowerCase().contains("locking") ||
 				ex.getMessage().toLowerCase().contains("locked")) &&
 				!ex.toString().contains("not return ResultSet"))
-					this.writeError("Error at SQL Wipe Table Query: " + ex, false);
+					this.writeError("Error at SQL Wipe Table Query: " + ex, false, ex);
 			return false;
-		}
-	}
-
-	/*
-	 * <b>retry</b><br>
-	 * <br>
-	 * Retries.
-	 * <br>
-	 * <br>
-	 * @param query The SQL query.
-	 */
-	public void retry(String query) {
-		boolean passed = false;
-		Connection connection = open();
-		Statement statement = null;
-		count = 0;
-
-		while (!passed || count < timeout) {
-			try {
-				statement = connection.createStatement();
-				statement.executeQuery(query);
-				statement.close();
-				connection.close();
-				passed = true;
-			} catch (SQLException ex) {
-				if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked") ) {
-					passed = false;
-					count++;
-					this.writeError("Locked",false);
-				} else {
-					this.writeError("Error at SQL Query: " + ex.getMessage(), false);
-				}
-			}
-		}
-		if(count >= timeout)
-		{
-			this.writeError("Failed to write to SQLite database. Timed out.",true);
 		}
 	}
 
@@ -352,7 +295,7 @@ public class SQLite extends Database {
 				if (ex.getMessage().toLowerCase().contains("locking") || ex.getMessage().toLowerCase().contains("locked")) {
 					passed = false;
 				} else {
-					this.writeError("Error at SQL Query: " + ex.getMessage(), false);
+					this.writeError("Error at SQL Query: " + ex.getMessage(), false, ex);
 				}
 			}
 		}

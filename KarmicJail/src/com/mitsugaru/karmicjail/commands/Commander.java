@@ -23,7 +23,7 @@ import com.mitsugaru.karmicjail.database.Table;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 import com.mitsugaru.karmicjail.config.RootConfig;
-import com.mitsugaru.karmicjail.database.SQLibrary.Database.Query;
+import com.mitsugaru.karmicjail.database.SQLibrary.Query;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
