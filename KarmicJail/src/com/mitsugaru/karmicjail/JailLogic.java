@@ -1306,7 +1306,7 @@ public class JailLogic
 							 * plugin.getLogger().info( item.toString() + " at "
 							 * + i);
 							 */
-							items.put(new Integer(i), item);
+							items.put(Integer.valueOf(i), item);
 						}
 					}
 				}
