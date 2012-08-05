@@ -21,7 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -37,7 +37,7 @@ public class KarmicJailListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerChat(final PlayerChatEvent event) {
+    public void onPlayerChat(final AsyncPlayerChatEvent event) {
 	final String name = event.getPlayer().getName();
 	if (JailLogic.playerCache.contains(name)) {
 	    if (JailLogic.playerIsMuted(name)) {
