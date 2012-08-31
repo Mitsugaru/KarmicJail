@@ -779,12 +779,10 @@ public class DBHandler
 						short dur = query.getResult().getShort(
 								Field.INV_DURABILITY.getColumnName());
 						ItemStack add = null;
-						if (Item.isTool(itemid))
+						if (Item.isTool(itemid) || Item.isPotion(itemid))
 						{
 							add = new ItemStack(itemid, amount, dur);
-						}
-						else
-						{
+						} else {
 							add = new ItemStack(itemid, amount, dur, data);
 						}
 						String enchantments = query.getResult().getString(
