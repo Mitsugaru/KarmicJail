@@ -4,6 +4,7 @@ description: Jail plugin for Mine-RP
 version: 0.436
 author: Original - imjake9 ... Fork - Mitsugaru
 depend: [Vault]
+softdepend: [Multiverse-Core]
 
 commands:
   jail:
