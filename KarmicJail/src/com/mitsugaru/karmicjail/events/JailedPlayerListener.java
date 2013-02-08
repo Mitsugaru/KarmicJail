@@ -32,8 +32,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void chatValid(final AsyncPlayerChatEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyChat && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyChat && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -43,8 +44,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void commandValid(final PlayerCommandPreprocessEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyCommands && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyCommands && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -54,8 +56,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void interactValid(final PlayerInteractEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyInteract && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyInteract && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -65,8 +68,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void interactEntityValid(final PlayerInteractEntityEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyInteract && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyInteract && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -76,8 +80,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void moveValid(final PlayerMoveEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyMove && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyMove && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -87,8 +92,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void blockPlaceValid(final BlockPlaceEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyBlockPlace && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyBlockPlace && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -98,8 +104,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void blockDestroyValid(final BlockBreakEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyBlockBreak && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyBlockBreak && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -109,8 +116,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void craftItemValid(final CraftItemEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getWhoClicked() != null) {
-         if(config.denyItemCraft && event.getWhoClicked() instanceof Player && JailLogic.PLAYER_CACHE.contains(event.getWhoClicked().getName())) {
+         if(config.denyItemCraft && event.getWhoClicked() instanceof Player && logic.getPlayerCache().contains(event.getWhoClicked().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage((Player) event.getWhoClicked());
          }
@@ -120,8 +128,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void enchantItemValid(final EnchantItemEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getEnchanter() != null) {
-         if(config.denyItemEnchant && event.getEnchanter() instanceof Player && JailLogic.PLAYER_CACHE.contains(event.getEnchanter().getName())) {
+         if(config.denyItemEnchant && event.getEnchanter() instanceof Player && logic.getPlayerCache().contains(event.getEnchanter().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage((Player) event.getEnchanter());
          }
@@ -131,8 +140,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void itemPickupValid(final PlayerPickupItemEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyItemPickup && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyItemPickup && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -142,8 +152,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void itemDropValid(final PlayerDropItemEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(config.denyItemDrop && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(config.denyItemDrop && logic.getPlayerCache().contains(event.getPlayer().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage(event.getPlayer());
          }
@@ -152,8 +163,9 @@ public class JailedPlayerListener implements Listener {
 
    @EventHandler(priority = EventPriority.MONITOR)
    public void itemDrop(final PlayerDropItemEvent event) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getPlayer() != null) {
-         if(JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+         if(logic.getPlayerCache().contains(event.getPlayer().getName())) {
             // They are jailed and dropped an item
             // TODO update thier inventory in the database
          }
@@ -163,8 +175,9 @@ public class JailedPlayerListener implements Listener {
    @EventHandler(priority = EventPriority.LOWEST)
    public void inventoryClickValid(final InventoryClickEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(!event.isCancelled() && event.getWhoClicked() != null) {
-         if(config.denyInventory && event.getWhoClicked() instanceof Player && JailLogic.PLAYER_CACHE.contains(event.getWhoClicked().getName())) {
+         if(config.denyInventory && event.getWhoClicked() instanceof Player && logic.getPlayerCache().contains(event.getWhoClicked().getName())) {
             event.setCancelled(true);
             sendDenyJailMessage((Player) event.getWhoClicked());
          }

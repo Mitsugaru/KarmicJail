@@ -44,9 +44,20 @@ import com.platymuus.bukkit.permissions.PermissionsPlugin;
  * Logic handler for KarmicJail.
  */
 public class JailLogic extends JailModule {
+   /**
+    * Date formatter.
+    */
    private final static DateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm z");
-   public final static Set<String> PLAYER_CACHE = new HashSet<String>();
+   /**
+    * Cache of jailed online players.
+    */
+   private final Set<String> PLAYER_CACHE = new HashSet<String>();
 
+   /**
+    * Constructor.
+    * 
+    * @param plugin
+    */
    public JailLogic(KarmicJail plugin) {
       super(plugin);
    }
@@ -282,6 +293,17 @@ public class JailLogic extends JailModule {
       freePlayer(sender, name, false);
    }
 
+   /**
+    * Unjails a player. Called if they were unjailed while offline or if their
+    * jail time runs out.
+    * 
+    * @param sender
+    *           - Typically console.
+    * @param inName
+    *           - Name of unjailed player.
+    * @param fromTempJail
+    *           - Whether they were temporarily jailed.
+    */
    public void freePlayer(CommandSender sender, String inName, boolean fromTempJail) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
@@ -525,6 +547,16 @@ public class JailLogic extends JailModule {
       return false;
    }
 
+   /**
+    * Set the jail time for the given player name.
+    * 
+    * @param sender
+    *           - Sender of command.
+    * @param name
+    *           - Name of jailed player.
+    * @param minutes
+    *           - Time in minutes.
+    */
    public void setJailTime(CommandSender sender, String name, int minutes) {
       // Check if player is in jail:
       if(!playerIsJailed(name) && !playerIsPendingJail(name)) {
@@ -567,6 +599,14 @@ public class JailLogic extends JailModule {
 
    }
 
+   /**
+    * Set the reason for the player.
+    * 
+    * @param inName
+    *           - Name of player.
+    * @param reason
+    *           - Reason string.
+    */
    public void setPlayerReason(String inName, String reason) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
@@ -611,6 +651,13 @@ public class JailLogic extends JailModule {
       return reason;
    }
 
+   /**
+    * Check if given player is muted.
+    * 
+    * @param player
+    *           - Player to check.
+    * @return True if player is muted, else false.
+    */
    public boolean playerIsMuted(String player) {
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       boolean mute = false;
@@ -625,7 +672,15 @@ public class JailLogic extends JailModule {
       return mute;
    }
 
-   public void mutePlayer(CommandSender sender, String player) {
+   /**
+    * Toggle mute for a player.
+    * 
+    * @param sender
+    *           - Sender of command.
+    * @param player
+    *           - Player to toggle mute for.
+    */
+   public void toggleMutePlayer(CommandSender sender, String player) {
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(player);
       if(name == null) {
@@ -963,6 +1018,7 @@ public class JailLogic extends JailModule {
    }
 
    /**
+    * Jail location.
     * 
     * @return location of jail
     */
@@ -972,6 +1028,7 @@ public class JailLogic extends JailModule {
    }
 
    /**
+    * Unjail location.
     * 
     * @return location of unjail
     */
@@ -994,6 +1051,14 @@ public class JailLogic extends JailModule {
       }
    }
 
+   /**
+    * Set the jailed player's last known location.
+    * 
+    * @param playername
+    *           - Name of player.
+    * @param location
+    *           - Location to use.
+    */
    public void setPlayerLastLocation(String playername, Location location) {
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(playername);
@@ -1005,6 +1070,13 @@ public class JailLogic extends JailModule {
       database.setField(Field.LAST_POSITION, name, entry, 0, 0);
    }
 
+   /**
+    * Get the last location of a player.
+    * 
+    * @param playername
+    *           - Name of player.
+    * @return Player's last known location.
+    */
    public Location getPlayerLastLocation(String playername) {
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       Location location = null;
@@ -1030,6 +1102,17 @@ public class JailLogic extends JailModule {
       return location;
    }
 
+   /**
+    * Record the inventory of a player.
+    * 
+    * @param playername
+    *           - Name of player.
+    * @param inventory
+    *           - Inventory.
+    * @param clear
+    *           - Whether or not to clear the player's inventory after saving
+    *           it.
+    */
    public void setPlayerInventory(String playername, Inventory inventory, boolean clear) {
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
@@ -1075,6 +1158,10 @@ public class JailLogic extends JailModule {
          }
       }
 
+   }
+
+   public Set<String> getPlayerCache() {
+      return PLAYER_CACHE;
    }
 
 }

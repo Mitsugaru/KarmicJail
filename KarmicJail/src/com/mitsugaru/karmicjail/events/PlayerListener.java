@@ -41,7 +41,7 @@ public class PlayerListener implements Listener {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       final String name = event.getPlayer().getName();
-      if(JailLogic.PLAYER_CACHE.contains(name)) {
+      if(logic.getPlayerCache().contains(name)) {
          if(logic.playerIsMuted(name)) {
             if(config.debugLog && config.debugEvents) {
                plugin.getLogger().info("Muted '" + name + "' with message: " + event.getMessage());
@@ -58,7 +58,7 @@ public class PlayerListener implements Listener {
       // Grab name
       final String name = event.getPlayer().getName();
       // Check if they're in the cache
-      if(config.jailTeleportRespawn && JailLogic.PLAYER_CACHE.contains(name)) {
+      if(config.jailTeleportRespawn && logic.getPlayerCache().contains(name)) {
          event.setRespawnLocation(logic.getJailLocation());
          if(config.debugLog && config.debugEvents) {
             plugin.getLogger().info("Respawned '" + name + "' to jail.");
@@ -145,7 +145,7 @@ public class PlayerListener implements Listener {
          }
          // Remove from cache
          try {
-            JailLogic.PLAYER_CACHE.remove(name);
+            logic.getPlayerCache().remove(name);
          } catch(Exception e) {
             // IGNORE
          }

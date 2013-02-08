@@ -36,7 +36,7 @@ public class MuteCommand implements JailCommand {
             sender.sendMessage(ChatColor.RED + "/jmute <player> [player2] ...");
          }
          for(String name : players) {
-            logic.mutePlayer(sender, name);
+            logic.toggleMutePlayer(sender, name);
          }
       }
       return true;

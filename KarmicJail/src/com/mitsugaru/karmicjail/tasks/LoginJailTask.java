@@ -25,7 +25,7 @@ public class LoginJailTask implements Runnable {
       // Get name
       final String playerName = player.getName();
       // Add to cache
-      JailLogic.PLAYER_CACHE.add(playerName);
+      logic.getPlayerCache().add(playerName);
       if(logic.playerIsTempJailed(playerName)) {
          final long time = logic.getPlayerTime(playerName);
          if(time > 0) {
