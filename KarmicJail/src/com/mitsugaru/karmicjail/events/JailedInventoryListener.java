@@ -25,11 +25,12 @@ public class JailedInventoryListener implements Listener {
 
    @EventHandler(priority = EventPriority.LOWEST)
    public void onPlayerCloseJailInventory(final InventoryCloseEvent event) {
+      Commander commander = plugin.getCommandHandlerForClass(Commander.class);
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       try {
          if(event.getInventory().getHolder() != null) {
             if(event.getInventory().getHolder() instanceof JailInventoryHolder) {
-               Commander.inv.remove(event.getPlayer().getName());
+               commander.getInventoryHolders().remove(event.getPlayer().getName());
                if(config.debugLog && config.debugEvents) {
                   plugin.getLogger().info("'" + event.getPlayer().getName() + "' closed JailInventory view");
                }

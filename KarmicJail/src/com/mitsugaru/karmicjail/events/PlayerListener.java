@@ -128,6 +128,7 @@ public class PlayerListener implements Listener {
    public void onPlayerQuit(final PlayerQuitEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       JailLogic logic = plugin.getModuleForClass(JailLogic.class);
+      Commander commander = plugin.getCommandHandlerForClass(Commander.class);
       if(config.debugLog && config.debugEvents) {
          plugin.getLogger().info("Quit Event for: " + event.getPlayer().getName());
       }
@@ -150,7 +151,7 @@ public class PlayerListener implements Listener {
          }
       }
       // Remove viewer
-      Commander.inv.remove(event.getPlayer().getName());
+      commander.getInventoryHolders().remove(event.getPlayer().getName());
       // Remove history viewer
       plugin.getCommandHandlerForClass(HistoryCommander.class).getCache().remove(event.getPlayer().getName());
       plugin.stopTask(event.getPlayer().getName());

@@ -50,7 +50,7 @@ public class JailLogic extends JailModule {
    public JailLogic(KarmicJail plugin) {
       super(plugin);
    }
-   
+
    @Override
    public void starting() {
    }
@@ -179,7 +179,7 @@ public class JailLogic extends JailModule {
             // Notify
             sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA + " sent to jail.");
             final PrisonerInfo pi = new PrisonerInfo(name, sender.getName(), date, reason, duration, false);
-            plugin.getCommandHandlerForClass(Commander.class).addToCache(name, pi);
+            plugin.getCommandHandlerForClass(Commander.class).getCache().put(name, pi);
             // Throw jail event
             plugin.getServer().getPluginManager().callEvent(new KarmicJailEvent(pi));
             // Broadcast if necessary
@@ -221,6 +221,7 @@ public class JailLogic extends JailModule {
    public void unjailPlayer(CommandSender sender, String inName, boolean fromTempJail) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       PermCheck perm = plugin.getModuleForClass(PermCheck.class);
+      Commander commander = plugin.getCommandHandlerForClass(Commander.class);
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -248,7 +249,7 @@ public class JailLogic extends JailModule {
 
       // Remove viewers
       final Set<String> viewList = new HashSet<String>();
-      for(Map.Entry<String, JailInventoryHolder> entry : Commander.inv.entrySet()) {
+      for(Map.Entry<String, JailInventoryHolder> entry : commander.getInventoryHolders().entrySet()) {
          if(entry.getValue().getTarget().equals(name)) {
             final Player viewer = plugin.getServer().getPlayer(entry.getKey());
             if(viewer != null) {
@@ -258,11 +259,11 @@ public class JailLogic extends JailModule {
          }
       }
       for(String viewer : viewList) {
-         Commander.inv.remove(viewer);
+         commander.getInventoryHolders().remove(viewer);
       }
       // Remove from cache
       PLAYER_CACHE.remove(name);
-      plugin.getCommandHandlerForClass(Commander.class).removeFromCache(name);
+      plugin.getCommandHandlerForClass(Commander.class).getCache().remove(name);
       // Check if player is offline:
       if(player == null) {
          setPlayerStatus(JailStatus.PENDINGFREE, name);

@@ -2,16 +2,11 @@ package com.mitsugaru.karmicjail.command;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
 import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -19,7 +14,6 @@ import org.bukkit.entity.Player;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.database.Table;
-import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 import com.mitsugaru.karmicjail.config.RootConfig;
@@ -27,461 +21,54 @@ import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 import com.mitsugaru.karmicjail.services.CommandHandler;
+import com.mitsugaru.karmicjail.services.JailCommand;
 
 public class Commander extends CommandHandler {
-   private KarmicJail plugin;
-   private static final String bar = "======================";
    private final Map<String, Integer> page = new HashMap<String, Integer>();
    private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-   public static final Map<String, JailInventoryHolder> inv = new HashMap<String, JailInventoryHolder>();
+   private final Map<String, JailInventoryHolder> inventoryHolders = new HashMap<String, JailInventoryHolder>();
 
    public Commander(KarmicJail plugin) {
       super(plugin, "kj");
       // Register commands
-      plugin.getCommand("jail").setExecutor(this);
-      plugin.getCommand("j").setExecutor(this);
-      plugin.getCommand("unjail").setExecutor(this);
-      plugin.getCommand("setjail").setExecutor(this);
-      plugin.getCommand("setunjail").setExecutor(this);
-      plugin.getCommand("jailstatus").setExecutor(this);
-      plugin.getCommand("jstatus").setExecutor(this);
-      plugin.getCommand("jailhelp").setExecutor(this);
-      plugin.getCommand("jhelp").setExecutor(this);
-      plugin.getCommand("jaillist").setExecutor(this);
-      plugin.getCommand("jlist").setExecutor(this);
-      plugin.getCommand("jailprev").setExecutor(this);
-      plugin.getCommand("jprev").setExecutor(this);
-      plugin.getCommand("jailnext").setExecutor(this);
-      plugin.getCommand("jnext").setExecutor(this);
-      plugin.getCommand("jailmute").setExecutor(this);
-      plugin.getCommand("jmute").setExecutor(this);
-      plugin.getCommand("jailtime").setExecutor(this);
-      plugin.getCommand("jtime").setExecutor(this);
-      plugin.getCommand("jailreason").setExecutor(this);
-      plugin.getCommand("jreason").setExecutor(this);
-      plugin.getCommand("jlast").setExecutor(this);
-      plugin.getCommand("jaillast").setExecutor(this);
-      plugin.getCommand("jinv").setExecutor(this);
-      plugin.getCommand("jailinv").setExecutor(this);
-      plugin.getCommand("jwarp").setExecutor(this);
-      plugin.getCommand("jailwarp").setExecutor(this);
-      plugin.getCommand("jailversion").setExecutor(this);
-      plugin.getCommand("jversion").setExecutor(this);
-      plugin.getCommand("jailreload").setExecutor(this);
-      plugin.getCommand("jreload").setExecutor(this);
+      registerCommand("jail", new JailPlayerCommand());
+      registerCommand("unjail", new UnjailCommand());
+      registerCommand("setjail", new SetJailCommand());
+      registerCommand("setunjail", new SetUnjailCommand());
+      HelpCommand help = new HelpCommand();
+      registerCommand("help", help);
+      registerCommand("?", help);
+      VersionCommand version = new VersionCommand();
+      registerCommand("version", version);
+      registerCommand("ver", version);
+      StatusCommand status = new StatusCommand();
+      registerCommand("status", status);
+      registerCommand("check", status);
+      registerCommand("reload", new ReloadCommand());
+      registerCommand("list", new ListCommand());
+      registerCommand("prev", new PrevCommand());
+      registerCommand("next", new NextCommand());
+      registerCommand("mute", new MuteCommand());
+      registerCommand("time", new TimeCommand());
+      registerCommand("reason", new ReasonCommand());
+      registerCommand("last", new LastCommand());
+      registerCommand("inv", new InventoryCommand());
+      registerCommand("warp", new WarpCommand());
    }
 
    @Override
-   public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
-      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
-      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
-      boolean com = false;
       long dTime = 0;
       if(config.debugTime) {
          dTime = System.nanoTime();
       }
-      if(commandLabel.equalsIgnoreCase("jail") || commandLabel.equalsIgnoreCase("j")) {
-         if(!perm.has(sender, PermissionNode.JAIL)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.JAIL.getNode());
-            com = true;
-         } else {
-            // All numeric player name must be the first name
-            boolean timed = false;
-            boolean done = false;
-            int time = 0;
-            StringBuilder sb = new StringBuilder();
-            String reason = "";
-            final Set<String> players = new HashSet<String>();
-            try {
-               String first = plugin.expandName(args[0]);
-               if(first == null) {
-                  // expand failed
-                  first = args[0];
-               }
-               players.add(first);
-               for(int i = 1; i < args.length; i++) {
-                  if(!done) {
-                     try {
-                        // Attempt to grab time
-                        time = Integer.parseInt(args[i]);
-                        // Attempt to grab player name if its all
-                        // numbers
-                        if(time > 0) {
-                           timed = true;
-                        }
-                        done = true;
-                     } catch(NumberFormatException e) {
-                        // Attempt to grab name and add to list
-                        String name = plugin.expandName(args[i]);
-                        if(name != null) {
-                           players.add(name);
-                        } else {
-                           players.add(args[i]);
-                        }
-                     }
-                  } else {
-                     // attempt to grab reason if it exists
-                     sb.append(args[i] + " ");
-                  }
-               }
-               if(sb.length() > 0) {
-                  // Remove all trailing whitespace
-                  reason = sb.toString().replaceAll("\\s+$", "");
-               }
-               for(String name : players) {
-                  logic.jailPlayer(sender, name, reason, time, timed);
-               }
-            } catch(ArrayIndexOutOfBoundsException e) {
-               // no player name given, error
-               sender.sendMessage(ChatColor.RED + "Missing paramters");
-               sender.sendMessage(ChatColor.RED + "/j <player> [player2] ... [time] [reason]");
-            }
-         }
-         com = true;
-      } else if(commandLabel.equalsIgnoreCase("unjail")) {
-         if(!perm.has(sender, PermissionNode.UNJAIL)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.UNJAIL.getNode());
-         } else {
-            final Vector<String> players = new Vector<String>();
-            for(int i = 0; i < args.length; i++) {
-               // Attempt to grab name and add to list
-               String name = plugin.expandName(args[i]);
-               if(name != null) {
-                  players.add(name);
-               } else {
-                  players.add(args[i]);
-               }
-            }
-            if(players.isEmpty()) {
-               sender.sendMessage(ChatColor.RED + "Missing paramters");
-               sender.sendMessage(ChatColor.RED + "/unjail <player> [player2]");
-            }
-            for(String name : players) {
-               logic.unjailPlayer(sender, name);
-            }
-         }
-         com = true;
-      } else if(commandLabel.equalsIgnoreCase("setjail") && (args.length == 0 || args.length == 4)) {
-         if(!perm.has(sender, PermissionNode.SETJAIL)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.SETJAIL.getNode());
-         } else {
-            logic.setJail(sender, args);
-         }
-         com = true;
-      } else if(commandLabel.equalsIgnoreCase("setunjail") && (args.length == 0 || args.length == 4)) {
-         if(!perm.has(sender, PermissionNode.SETJAIL)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.SETJAIL.getNode());
-         } else {
-            logic.setUnjail(sender, args);
-         }
-         com = true;
-      } else if((commandLabel.equalsIgnoreCase("jailstatus") || commandLabel.equalsIgnoreCase("jstatus")
-            || commandLabel.equalsIgnoreCase("jailcheck") || commandLabel.equalsIgnoreCase("jcheck"))
-            && args.length <= 1) {
-         if(!perm.has(sender, PermissionNode.JAILSTATUS)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.JAILSTATUS.getNode());
-         } else {
-            logic.jailStatus(sender, args);
-         }
-         com = true;
-      } else if(commandLabel.equalsIgnoreCase("jailversion") || commandLabel.equalsIgnoreCase("jversion")) {
-         showVersion(sender);
-         com = true;
-      } else if(commandLabel.equalsIgnoreCase("jailhelp") || commandLabel.equalsIgnoreCase("jhelp")) {
-         showHelp(sender);
-         com = true;
-      } else if(commandLabel.equalsIgnoreCase("jaillist") || commandLabel.equalsIgnoreCase("jlist")) {
-         if(!perm.has(sender, PermissionNode.LIST)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.LIST.getNode());
-         } else {
-            // list jailed people
-            if(args.length > 0) {
-               // If they provided a page number
-               try {
-                  // Attempt to parse argument for page number
-                  int pageNum = Integer.parseInt(args[0]);
-                  // Set current page to given number
-                  page.put(sender.getName(), pageNum - 1);
-                  // Show page if possible
-                  this.listJailed(sender, 0);
-               } catch(NumberFormatException e) {
-                  sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Invalid integer for page number");
-               }
-            } else {
-               // List with current page
-               this.listJailed(sender, 0);
-            }
-         }
-         com = true;
-      } else if(commandLabel.equals("jailprev") || commandLabel.equals("jprev")) {
-         if(!perm.has(sender, PermissionNode.LIST)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.LIST.getNode());
-         } else {
-            // List, with previous page
-            this.listJailed(sender, -1);
-         }
-         com = true;
+      boolean value = super.onCommand(sender, command, label, args);
+      if(config.debugTime) {
+         dTime = System.nanoTime() - dTime;
+         sender.sendMessage("[Debug]" + KarmicJail.TAG + "Process time: " + dTime);
       }
-      // Next page of item pool
-      else if(commandLabel.equals("jailnext") || commandLabel.equals("jnext")) {
-         if(!perm.has(sender, PermissionNode.LIST)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.LIST.getNode());
-         } else {
-            // List with next page
-            this.listJailed(sender, 1);
-         }
-         com = true;
-      } else if(commandLabel.equals("jailmute") || commandLabel.equals("jmute")) {
-         if(!perm.has(sender, PermissionNode.MUTE)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.MUTE.getNode());
-         } else {
-            final Vector<String> players = new Vector<String>();
-            for(int i = 0; i < args.length; i++) {
-               // Attempt to grab name and add to list
-               String name = plugin.expandName(args[i]);
-               if(name != null) {
-                  players.add(name);
-               } else {
-                  players.add(args[i]);
-               }
-            }
-            if(players.isEmpty()) {
-               sender.sendMessage(ChatColor.RED + "Missing paramters");
-               sender.sendMessage(ChatColor.RED + "/jmute <player> [player2] ...");
-            }
-            for(String name : players) {
-               logic.mutePlayer(sender, name);
-            }
-         }
-         com = true;
-      } else if(commandLabel.equals("jaillast") || commandLabel.equals("jlast")) {
-         if(!perm.has(sender, PermissionNode.WARP_LAST)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.WARP_LAST.getNode());
-         } else {
-            if(sender instanceof Player) {
-               final Player player = (Player) sender;
-               if(args.length > 0) {
-                  String name = plugin.expandName(args[0]);
-                  final Location last = logic.getPlayerLastLocation(name);
-                  if(last != null) {
-                     player.teleport(last);
-                     sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG + " Warp to last location of " + ChatColor.AQUA + name);
-                  } else {
-                     sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " No last location for " + ChatColor.AQUA + name);
-                  }
-               } else {
-                  sender.sendMessage(ChatColor.RED + "Missing name");
-                  sender.sendMessage(ChatColor.RED + "/jlast <player>");
-               }
-            } else {
-               sender.sendMessage(ChatColor.RED + "Cannot use command as console.");
-            }
-         }
-         com = true;
-      } else if(commandLabel.equals("jailwarp") || commandLabel.equals("jwarp")) {
-         if(!perm.has(sender, PermissionNode.WARP_JAIL)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.WARP_JAIL);
-         } else {
-            if(args.length > 0) {
-               final Player target = plugin.getServer().getPlayer(args[0]);
-               boolean warped = false;
-               if(target != null) {
-                  if(target.isOnline()) {
-                     target.teleport(logic.getJailLocation());
-                     warped = true;
-                     sender.sendMessage(ChatColor.GREEN + "Warped " + ChatColor.AQUA + target.getName() + ChatColor.GREEN + " to jail location.");
-                  }
-               }
-               if(!warped) {
-                  sender.sendMessage(ChatColor.RED + "Could not warp " + ChatColor.AQUA + args[0]);
-               }
-            } else if(sender instanceof Player) {
-               final Player player = (Player) sender;
-               player.teleport(logic.getJailLocation());
-            } else {
-               sender.sendMessage(ChatColor.RED + "Cannot use command as console without giving name.");
-            }
-         }
-         com = true;
-      } else if(commandLabel.equals("jailinv") || commandLabel.equals("jinv")) {
-         if(!perm.has(sender, PermissionNode.INVENTORY_VIEW)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.INVENTORY_VIEW);
-         } else {
-            if(sender instanceof Player) {
-               final Player player = (Player) sender;
-               if(args.length > 0) {
-                  String temp = plugin.expandName(args[0]);
-                  String name = logic.getPlayerInDatabase(temp);
-                  if(name == null) {
-                     name = temp;
-                  }
-                  if(logic.playerIsJailed(name) || logic.playerIsPendingJail(name)) {
-                     JailInventoryHolder holder = null;
-                     for(JailInventoryHolder h : inv.values()) {
-                        if(h.getTarget().equals(name)) {
-                           holder = h;
-                           break;
-                        }
-                     }
-                     if(holder == null) {
-                        holder = new JailInventoryHolder(plugin, name);
-                        holder.setInventory(plugin.getServer().createInventory(holder, 45, name));
-                     }
-                     player.openInventory(holder.getInventory());
-                     inv.put(player.getName(), holder);
-                     sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG + " Open inventory of " + ChatColor.AQUA + name);
-                  } else {
-                     sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " Player '" + ChatColor.AQUA + name + ChatColor.RED + "' not jailed.");
-                  }
-               } else {
-                  sender.sendMessage(ChatColor.RED + "Missing name");
-                  sender.sendMessage(ChatColor.RED + "/jinv <player>");
-               }
-            } else {
-               sender.sendMessage(ChatColor.RED + "Cannot use command as console.");
-            }
-         }
-         com = true;
-      } else if(commandLabel.equals("jailtime") || commandLabel.equals("jtime")) {
-         boolean hasPerm = true;
-         if(!perm.has(sender, PermissionNode.JAIL)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.JAIL.getNode());
-            hasPerm = false;
-         }
-         if(config.timePerm) {
-            if(!perm.has(sender, PermissionNode.TIMED)) {
-               sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.TIMED.getNode());
-               hasPerm = false;
-            }
-         }
-         if(hasPerm) {
-            boolean done = false;
-            int time = 0;
-            final Vector<String> players = new Vector<String>();
-            for(int i = 0; i < args.length; i++) {
-               if(!done) {
-                  try {
-                     // Attempt to grab time
-                     time = Integer.parseInt(args[i]);
-                     done = true;
-                  } catch(NumberFormatException e) {
-                     // Attempt to grab name and add to list
-                     String name = plugin.expandName(args[i]);
-                     if(name != null) {
-                        players.add(name);
-                     } else {
-                        players.add(args[i]);
-                     }
-                  }
-               }
-            }
-            if(players.isEmpty()) {
-               sender.sendMessage(ChatColor.RED + "Missing paramters");
-               sender.sendMessage(ChatColor.RED + "/jtime <player> [player2] ... <time>");
-            }
-            for(String name : players) {
-               logic.setJailTime(sender, name, time);
-            }
-         }
-         com = true;
-      } else if(commandLabel.equals("jailreload") || commandLabel.equals("jreload")) {
-         if(perm.has(sender, PermissionNode.JAIL) || perm.has(sender, PermissionNode.UNJAIL) || perm.has(sender, PermissionNode.SETJAIL)) {
-            config.reload();
-            sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG + " Config reloaded.");
-         } else {
-            sender.sendMessage(ChatColor.RED + "Lack permission to reload");
-         }
-         com = true;
-      } else if(commandLabel.equals("jailreason") || commandLabel.equals("jreason")) {
-         if(!perm.has(sender, PermissionNode.JAIL)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.JAIL.getNode());
-         } else {
-            if(args.length > 0) {
-               String name = plugin.expandName(args[0]);
-               final StringBuilder sb = new StringBuilder();
-               for(int i = 1; i < args.length; i++) {
-                  sb.append(args[i] + " ");
-               }
-               String reason = "";
-               if(sb.length() > 0) {
-                  // Remove all trailing whitespace
-                  reason = sb.toString().replaceAll("\\s+$", "");
-               }
-               if(logic.playerIsJailed(name) || logic.playerIsPendingJail(name)) {
-                  logic.setPlayerReason(name, reason);
-                  sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG + " Set reason for " + ChatColor.AQUA + name + ChatColor.GREEN + " to: "
-                        + ChatColor.GRAY + reason);
-               } else {
-                  sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " Player '" + ChatColor.AQUA + name + ChatColor.RED + "' not jailed.");
-               }
-            } else {
-               sender.sendMessage(ChatColor.RED + "Missing name");
-               sender.sendMessage(ChatColor.RED + "/jtime <player> <reason>");
-            }
-         }
-         com = true;
-      } else {
-         // TODO don't think this is necessary at all...
-         // Honestly, this section probably is for unrecognized commands
-         if(!perm.has(sender, "KarmicJail.jail"))
-            com = true;
-         if(!perm.has(sender, "KarmicJail.unjail"))
-            com = true;
-         if(!perm.has(sender, "KarmicJail.setjail"))
-            com = true;
-         if(!perm.has(sender, "KarmicJail.jailstatus"))
-            com = true;
-      }
-
-      if(com) {
-         if(config.debugTime) {
-            this.debugTime(sender, dTime);
-         }
-         return true;
-      }
-      return false;
-   }
-
-   /**
-    * Method that messages how long a command took to complete
-    * 
-    * @param sender
-    *           of command
-    * @param time
-    *           when command was issued
-    */
-   private void debugTime(CommandSender sender, long time) {
-      time = System.nanoTime() - time;
-      sender.sendMessage("[Debug]" + KarmicJail.TAG + "Process time: " + time);
-   }
-
-   public void removeFromCache(String name) {
-      cache.remove(name);
-   }
-
-   public void addToCache(String name, PrisonerInfo info) {
-      cache.put(name, info);
-   }
-
-   public void showVersion(CommandSender sender) {
-      RootConfig config = plugin.getModuleForClass(RootConfig.class);
-      // Version
-      sender.sendMessage(ChatColor.BLUE + "==================" + ChatColor.GREEN + "KarmicJail v" + plugin.getDescription().getVersion()
-            + ChatColor.BLUE + "=================");
-      sender.sendMessage(ChatColor.GREEN + "Coded by Mitsugaru" + ChatColor.WHITE + " - " + ChatColor.AQUA + "Fork of imjake9's SimpleJail project");
-      sender.sendMessage(ChatColor.WHITE + "Shout outs: " + ChatColor.GOLD + "@khanjal");
-      sender.sendMessage(ChatColor.BLUE + bar + ChatColor.GRAY + "Config" + ChatColor.BLUE + bar);
-      DecimalFormat twoDForm = new DecimalFormat("#.##");
-      sender.sendMessage(ChatColor.LIGHT_PURPLE + "Jail: " + ChatColor.GRAY + config.jailLoc.getWorld().getName() + ChatColor.BLUE + " : ("
-            + ChatColor.WHITE + Double.valueOf(twoDForm.format(config.jailLoc.getX())) + ChatColor.BLUE + ", " + ChatColor.WHITE
-            + Double.valueOf(twoDForm.format(config.jailLoc.getY())) + ChatColor.BLUE + ", " + ChatColor.WHITE
-            + Double.valueOf(twoDForm.format(config.jailLoc.getZ())) + ChatColor.BLUE + ")");
-      sender.sendMessage(ChatColor.LIGHT_PURPLE + "UnJail: " + ChatColor.GRAY + config.unjailLoc.getWorld().getName() + ChatColor.BLUE + " : ("
-            + ChatColor.WHITE + Double.valueOf(twoDForm.format(config.unjailLoc.getX())) + ChatColor.BLUE + ", " + ChatColor.WHITE
-            + Double.valueOf(twoDForm.format(config.unjailLoc.getY())) + ChatColor.BLUE + ", " + ChatColor.WHITE
-            + Double.valueOf(twoDForm.format(config.unjailLoc.getZ())) + ChatColor.BLUE + ")");
-      // TODO show other config options here too
+      return value;
    }
 
    public void showHelp(CommandSender sender) {
@@ -542,7 +129,7 @@ public class Commander extends CommandHandler {
     * @param Page
     *           adjustment
     */
-   private void listJailed(CommandSender sender, int pageAdjust) {
+   public void listJailed(CommandSender sender, int pageAdjust) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       // Update cache of jailed players
@@ -671,6 +258,18 @@ public class Commander extends CommandHandler {
       }
    }
 
+   public Map<String, JailInventoryHolder> getInventoryHolders() {
+      return inventoryHolders;
+   }
+
+   public Map<String, Integer> getPage() {
+      return page;
+   }
+
+   public Map<String, PrisonerInfo> getCache() {
+      return cache;
+   }
+
    @Override
    public boolean noArgs(CommandSender sender, Command command, String label) {
       showHelp(sender);
@@ -679,7 +278,17 @@ public class Commander extends CommandHandler {
 
    @Override
    public boolean unknownCommand(CommandSender sender, Command command, String label, String[] args) {
-      // TODO Auto-generated method stub
-      return false;
+      sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Invalid command '" + args[0] + "', use /ks help.");
+      return true;
+   }
+
+   private class HelpCommand implements JailCommand {
+
+      @Override
+      public boolean execute(KarmicJail plugin, CommandSender sender, Command command, String label, String[] args) {
+         showHelp(sender);
+         return true;
+      }
+
    }
 }
