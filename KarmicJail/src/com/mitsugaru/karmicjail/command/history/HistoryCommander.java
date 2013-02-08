@@ -25,19 +25,22 @@ public class HistoryCommander extends CommandHandler {
       // Register commands
       registerCommand("next", new NextHistoryCommand());
       registerCommand("prev", new PrevHistoryCommand());
+      registerCommand("page", new PageHistoryCommand());
+      registerCommand("add", new AddHistoryCommand());
       HelpCommand help = new HelpCommand();
       registerCommand("help", help);
       registerCommand("?", help);
+      registerCommand("view", new ViewHistoryCommand());
    }
 
    @Override
    public boolean noArgs(CommandSender sender, Command command, String label) {
-      sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.YELLOW + " : Show currently open history");
-      sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " <prev | next>" + ChatColor.YELLOW
+      sender.sendMessage(ChatColor.GREEN + "/kj history view" + ChatColor.YELLOW + " : Show currently open history");
+      sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.AQUA + " <prev | next>" + ChatColor.YELLOW
             + " : Go to previous or next page of history");
-      sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " view <player>" + ChatColor.YELLOW + " : View history of given player");
-      sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " page <#>" + ChatColor.YELLOW + " : Go to given page number of history");
-      sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " add <player> <comment...>" + ChatColor.YELLOW
+      sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.AQUA + " view <player>" + ChatColor.YELLOW + " : View history of given player");
+      sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.AQUA + " page <#>" + ChatColor.YELLOW + " : Go to given page number of history");
+      sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.AQUA + " add <player> <comment...>" + ChatColor.YELLOW
             + " : Add a comment to the history of a given player");
       return true;
    }

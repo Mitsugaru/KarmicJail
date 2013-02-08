@@ -75,50 +75,50 @@ public class Commander extends CommandHandler {
       PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN + "KarmicJail" + ChatColor.BLUE + "=====");
       if(perm.has(sender, PermissionNode.JAIL)) {
-         sender.sendMessage(ChatColor.GREEN + "/jail " + ChatColor.AQUA + "<player> " + ChatColor.LIGHT_PURPLE + "[player2]... [time] [reason]"
+         sender.sendMessage(ChatColor.GREEN + "/kj jail " + ChatColor.AQUA + "<player> " + ChatColor.LIGHT_PURPLE + "[player2]... [time] [reason]"
                + ChatColor.YELLOW + " : Jails player(s)");
-         sender.sendMessage(ChatColor.YELLOW + "Note - Names auto-complete if player is online. Alias: /j");
-         sender.sendMessage(ChatColor.GREEN + "/jailtime" + ChatColor.AQUA + " <player> <time>" + ChatColor.YELLOW
-               + " : Sets time for jailed player. Alias: /jtime");
-         sender.sendMessage(ChatColor.GREEN + "/jailreason" + ChatColor.AQUA + " <player> " + ChatColor.LIGHT_PURPLE + "[reason]" + ChatColor.YELLOW
-               + " : Sets jail reason for player. Alias: /jreason");
+         sender.sendMessage(ChatColor.YELLOW + "Note - Names auto-complete if player is online.");
+         sender.sendMessage(ChatColor.GREEN + "/kj time" + ChatColor.AQUA + " <player> <time>" + ChatColor.YELLOW
+               + " : Sets time for jailed player.");
+         sender.sendMessage(ChatColor.GREEN + "/kj reason" + ChatColor.AQUA + " <player> " + ChatColor.LIGHT_PURPLE + "[reason]" + ChatColor.YELLOW
+               + " : Sets jail reason for player.");
       }
       if(perm.has(sender, PermissionNode.UNJAIL)) {
-         sender.sendMessage(ChatColor.GREEN + "/unjail" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW + " : Unjail player");
+         sender.sendMessage(ChatColor.GREEN + "/kj unjail" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW + " : Unjail player");
       }
       if(perm.has(sender, PermissionNode.MUTE)) {
-         sender.sendMessage(ChatColor.GREEN + "/jailmute" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
-               + " : Toggle mute for a player. Alias: /jmute");
+         sender.sendMessage(ChatColor.GREEN + "/kj mute" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
+               + " : Toggle mute for a player.");
       }
       if(perm.has(sender, PermissionNode.LIST)) {
-         sender.sendMessage(ChatColor.GREEN + "/jaillist" + ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
-               + " : List jailed players. Alias: /jlist");
-         sender.sendMessage(ChatColor.GREEN + "/jailprev" + ChatColor.YELLOW + " : Previous page. Alias: /jprev");
-         sender.sendMessage(ChatColor.GREEN + "/jailnext" + ChatColor.YELLOW + " : Next page. Alias: /jnext");
+         sender.sendMessage(ChatColor.GREEN + "/kj list" + ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
+               + " : List jailed players.");
+         sender.sendMessage(ChatColor.GREEN + "/kj prev" + ChatColor.YELLOW + " : Previous page. Alias: /jprev");
+         sender.sendMessage(ChatColor.GREEN + "/kj next" + ChatColor.YELLOW + " : Next page. Alias: /jnext");
       }
       if(perm.has(sender, PermissionNode.HISTORY_VIEW)) {
-         sender.sendMessage(ChatColor.GREEN + "/jailhistory" + ChatColor.LIGHT_PURPLE + " [args]" + ChatColor.YELLOW
-               + " : Jail history command. Alias: /jhistory");
+         sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.LIGHT_PURPLE + " [args]" + ChatColor.YELLOW
+               + " : Jail history command.");
       }
       if(perm.has(sender, PermissionNode.INVENTORY_VIEW)) {
-         sender.sendMessage(ChatColor.GREEN + "/jailinv" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
-               + " : Open inventory of jailed player. Alias: /jinv");
+         sender.sendMessage(ChatColor.GREEN + "/kj inv" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
+               + " : Open inventory of jailed player.");
       }
       if(perm.has(sender, PermissionNode.WARP_LAST)) {
-         sender.sendMessage(ChatColor.GREEN + "/jaillast" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
+         sender.sendMessage(ChatColor.GREEN + "/kj last" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
                + " : Warp to last known postion of player");
       }
       if(perm.has(sender, PermissionNode.SETJAIL)) {
-         sender.sendMessage(ChatColor.GREEN + "/setjail" + ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]" + ChatColor.YELLOW
+         sender.sendMessage(ChatColor.GREEN + "/kj setjail" + ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]" + ChatColor.YELLOW
                + " : Set jail teleport to current pos or given pos");
-         sender.sendMessage(ChatColor.GREEN + "/setunjail" + ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]" + ChatColor.YELLOW
+         sender.sendMessage(ChatColor.GREEN + "/kj setunjail" + ChatColor.LIGHT_PURPLE + " [x] [y] [z] [world]" + ChatColor.YELLOW
                + " : Set unjail teleport to current pos or given pos");
       }
       if(perm.has(sender, PermissionNode.JAILSTATUS)) {
-         sender.sendMessage(ChatColor.GREEN + "/jailstatus" + ChatColor.LIGHT_PURPLE + " [player]" + ChatColor.YELLOW
-               + " : Get jail status. Alias: /jstatus");
+         sender.sendMessage(ChatColor.GREEN + "/kj status" + ChatColor.LIGHT_PURPLE + " [player]" + ChatColor.YELLOW
+               + " : Get jail status.");
       }
-      sender.sendMessage(ChatColor.GREEN + "/jailversion" + ChatColor.YELLOW + " : Plugin version and config info. Alias: /jversion");
+      sender.sendMessage(ChatColor.GREEN + "/kj version" + ChatColor.YELLOW + " : Plugin version and config info. Alias: /jversion");
    }
 
    /**
