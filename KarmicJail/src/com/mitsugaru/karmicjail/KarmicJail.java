@@ -22,6 +22,7 @@ import com.mitsugaru.karmicjail.events.KJInventoryListener;
 import com.mitsugaru.karmicjail.events.KJPlayerListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
+import com.mitsugaru.karmicjail.tasks.JailTask;
 import com.mitsugaru.karmicjail.update.Update;
 
 public class KarmicJail extends JavaPlugin {
