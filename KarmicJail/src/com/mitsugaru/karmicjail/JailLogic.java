@@ -1,6 +1,7 @@
 package com.mitsugaru.karmicjail;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -30,7 +32,6 @@ import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 import com.mitsugaru.karmicjail.commands.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
-import com.mitsugaru.karmicjail.database.SQLibrary.Query;
 import com.mitsugaru.karmicjail.events.KarmicJailEvent;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
@@ -39,18 +40,18 @@ import com.platymuus.bukkit.permissions.Group;
 import com.platymuus.bukkit.permissions.PermissionsPlugin;
 
 public class JailLogic {
-   private static KarmicJail plugin;
-   private static RootConfig config;
-   private static PermCheck perm;
-   private static DBHandler database;
-   private final static DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm z");
-   public final static Set<String> playerCache = new HashSet<String>();
+   private KarmicJail plugin;
+   private RootConfig config;
+   private PermCheck perm;
+   private DBHandler database;
+   private final static DateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm z");
+   public final static Set<String> PLAYER_CACHE = new HashSet<String>();
 
-   public static void init(KarmicJail plugin) {
-      JailLogic.plugin = plugin;
-      JailLogic.perm = plugin.getPermissions();
-      JailLogic.config = plugin.getPluginConfig();
-      JailLogic.database = plugin.getDatabaseHandler();
+   public JailLogic(KarmicJail plugin) {
+      this.plugin = plugin;
+      this.perm = plugin.getPermissions();
+      this.config = plugin.getPluginConfig();
+      this.database = plugin.getDatabaseHandler();
    }
 
    /**
@@ -66,7 +67,7 @@ public class JailLogic {
     *           for how long they're in jail
     * @param boolean to determine of player has a timed release
     */
-   public static void jailPlayer(CommandSender sender, String inName, String reason, int minutes, boolean timedCom) {
+   public void jailPlayer(CommandSender sender, String inName, String reason, int minutes, boolean timedCom) {
       // Check if player is already jailed:
       if(playerIsJailed(inName) || playerIsPendingJail(inName)) {
          sender.sendMessage(ChatColor.RED + "That player is already in jail!");
@@ -116,7 +117,7 @@ public class JailLogic {
          if(player != null) {
             if(player.isOnline()) {
                // Add to cache
-               playerCache.add(name);
+               PLAYER_CACHE.add(name);
                // Set previous location
                setPlayerLastLocation(name, player.getLocation());
                // Move to jail
@@ -148,7 +149,7 @@ public class JailLogic {
             setPlayerStatus(JailStatus.PENDINGJAIL, name);
          }
          try {
-            final String date = dateFormat.format(new Date());
+            final String date = DATE_FORMAT.format(new Date());
             final PreparedStatement statement = database.prepare("UPDATE " + Table.JAILED.getName() + " SET " + Field.JAILER.getColumnName() + "=?,"
                   + Field.DATE.getColumnName() + "=?," + Field.REASON.getColumnName() + "=?, " + Field.MUTE.getColumnName() + "=? WHERE "
                   + Field.PLAYERNAME.getColumnName() + "=?;");
@@ -209,7 +210,7 @@ public class JailLogic {
     * @param fromTempJail
     *           , if the jailed player's time ran out
     */
-   public static void unjailPlayer(CommandSender sender, String inName, boolean fromTempJail) {
+   public void unjailPlayer(CommandSender sender, String inName, boolean fromTempJail) {
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -250,7 +251,7 @@ public class JailLogic {
          Commander.inv.remove(viewer);
       }
       // Remove from cache
-      playerCache.remove(name);
+      PLAYER_CACHE.remove(name);
       plugin.getCommander().removeFromCache(name);
       // Check if player is offline:
       if(player == null) {
@@ -262,15 +263,15 @@ public class JailLogic {
       freePlayer(sender, inName, fromTempJail);
    }
 
-   public static void unjailPlayer(CommandSender sender, String name) {
+   public void unjailPlayer(CommandSender sender, String name) {
       unjailPlayer(sender, name, false);
    }
 
-   public static void freePlayer(CommandSender sender, String name) {
+   public void freePlayer(CommandSender sender, String name) {
       freePlayer(sender, name, false);
    }
 
-   public static void freePlayer(CommandSender sender, String inName, boolean fromTempJail) {
+   public void freePlayer(CommandSender sender, String inName, boolean fromTempJail) {
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -347,7 +348,7 @@ public class JailLogic {
     *           of player
     * @return True if pending jailed, else false
     */
-   public static boolean playerIsPendingJail(String player) {
+   public boolean playerIsPendingJail(String player) {
       boolean jailed = false;
       String name = getPlayerInDatabase(player);
       if(name == null) {
@@ -371,7 +372,7 @@ public class JailLogic {
     *           of player
     * @return true if jailed, else false
     */
-   public static boolean playerIsJailed(String player) {
+   public boolean playerIsJailed(String player) {
       boolean jailed = false;
       String name = getPlayerInDatabase(player);
       if(name == null) {
@@ -395,7 +396,7 @@ public class JailLogic {
     *           of player
     * @return long of time left to serve
     */
-   public static long getPlayerTime(String player) {
+   public long getPlayerTime(String player) {
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -411,12 +412,19 @@ public class JailLogic {
     * @param duration
     *           of time
     */
-   public static void updatePlayerTime(String player, long duration) {
+   public void updatePlayerTime(String player, long duration) {
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
       }
-      database.standardQuery("UPDATE " + Table.JAILED.getName() + " SET time='" + duration + "' WHERE playername='" + name + "';");
+      ResultSet rs = null;
+      try {
+         rs = database.query("UPDATE " + Table.JAILED.getName() + " SET time='" + duration + "' WHERE playername='" + name + "';");
+      } catch(SQLException e) {
+         plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQL Exception", e);
+      } finally {
+         database.cleanup(rs, null);
+      }
    }
 
    /**
@@ -426,22 +434,23 @@ public class JailLogic {
     *           of player
     * @return Name of player in database, else null
     */
-   public static String getPlayerInDatabase(String name) {
+   public String getPlayerInDatabase(String name) {
       String has = null;
+      ResultSet rs = null;
       try {
-         Query rs = database.select("SELECT * FROM " + Table.JAILED.getName() + ";");
-         if(rs.getResult().next()) {
+         rs = database.query("SELECT * FROM " + Table.JAILED.getName() + ";");
+         if(rs.next()) {
             do {
-               if(name.equalsIgnoreCase(rs.getResult().getString(Field.PLAYERNAME.getColumnName()))) {
-                  has = rs.getResult().getString("playername");
+               if(name.equalsIgnoreCase(rs.getString(Field.PLAYERNAME.getColumnName()))) {
+                  has = rs.getString("playername");
                   break;
                }
-            } while(rs.getResult().next());
+            } while(rs.next());
          }
-         rs.closeQuery();
       } catch(SQLException e) {
-         plugin.getLogger().warning(KarmicJail.TAG + " SQL Exception");
-         e.printStackTrace();
+         plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQL Exception", e);
+      } finally {
+         database.cleanup(rs, null);
       }
       return has;
    }
@@ -452,27 +461,30 @@ public class JailLogic {
     * @param name
     *           of player
     */
-   public static void addPlayerToDatabase(String name) {
+   public void addPlayerToDatabase(String name) {
+      ResultSet first = null;
+      ResultSet second = null;
       try {
          boolean has = false;
-         Query rs = database.select("SELECT COUNT(*) FROM " + Table.JAILED.getName() + " WHERE playername='" + name + "';");
-         if(rs.getResult().next()) {
-            final int count = rs.getResult().getInt(1);
-            if(!rs.getResult().wasNull()) {
+         first = database.query("SELECT COUNT(*) FROM " + Table.JAILED.getName() + " WHERE playername='" + name + "';");
+         if(first.next()) {
+            final int count = first.getInt(1);
+            if(!first.wasNull()) {
                if(count > 0) {
                   has = true;
                }
             }
          }
-         rs.closeQuery();
+         database.cleanup(first, null);
          if(!has) {
             // Add to database
-            database.standardQuery("INSERT INTO " + Table.JAILED.getName() + " (playername,status,time) VALUES ('" + name + "', '" + JailStatus.FREED
-                  + "', '-1');");
+            second = database.query("INSERT INTO " + Table.JAILED.getName() + " (playername,status,time) VALUES ('" + name + "', '"
+                  + JailStatus.FREED + "', '-1');");
          }
       } catch(SQLException e) {
-         plugin.getLogger().warning(KarmicJail.TAG + " SQL Exception");
-         e.printStackTrace();
+         plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQL Exception", e);
+      } finally {
+         database.cleanup(second, null);
       }
    }
 
@@ -483,7 +495,7 @@ public class JailLogic {
     *           of player
     * @return true if player has a valid time, else false
     */
-   public static boolean playerIsTempJailed(String player) {
+   public boolean playerIsTempJailed(String player) {
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -495,7 +507,7 @@ public class JailLogic {
       return false;
    }
 
-   public static void setJailTime(CommandSender sender, String name, int minutes) {
+   public void setJailTime(CommandSender sender, String name, int minutes) {
       // Check if player is in jail:
       if(!playerIsJailed(name) && !playerIsPendingJail(name)) {
          sender.sendMessage(ChatColor.RED + "That player is not in jail!");
@@ -537,7 +549,7 @@ public class JailLogic {
 
    }
 
-   public static void setPlayerReason(String inName, String reason) {
+   public void setPlayerReason(String inName, String reason) {
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -566,7 +578,7 @@ public class JailLogic {
     *           of player
     * @return String of jailer's reason
     */
-   public static String getJailReason(String player) {
+   public String getJailReason(String player) {
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -578,7 +590,7 @@ public class JailLogic {
       return reason;
    }
 
-   public static boolean playerIsMuted(String player) {
+   public boolean playerIsMuted(String player) {
       boolean mute = false;
       String name = getPlayerInDatabase(player);
       if(name == null) {
@@ -591,7 +603,7 @@ public class JailLogic {
       return mute;
    }
 
-   public static void mutePlayer(CommandSender sender, String player) {
+   public void mutePlayer(CommandSender sender, String player) {
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -617,7 +629,7 @@ public class JailLogic {
     *           of player
     * @return String of the player's JailStatus
     */
-   public static JailStatus getPlayerStatus(String inName) {
+   public JailStatus getPlayerStatus(String inName) {
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -642,7 +654,7 @@ public class JailLogic {
     * @param name
     *           of player
     */
-   public static void setPlayerStatus(JailStatus status, String inName) {
+   public void setPlayerStatus(JailStatus status, String inName) {
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -656,7 +668,7 @@ public class JailLogic {
     * @param name
     *           of player
     */
-   private static void savePlayerGroups(String name) {
+   private void savePlayerGroups(String name) {
       StringBuilder sb = new StringBuilder();
       boolean append = false;
       for(String s : getGroups(name)) {
@@ -678,7 +690,7 @@ public class JailLogic {
     * @param name
     *           of player
     */
-   private static void removePlayerGroups(String name) {
+   private void removePlayerGroups(String name) {
       if(perm.getName().equals("PermissionsBukkit")) {
          final PermissionsPlugin permission = (PermissionsPlugin) plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
          for(Group group : permission.getGroups(name)) {
@@ -701,7 +713,7 @@ public class JailLogic {
     *           of player
     * @return List of groups with associated world
     */
-   public static List<String> getGroups(String player) {
+   public List<String> getGroups(String player) {
       List<String> list = new ArrayList<String>();
       if(perm.getName().equals("PermissionsBukkit")) {
          final PermissionsPlugin permission = (PermissionsPlugin) plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
@@ -730,7 +742,7 @@ public class JailLogic {
     * @param name
     *           of player
     */
-   private static void returnGroups(String name) {
+   private void returnGroups(String name) {
 
       String groups = database.getStringField(Field.GROUPS, name);
       if(!groups.equals("")) {
@@ -759,7 +771,7 @@ public class JailLogic {
     * @param arguments
     *           of command
     */
-   public static void jailStatus(CommandSender sender, String[] args) {
+   public void jailStatus(CommandSender sender, String[] args) {
       if(!(sender instanceof Player) && args.length == 0) {
          sender.sendMessage(ChatColor.RED + "Must specify a player.");
          return;
@@ -823,7 +835,7 @@ public class JailLogic {
     *           of person in jail
     * @return name of jailer
     */
-   private static String getJailer(String name) {
+   private String getJailer(String name) {
       String jailer = database.getStringField(Field.JAILER, name);
       if(jailer.equals("")) {
          jailer = "UNKOWN";
@@ -838,7 +850,7 @@ public class JailLogic {
     *           of person jailed
     * @return String of the date when player was jailed
     */
-   private static String getJailDate(String name) {
+   private String getJailDate(String name) {
       String date = database.getStringField(Field.DATE, name);
       if(date.equals("")) {
          date = "UNKOWN";
@@ -854,7 +866,7 @@ public class JailLogic {
     * @param arguments
     *           of command
     */
-   public static void setJail(CommandSender sender, String[] args) {
+   public void setJail(CommandSender sender, String[] args) {
       if(!(sender instanceof Player) && args.length != 4) {
          sender.sendMessage(ChatColor.RED + "Only players can use that.");
          return;
@@ -889,7 +901,7 @@ public class JailLogic {
     * @param arguments
     *           of command
     */
-   public static void setUnjail(CommandSender sender, String[] args) {
+   public void setUnjail(CommandSender sender, String[] args) {
       if(!(sender instanceof Player) && args.length != 4) {
          sender.sendMessage(ChatColor.RED + "Only players can use that.");
          return;
@@ -920,7 +932,7 @@ public class JailLogic {
     * 
     * @return location of jail
     */
-   public static Location getJailLocation() {
+   public Location getJailLocation() {
       return config.jailLoc;
    }
 
@@ -928,7 +940,7 @@ public class JailLogic {
     * 
     * @return location of unjail
     */
-   public static Location getUnjailLocation() {
+   public Location getUnjailLocation() {
       return config.unjailLoc;
    }
 
@@ -938,14 +950,14 @@ public class JailLogic {
     * @param name
     *           of player to be teleported
     */
-   public static void teleportOut(String name) {
+   public void teleportOut(String name) {
       final Player player = plugin.getServer().getPlayer(name);
       if(player != null) {
          player.teleport(config.unjailLoc);
       }
    }
 
-   public static void setPlayerLastLocation(String playername, Location location) {
+   public void setPlayerLastLocation(String playername, Location location) {
       String name = getPlayerInDatabase(playername);
       if(name == null) {
          name = playername;
@@ -955,7 +967,7 @@ public class JailLogic {
       database.setField(Field.LAST_POSITION, name, entry, 0, 0);
    }
 
-   public static Location getPlayerLastLocation(String playername) {
+   public Location getPlayerLastLocation(String playername) {
       Location location = null;
       String name = getPlayerInDatabase(playername);
       if(name == null) {
@@ -979,7 +991,7 @@ public class JailLogic {
       return location;
    }
 
-   public static void setPlayerInventory(String playername, Inventory inventory, boolean clear) {
+   public void setPlayerInventory(String playername, Inventory inventory, boolean clear) {
       Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
       if(inventory instanceof PlayerInventory) {
          PlayerInventory inv = (PlayerInventory) inventory;

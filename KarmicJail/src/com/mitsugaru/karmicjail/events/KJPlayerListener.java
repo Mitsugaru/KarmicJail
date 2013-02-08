@@ -39,7 +39,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyChat
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -54,7 +54,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyCommands
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -69,7 +69,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyInteract
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -84,7 +84,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyInteract
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -99,7 +99,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyMove
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -114,7 +114,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyBlockPlace
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -129,7 +129,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyBlockBreak
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -145,7 +145,7 @@ public class KJPlayerListener implements Listener
 		{
 			if (config.denyItemCraft
 					&& event.getWhoClicked() instanceof Player
-					&& JailLogic.playerCache.contains(event.getWhoClicked()
+					&& JailLogic.PLAYER_CACHE.contains(event.getWhoClicked()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -161,7 +161,7 @@ public class KJPlayerListener implements Listener
 		{
 			if (config.denyItemEnchant
 					&& event.getEnchanter() instanceof Player
-					&& JailLogic.playerCache.contains(event.getEnchanter()
+					&& JailLogic.PLAYER_CACHE.contains(event.getEnchanter()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -176,7 +176,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyItemPickup
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -191,7 +191,7 @@ public class KJPlayerListener implements Listener
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
 			if (config.denyItemDrop
-					&& JailLogic.playerCache.contains(event.getPlayer()
+					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
 							.getName()))
 			{
 				event.setCancelled(true);
@@ -205,7 +205,7 @@ public class KJPlayerListener implements Listener
 	{
 		if (!event.isCancelled() && event.getPlayer() != null)
 		{
-			if (JailLogic.playerCache.contains(event.getPlayer().getName()))
+			if (JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName()))
 			{
 				// They are jailed and dropped an item
 				// TODO update thier inventory in the database
@@ -220,7 +220,7 @@ public class KJPlayerListener implements Listener
 		{
 			if (config.denyInventory
 					&& event.getWhoClicked() instanceof Player
-					&& JailLogic.playerCache.contains(event.getWhoClicked()
+					&& JailLogic.PLAYER_CACHE.contains(event.getWhoClicked()
 							.getName()))
 			{
 				event.setCancelled(true);

@@ -23,7 +23,7 @@ public class JailTask implements Runnable {
 
 	@Override
 	public void run() {
-		JailLogic.unjailPlayer(plugin.getServer().getConsoleSender(), name, true);
+		plugin.getLogic().unjailPlayer(plugin.getServer().getConsoleSender(), name, true);
 	}
 
 	public String getName()
@@ -44,7 +44,7 @@ public class JailTask implements Runnable {
 			plugin.getServer().getScheduler().cancelTask(id);
 			final long early = System.nanoTime() - start;
 			duration -= (long) (Math.floor((early * 0.000000001) + 0.5f) * 20);
-			JailLogic.updatePlayerTime(name, duration);
+			plugin.getLogic().updatePlayerTime(name, duration);
 			KarmicJail.removeTask(name);
 			return true;
 		}

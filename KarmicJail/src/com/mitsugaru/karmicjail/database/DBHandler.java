@@ -1,912 +1,723 @@
 package com.mitsugaru.karmicjail.database;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+
+import lib.PatPeter.SQLibrary.MySQL;
+import lib.PatPeter.SQLibrary.SQLite;
 
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
-import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.config.RootConfig;
-import com.mitsugaru.karmicjail.database.SQLibrary.MySQL;
-import com.mitsugaru.karmicjail.database.SQLibrary.SQLite;
-import com.mitsugaru.karmicjail.database.SQLibrary.Query;
 import com.mitsugaru.karmicjail.inventory.Item;
 
+public class DBHandler {
+   // Class Variables
+   private KarmicJail plugin;
+   private RootConfig config;
+   private SQLite sqlite;
+   private MySQL mysql;
+   private boolean useMySQL;
 
-public class DBHandler
-{
-	// Class Variables
-	private KarmicJail plugin;
-	private static RootConfig config;
-	private SQLite sqlite;
-	private MySQL mysql;
-	private boolean useMySQL;
+   public DBHandler(KarmicJail ks, RootConfig conf) {
+      plugin = ks;
+      config = conf;
+      useMySQL = config.useMySQL;
+      if(config.importSQL) {
+         if(useMySQL) {
+            importSQL();
+         }
+         config.set("mysql.import", false);
+      }
+   }
 
-	public DBHandler(KarmicJail ks, RootConfig conf)
-	{
-		plugin = ks;
-		config = conf;
-		useMySQL = config.useMySQL;
-		checkTables();
-		if (config.importSQL)
-		{
-			if (useMySQL)
-			{
-				importSQL();
-			}
-			config.set("mysql.import", false);
-		}
-	}
+   public boolean checkTables() {
+      boolean valid = true;
+      if(useMySQL) {
+         // Connect to mysql database
+         mysql = new MySQL(plugin.getLogger(), KarmicJail.TAG, config.host, Integer.parseInt(config.port), config.database, config.user,
+               config.password);
+         // Check if jailed table exists
+         if(!mysql.isTable(Table.JAILED.getName())) {
+            plugin.getLogger().info(KarmicJail.TAG + " Created jailed table");
+            // Jail table
+            try {
+               mysql.query("CREATE TABLE "
+                     + Table.JAILED.getName()
+                     + " (id INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INT, lastpos TEXT, UNIQUE (playername), PRIMARY KEY(id));");
+            } catch(SQLException e) {
+               plugin.getLogger().log(Level.SEVERE, "SQLException on creating jailed table.", e);
+               valid = false;
+            }
+         }
+         // Check for history table
+         if(!mysql.isTable(Table.HISTORY.getName())) {
+            plugin.getLogger().info(KarmicJail.TAG + " Created history table");
+            // history table
+            try {
+               mysql.query("CREATE TABLE " + Table.HISTORY.getName()
+                     + " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, history TEXT NOT NULL, PRIMARY KEY(row));");
+            } catch(SQLException e) {
+               plugin.getLogger().log(Level.SEVERE, "SQLException on creating history table.", e);
+               valid = false;
+            }
+         }
+         // Check inventory table
+         if(!mysql.isTable(Table.INVENTORY.getName())) {
+            plugin.getLogger().info(KarmicJail.TAG + " Created inventory table");
+            // inventory table
+            try {
+               mysql.query("CREATE TABLE "
+                     + Table.INVENTORY.getName()
+                     + " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, slot INT NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT NOT NULL, durability TINYTEXT NOT NULL, enchantments TEXT, PRIMARY KEY(row));");
+            } catch(SQLException e) {
+               plugin.getLogger().log(Level.SEVERE, "SQLException on creating inventory table.", e);
+               valid = false;
+            }
+         }
+      } else {
+         // Connect to sql database
+         sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail", plugin.getDataFolder().getAbsolutePath());
+         // Check if jailed table exists
+         if(!sqlite.isTable(Table.JAILED.getName())) {
+            plugin.getLogger().info(KarmicJail.TAG + " Created jailed table");
+            // Jail table
+            try {
+               sqlite.query("CREATE TABLE "
+                     + Table.JAILED.getName()
+                     + " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, lastpos TEXT, UNIQUE (playername));");
+            } catch(SQLException e) {
+               plugin.getLogger().log(Level.SEVERE, "SQLException on creating jailed table.", e);
+               valid = false;
+            }
+         }
+         // Check for history table
+         if(!sqlite.isTable(Table.HISTORY.getName())) {
+            plugin.getLogger().info(KarmicJail.TAG + " Created history table");
+            // history table
+            try {
+               sqlite.query("CREATE TABLE " + Table.HISTORY.getName() + " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, history TEXT NOT NULL);");
+            } catch(SQLException e) {
+               plugin.getLogger().log(Level.SEVERE, "SQLException on creating history table.", e);
+               valid = false;
+            }
+         }
+         // Check inventory table
+         if(!sqlite.isTable(Table.INVENTORY.getName())) {
+            plugin.getLogger().info(KarmicJail.TAG + " Created inventory table");
+            // inventory table
+            try {
+               sqlite.query("CREATE TABLE "
+                     + Table.INVENTORY.getName()
+                     + " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT NOT NULL, durability TEXT NOT NULL, enchantments TEXT);");
+            } catch(SQLException e) {
+               plugin.getLogger().log(Level.SEVERE, "SQLException on creating inventory table.", e);
+               valid = false;
+            }
+         }
+      }
+      return valid;
+   }
 
-	private void checkTables()
-	{
-		if (useMySQL)
-		{
-			// Connect to mysql database
-			mysql = new MySQL(plugin.getLogger(), KarmicJail.TAG, config.host,
-					config.port, config.database, config.user, config.password);
-			// Check if jailed table exists
-			if (!mysql.checkTable(Table.JAILED.getName()))
-			{
-				plugin.getLogger().info(
-						KarmicJail.TAG + " Created jailed table");
-				// Jail table
-				mysql.createTable("CREATE TABLE "
-						+ Table.JAILED.getName()
-						+ " (id INT UNSIGNED NOT NULL AUTO_INCREMENT, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INT, lastpos TEXT, UNIQUE (playername), PRIMARY KEY(id));");
-			}
-			// Check for history table
-			if (!mysql.checkTable(Table.HISTORY.getName()))
-			{
-				plugin.getLogger().info(
-						KarmicJail.TAG + " Created history table");
-				// history table
-				mysql.createTable("CREATE TABLE "
-						+ Table.HISTORY.getName()
-						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, history TEXT NOT NULL, PRIMARY KEY(row));");
-			}
-			// Check inventory table
-			if (!mysql.checkTable(Table.INVENTORY.getName()))
-			{
-				plugin.getLogger().info(
-						KarmicJail.TAG + " Created inventory table");
-				// inventory table
-				mysql.createTable("CREATE TABLE "
-						+ Table.INVENTORY.getName()
-						+ " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, slot INT NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT NOT NULL, durability TINYTEXT NOT NULL, enchantments TEXT, PRIMARY KEY(row));");
-			}
-		}
-		else
-		{
-			// Connect to sql database
-			sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail",
-					plugin.getDataFolder().getAbsolutePath());
-			// Check if jailed table exists
-			if (!sqlite.checkTable(Table.JAILED.getName()))
-			{
-				plugin.getLogger().info(
-						KarmicJail.TAG + " Created jailed table");
-				// Jail table
-				sqlite.createTable("CREATE TABLE "
-						+ Table.JAILED.getName()
-						+ " (id INTEGER PRIMARY KEY, playername varchar(32) NOT NULL, status TEXT NOT NULL, time REAL NOT NULL, groups TEXT, jailer varchar(32), date TEXT, reason TEXT, muted INTEGER, lastpos TEXT, UNIQUE (playername));");
-			}
-			// Check for history table
-			if (!sqlite.checkTable(Table.HISTORY.getName()))
-			{
-				plugin.getLogger().info(
-						KarmicJail.TAG + " Created history table");
-				// history table
-				sqlite.createTable("CREATE TABLE "
-						+ Table.HISTORY.getName()
-						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, history TEXT NOT NULL);");
-			}
-			// Check inventory table
-			if (!sqlite.checkTable(Table.INVENTORY.getName()))
-			{
-				plugin.getLogger().info(
-						KarmicJail.TAG + " Created inventory table");
-				// inventory table
-				sqlite.createTable("CREATE TABLE "
-						+ Table.INVENTORY.getName()
-						+ " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT NOT NULL, durability TEXT NOT NULL, enchantments TEXT);");
-			}
-		}
-	}
+   private void importSQL() {
+      // Connect to sql database
+      ResultSet rs = null;
+      ResultSet statementResult = null;
+      PreparedStatement statement = null;
+      try {
+         // Grab local SQLite database
+         sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail", plugin.getDataFolder().getAbsolutePath());
+         // Copy items
+         rs = sqlite.query("SELECT * FROM " + Table.JAILED.getName() + ";");
+         if(rs.next()) {
+            plugin.getLogger().info(KarmicJail.TAG + " Importing jailed players...");
+            statement = mysql.prepare("INSERT INTO " + Table.JAILED.getName()
+                  + " (playername, status, time, groups, jailer, date, reason, muted, lastpos) VALUES(?,?,?,?,?,?,?,?,?);");
+            do {
+               String name = rs.getString("playername");
+               String status = rs.getString("status");
+               if(rs.wasNull()) {
+                  status = JailStatus.FREED + "";
+               }
+               double time = rs.getDouble("time");
+               if(rs.wasNull()) {
+                  time = -1;
+               }
+               String groups = rs.getString("groups");
+               if(rs.wasNull()) {
+                  groups = "";
+               }
+               String jailer = rs.getString("jailer");
+               if(rs.wasNull()) {
+                  jailer = "";
+               }
+               String date = rs.getString("date");
+               if(rs.wasNull()) {
+                  date = "";
+               }
+               String reason = rs.getString("reason");
+               if(rs.wasNull()) {
+                  reason = "";
+               }
+               int muted = rs.getInt("muted");
+               if(rs.wasNull()) {
+                  muted = 0;
+               }
+               String lastpos = "";
+               try {
+                  lastpos = rs.getString("lastpos");
+                  if(rs.wasNull()) {
+                     lastpos = "";
+                  }
+               } catch(SQLException e) {
+                  // Ignore. Try catch for < 0.4 databases that don't have
+                  // this field
+               }
+               statement.setString(1, name);
+               statement.setString(2, status);
+               statement.setDouble(3, time);
+               statement.setString(4, groups);
+               statement.setString(5, jailer);
+               statement.setString(6, date);
+               statement.setString(7, reason);
+               statement.setInt(8, muted);
+               statement.setString(9, lastpos);
+               try {
+                  statementResult = sqlite.query(statement);
+               } catch(SQLException e) {
+                  plugin.getLogger().warning(KarmicJail.TAG + " SQL Exception on Import");
+                  e.printStackTrace();
+               } finally {
+                  cleanup(statementResult, null);
+               }
+            } while(rs.next());
+         }
+         // TODO import inventory
+         // TODO import history
+         plugin.getLogger().info(KarmicJail.TAG + " Done importing SQLite into MySQL");
+      } catch(SQLException e) {
+         plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQL Exception on Import", e);
+      } finally {
+         cleanup(statementResult, null);
+         cleanup(rs, statement);
+      }
+   }
 
-	private void importSQL()
-	{
-		// Connect to sql database
-		try
-		{
-			// Grab local SQLite database
-			sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail",
-					plugin.getDataFolder().getAbsolutePath());
-			// Copy items
-			Query rs = sqlite.select("SELECT * FROM " + Table.JAILED.getName()
-					+ ";");
-			if (rs.getResult().next())
-			{
-				plugin.getLogger().info(
-						KarmicJail.TAG + " Importing jailed players...");
-				PreparedStatement statement = mysql
-						.prepare("INSERT INTO "
-								+ Table.JAILED.getName()
-								+ " (playername, status, time, groups, jailer, date, reason, muted, lastpos) VALUES(?,?,?,?,?,?,?,?,?);");
-				do
-				{
-					String name = rs.getResult().getString("playername");
-					String status = rs.getResult().getString("status");
-					if (rs.getResult().wasNull())
-					{
-						status = JailStatus.FREED + "";
-					}
-					double time = rs.getResult().getDouble("time");
-					if (rs.getResult().wasNull())
-					{
-						time = -1;
-					}
-					String groups = rs.getResult().getString("groups");
-					if (rs.getResult().wasNull())
-					{
-						groups = "";
-					}
-					String jailer = rs.getResult().getString("jailer");
-					if (rs.getResult().wasNull())
-					{
-						jailer = "";
-					}
-					String date = rs.getResult().getString("date");
-					if (rs.getResult().wasNull())
-					{
-						date = "";
-					}
-					String reason = rs.getResult().getString("reason");
-					if (rs.getResult().wasNull())
-					{
-						reason = "";
-					}
-					int muted = rs.getResult().getInt("muted");
-					if (rs.getResult().wasNull())
-					{
-						muted = 0;
-					}
-					String lastpos = "";
-					try
-					{
-						lastpos = rs.getResult().getString("lastpos");
-						if (rs.getResult().wasNull())
-						{
-							lastpos = "";
-						}
-					}
-					catch (SQLException e)
-					{
-						// Ignore. Try catch for < 0.4 databases that don't have
-						// this field
-					}
-					statement.setString(1, name);
-					statement.setString(2, status);
-					statement.setDouble(3, time);
-					statement.setString(4, groups);
-					statement.setString(5, jailer);
-					statement.setString(6, date);
-					statement.setString(7, reason);
-					statement.setInt(8, muted);
-					statement.setString(9, lastpos);
-					try
-					{
-						statement.executeUpdate();
-					}
-					catch (SQLException e)
-					{
-						plugin.getLogger().warning(
-								KarmicJail.TAG + " SQL Exception on Import");
-						e.printStackTrace();
-					}
-				} while (rs.getResult().next());
-				statement.close();
-			}
-			rs.closeQuery();
-			// TODO import inventory
-			// TODO import history
-			plugin.getLogger().info(
-					KarmicJail.TAG + " Done importing SQLite into MySQL");
-		}
-		catch (SQLException e)
-		{
-			plugin.getLogger().warning(
-					KarmicJail.TAG + " SQL Exception on Import");
-			e.printStackTrace();
-		}
+   public void cleanup(ResultSet rs, PreparedStatement statement) {
+      if(statement != null) {
+         try {
+            statement.close();
+         } catch(SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQL Exception on cleanup.", e);
+         }
+      }
+      if(rs != null) {
+         try {
+            rs.close();
+         } catch(SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQL Exception on cleanup.", e);
+         }
+      }
+   }
 
-	}
+   public boolean checkConnection() {
+      boolean connected = false;
+      if(useMySQL) {
+         connected = mysql.checkConnection();
+      } else {
+         connected = sqlite.checkConnection();
+      }
+      return connected;
+   }
 
-	public boolean checkConnection()
-	{
-		boolean connected = false;
-		if (useMySQL)
-		{
-			connected = mysql.checkConnection();
-		}
-		else
-		{
-			connected = sqlite.checkConnection();
-		}
-		return connected;
-	}
+   public void close() {
+      if(useMySQL) {
+         mysql.close();
+      } else {
+         sqlite.close();
+      }
+   }
 
-	public void close()
-	{
-		if (useMySQL)
-		{
-			mysql.close();
-		}
-		else
-		{
-			sqlite.close();
-		}
-	}
+   public ResultSet query(String query) throws SQLException {
+      if(useMySQL) {
+         return mysql.query(query);
+      } else {
+         return sqlite.query(query);
+      }
+   }
 
-	public Query select(String query)
-	{
-		if (useMySQL)
-		{
-			return mysql.select(query);
-		}
-		else
-		{
-			return sqlite.select(query);
-		}
-	}
+   public ResultSet query(PreparedStatement statement) throws SQLException {
+      if(useMySQL) {
+         return mysql.query(statement);
+      } else {
+         return sqlite.query(statement);
+      }
+   }
 
-	public void standardQuery(String query)
-	{
-		if (useMySQL)
-		{
-			mysql.standardQuery(query);
-		}
-		else
-		{
-			sqlite.standardQuery(query);
-		}
-	}
+   public PreparedStatement prepare(String statement) throws SQLException {
+      if(useMySQL) {
+         return mysql.prepare(statement);
+      } else {
+         return sqlite.prepare(statement);
+      }
+   }
 
-	public void createTable(String query)
-	{
-		if (useMySQL)
-		{
-			mysql.createTable(query);
-		}
-		else
-		{
-			sqlite.createTable(query);
-		}
-	}
+   public int getPlayerId(String playername) {
+      int id = -1;
+      ResultSet query = null;
+      try {
+         // TODO make this a prepared statement
+         query = query("SELECT * FROM " + Table.JAILED.getName() + " WHERE playername='" + playername + "';");
+         if(query.next()) {
+            id = query.getInt("id");
+         }
+      } catch(SQLException e) {
+         plugin.getLogger().warning("SQL Exception on grabbing player ID");
+         e.printStackTrace();
+      } finally {
+         cleanup(query, null);
+      }
+      return id;
+   }
 
-	public PreparedStatement prepare(String statement)
-	{
-		if (useMySQL)
-		{
-			return mysql.prepare(statement);
-		}
-		else
-		{
-			return sqlite.prepare(statement);
-		}
-	}
+   public List<String> getPlayerHistory(String name) {
+      List<String> list = new ArrayList<String>();
+      int id = getPlayerId(name);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(name);
+         id = getPlayerId(name);
+      }
+      ResultSet query = null;
+      if(id != -1) {
+         try {
+            query = query("SELECT * FROM " + Table.HISTORY.getName() + " WHERE id='" + id + "' ORDER BY row DESC;");
+            if(query.next()) {
+               do {
+                  list.add(query.getString(Field.HISTORY.getColumnName()));
+               } while(query.next());
+            }
+         } catch(SQLException e) {
+            plugin.getLogger().warning("SQL Exception on grabbing player history:" + name);
+            e.printStackTrace();
+         } finally {
+            cleanup(query, null);
+         }
+      }
+      return list;
+   }
 
-	public int getPlayerId(String playername)
-	{
-		int id = -1;
-		try
-		{
-			// TODO make this a prepared statement
-			final Query query = select("SELECT * FROM "
-					+ Table.JAILED.getName() + " WHERE playername='"
-					+ playername + "';");
-			if (query.getResult().next())
-			{
-				id = query.getResult().getInt("id");
-			}
-			query.closeQuery();
-		}
-		catch (SQLException e)
-		{
-			plugin.getLogger().warning("SQL Exception on grabbing player ID");
-			e.printStackTrace();
-		}
-		return id;
-	}
+   public void addToHistory(String name, String reason) {
+      int id = getPlayerId(name);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(name);
+         id = getPlayerId(name);
+      }
+      if(id != -1) {
+         try {
+            final PreparedStatement statement = prepare("INSERT INTO " + Table.HISTORY.getName() + " (id," + Field.HISTORY.getColumnName()
+                  + ") VALUES(?,?);");
+            statement.setInt(1, id);
+            statement.setString(2, reason);
+            statement.executeUpdate();
+            statement.close();
+         } catch(SQLException e) {
+            plugin.getLogger().warning("SQL Exception on inserting player history:" + name);
+            e.printStackTrace();
+         }
+      }
+   }
 
-	public List<String> getPlayerHistory(String name)
-	{
-		List<String> list = new ArrayList<String>();
-		int id = getPlayerId(name);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(name);
-			id = getPlayerId(name);
-		}
-		if (id != -1)
-		{
-			Query query = select("SELECT * FROM " + Table.HISTORY.getName()
-					+ " WHERE id='" + id + "' ORDER BY row DESC;");
-			try
-			{
-				if (query.getResult().next())
-				{
-					do
-					{
-						list.add(query.getResult().getString(
-								Field.HISTORY.getColumnName()));
-					} while (query.getResult().next());
-				}
-				query.closeQuery();
-			}
-			catch (SQLException e)
-			{
-				plugin.getLogger().warning(
-						"SQL Exception on grabbing player history:" + name);
-				e.printStackTrace();
-			}
-		}
-		return list;
-	}
+   public void resetPlayer(String name) {
+      int id = getPlayerId(name);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(name);
+         id = getPlayerId(name);
+      }
+      ResultSet first = null;
+      ResultSet second = null;
+      if(id != -1) {
+         try {
+            first = query("UPDATE " + Table.JAILED.getName() + " SET time='-1',jailer='',date='',reason='' WHERE id='" + id + "';");
+         } catch(SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to update player time for " + name, e);
+         } finally {
+            cleanup(first, null);
+         }
+         // Delete inventory table entries of their id
+         try {
+            second = query("DELETE FROM " + Table.INVENTORY.getName() + " WHERE id='" + id + "';");
+         } catch(SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to delete inventory entires for " + name, e);
+         } finally {
+            cleanup(second, null);
+         }
+      } else {
+         plugin.getLogger().warning("Could not reset player '" + name + "'");
+      }
+   }
 
-	public void addToHistory(String name, String reason)
-	{
-		int id = getPlayerId(name);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(name);
-			id = getPlayerId(name);
-		}
-		if (id != -1)
-		{
-			try
-			{
-				final PreparedStatement statement = prepare("INSERT INTO "
-						+ Table.HISTORY.getName() + " (id,"
-						+ Field.HISTORY.getColumnName() + ") VALUES(?,?);");
-				statement.setInt(1, id);
-				statement.setString(2, reason);
-				statement.executeUpdate();
-				statement.close();
-			}
-			catch (SQLException e)
-			{
-				plugin.getLogger().warning(
-						"SQL Exception on inserting player history:" + name);
-				e.printStackTrace();
-			}
-		}
-	}
+   public void setField(Field field, String playername, String entry, int i, double d) {
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      PreparedStatement statement = null;
+      ResultSet rs = null;
+      if(id != -1) {
+         try {
+            statement = prepare("UPDATE " + field.getTable().getName() + " SET " + field.getColumnName() + "=? WHERE id='" + id + "';");
+            boolean execute = false;
+            switch(field.getType()) {
 
-	public void resetPlayer(String name)
-	{
-		int id = getPlayerId(name);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(name);
-			id = getPlayerId(name);
-		}
-		if (id != -1)
-		{
-			standardQuery("UPDATE " + Table.JAILED.getName()
-					+ " SET time='-1',jailer='',date='',reason='' WHERE id='"
-					+ id + "';");
-			// Delete inventory table entries of their id
-			standardQuery("DELETE FROM " + Table.INVENTORY.getName()
-					+ " WHERE id='" + id + "';");
-		}
-		else
-		{
-			plugin.getLogger().warning("Could not reset player '" + name + "'");
-		}
-	}
+            case STRING: {
+               if(entry != null) {
+                  statement.setString(1, entry);
+                  execute = true;
+               } else {
+                  plugin.getLogger().warning("String cannot be null for field: " + field.name());
+               }
+               break;
+            }
+            case INT: {
+               statement.setInt(1, i);
+               execute = true;
+               break;
+            }
+            case DOUBLE: {
+               statement.setDouble(1, d);
+               execute = true;
+               break;
+            }
+            default: {
+               if(config.debugUnhandled) {
+                  plugin.getLogger().warning("Unhandled setField for field " + field);
+               }
+               break;
+            }
+            }
+            if(execute) {
+               rs = query(statement);
+            }
+         } catch(SQLException e) {
+            plugin.getLogger().warning("SQL Exception on setting field " + field.name() + " for '" + playername + "'");
+            e.printStackTrace();
+         } finally {
+            cleanup(rs, statement);
+         }
+      } else {
+         plugin.getLogger().warning("Could not set field " + field.name() + " for player '" + playername + "' to: " + entry);
+      }
+   }
 
-	public void setField(Field field, String playername, String entry, int i,
-			double d)
-	{
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			try
-			{
-				final PreparedStatement statement = prepare("UPDATE "
-						+ field.getTable().getName() + " SET "
-						+ field.getColumnName() + "=? WHERE id='" + id + "';");
-				boolean execute = false;
-				switch (field.getType())
-				{
+   public String getStringField(Field field, String playername) {
+      String out = "";
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      if(id != -1) {
+         switch(field.getType()) {
+         case STRING: {
+            ResultSet query = null;
+            try {
+               query = query("SELECT * FROM " + field.getTable().getName() + " WHERE id ='" + id + "'");
+               if(query.next()) {
+                  out = query.getString(field.getColumnName());
+                  if(query.wasNull()) {
+                     out = "";
+                  }
+               }
+            } catch(SQLException e) {
+               plugin.getLogger().warning("SQL Exception on grabbing field " + field.name() + " for player '" + playername + "'");
+               e.printStackTrace();
+            } finally {
+               cleanup(query, null);
+            }
+            break;
+         }
+         default: {
+            if(config.debugUnhandled) {
+               plugin.getLogger().warning("Unhandled getStringField for field " + field);
+            }
+            break;
+         }
+         }
+      } else {
+         plugin.getLogger().warning("Could not get field " + field.name() + " for player '" + playername + "'");
+      }
+      return out;
+   }
 
-					case STRING:
-					{
-						if (entry != null)
-						{
-							statement.setString(1, entry);
-							execute = true;
-						}
-						else
-						{
-							plugin.getLogger().warning(
-									"String cannot be null for field: "
-											+ field.name());
-						}
-						break;
-					}
-					case INT:
-					{
-						statement.setInt(1, i);
-						execute = true;
-						break;
-					}
-					case DOUBLE:
-					{
-						statement.setDouble(1, d);
-						execute = true;
-						break;
-					}
-					default:
-					{
-						if (config.debugUnhandled)
-						{
-							plugin.getLogger().warning(
-									"Unhandled setField for field " + field);
-						}
-						break;
-					}
-				}
-				if (execute)
-				{
-					statement.executeUpdate();
-				}
-				statement.close();
-			}
-			catch (SQLException e)
-			{
-				plugin.getLogger().warning(
-						"SQL Exception on setting field " + field.name()
-								+ " for '" + playername + "'");
-				e.printStackTrace();
-			}
-		}
-		else
-		{
-			plugin.getLogger().warning(
-					"Could not set field " + field.name() + " for player '"
-							+ playername + "' to: " + entry);
-		}
-	}
+   public int getIntField(Field field, String playername) {
+      int out = -1;
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      if(id != -1) {
+         switch(field.getType()) {
+         case INT: {
+            ResultSet query = null;
+            try {
+               query = query("SELECT * FROM " + field.getTable().getName() + " WHERE id ='" + id + "'");
+               if(query.next()) {
+                  out = query.getInt(field.getColumnName());
+                  if(query.wasNull()) {
+                     out = -1;
+                  }
+               }
+            } catch(SQLException e) {
+               plugin.getLogger().warning("SQL Exception on grabbing field " + field.name() + " for player '" + playername + "'");
+               e.printStackTrace();
+            } finally {
+               cleanup(query, null);
+            }
+            break;
+         }
+         default: {
+            if(config.debugUnhandled) {
+               plugin.getLogger().warning("Unhandled getIntField for field " + field);
+            }
+            break;
+         }
+         }
+      } else {
+         plugin.getLogger().warning("Could not get field " + field.name() + " for player '" + playername + "'");
+      }
+      return out;
+   }
 
-	public String getStringField(Field field, String playername)
-	{
-		String out = "";
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			switch (field.getType())
-			{
-				case STRING:
-				{
-					try
-					{
-						final Query query = select("SELECT * FROM "
-								+ field.getTable().getName() + " WHERE id ='"
-								+ id + "'");
-						if (query.getResult().next())
-						{
-							out = query.getResult().getString(field.getColumnName());
-							if (query.getResult().wasNull())
-							{
-								out = "";
-							}
-						}
-						query.closeQuery();
-					}
-					catch (SQLException e)
-					{
-						plugin.getLogger().warning(
-								"SQL Exception on grabbing field "
-										+ field.name() + " for player '"
-										+ playername + "'");
-						e.printStackTrace();
-					}
-					break;
-				}
-				default:
-				{
-					if (config.debugUnhandled)
-					{
-						plugin.getLogger().warning(
-								"Unhandled getStringField for field " + field);
-					}
-					break;
-				}
-			}
-		}
-		else
-		{
-			plugin.getLogger().warning(
-					"Could not get field " + field.name() + " for player '"
-							+ playername + "'");
-		}
-		return out;
-	}
+   public double getDoubleField(Field field, String playername) {
+      double out = -1;
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      if(id != -1) {
+         switch(field.getType()) {
+         case DOUBLE: {
+            ResultSet query = null;
+            try {
+               query = query("SELECT * FROM " + field.getTable().getName() + " WHERE id ='" + id + "'");
+               if(query.next()) {
+                  out = query.getDouble(field.getColumnName());
+                  if(query.wasNull()) {
+                     out = -1;
+                  }
+               }
+            } catch(SQLException e) {
+               plugin.getLogger().warning("SQL Exception on grabbing field " + field.name() + " for player '" + playername + "'");
+               e.printStackTrace();
+            } finally {
+               cleanup(query, null);
+            }
+            break;
+         }
+         default: {
+            if(config.debugUnhandled) {
+               plugin.getLogger().warning("Unhandled getDoubleField for field " + field);
+            }
+            break;
+         }
+         }
+      } else {
+         plugin.getLogger().warning("Could not get field " + field.name() + " for player '" + playername + "'");
+      }
+      return out;
+   }
 
-	public int getIntField(Field field, String playername)
-	{
-		int out = -1;
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			switch (field.getType())
-			{
-				case INT:
-				{
-					try
-					{
-						final Query query = select("SELECT * FROM "
-								+ field.getTable().getName() + " WHERE id ='"
-								+ id + "'");
-						if (query.getResult().next())
-						{
-							out = query.getResult().getInt(field.getColumnName());
-							if (query.getResult().wasNull())
-							{
-								out = -1;
-							}
-						}
-						query.closeQuery();
-					}
-					catch (SQLException e)
-					{
-						plugin.getLogger().warning(
-								"SQL Exception on grabbing field "
-										+ field.name() + " for player '"
-										+ playername + "'");
-						e.printStackTrace();
-					}
-					break;
-				}
-				default:
-				{
-					if (config.debugUnhandled)
-					{
-						plugin.getLogger().warning(
-								"Unhandled getIntField for field " + field);
-					}
-					break;
-				}
-			}
-		}
-		else
-		{
-			plugin.getLogger().warning(
-					"Could not get field " + field.name() + " for player '"
-							+ playername + "'");
-		}
-		return out;
-	}
+   public boolean setPlayerItems(String playername, Map<Integer, ItemStack> items) {
+      boolean valid = false;
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      if(id != -1) {
+         ResultSet rs = null;
+         PreparedStatement statement = null;
+         ResultSet second = null;
+         try {
+            // Remove old items
+            rs = query("DELETE FROM " + Table.INVENTORY.getName() + " WHERE id='" + id + "';");
+            cleanup(rs, null);
+            // Add in items
+            statement = prepare("INSERT INTO " + Table.INVENTORY.getName()
+                  + " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
+            for(Map.Entry<Integer, ItemStack> item : items.entrySet()) {
+               statement.setInt(1, id);
+               statement.setInt(2, item.getKey().intValue());
+               statement.setInt(3, item.getValue().getTypeId());
+               statement.setInt(4, item.getValue().getAmount());
+               statement.setString(5, "" + item.getValue().getData().getData());
+               statement.setString(6, "" + item.getValue().getDurability());
+               if(!item.getValue().getEnchantments().isEmpty()) {
+                  StringBuilder sb = new StringBuilder();
+                  for(Map.Entry<Enchantment, Integer> e : item.getValue().getEnchantments().entrySet()) {
+                     sb.append(e.getKey().getId() + "v" + e.getValue().intValue() + "i");
+                  }
+                  // Remove trailing comma
+                  sb.deleteCharAt(sb.length() - 1);
+                  statement.setString(7, sb.toString());
+               } else {
+                  statement.setString(7, "");
+               }
+               second = query(statement);
+               cleanup(second, null);
+            }
+            valid = true;
+         } catch(SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "SQL Exception on setting inventory for '" + playername + "'", e);
+            valid = false;
+         } finally {
+            cleanup(null, statement);
+         }
+         return valid;
+      } else {
+         plugin.getLogger().log(Level.SEVERE, "Could not set items for player '" + playername + "'");
+      }
+      return valid;
+   }
 
-	public double getDoubleField(Field field, String playername)
-	{
-		double out = -1;
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			switch (field.getType())
-			{
-				case DOUBLE:
-				{
-					try
-					{
-						final Query query = select("SELECT * FROM "
-								+ field.getTable().getName() + " WHERE id ='"
-								+ id + "'");
-						if (query.getResult().next())
-						{
-							out = query.getResult().getDouble(field.getColumnName());
-							if (query.getResult().wasNull())
-							{
-								out = -1;
-							}
-						}
-						query.closeQuery();
-					}
-					catch (SQLException e)
-					{
-						plugin.getLogger().warning(
-								"SQL Exception on grabbing field "
-										+ field.name() + " for player '"
-										+ playername + "'");
-						e.printStackTrace();
-					}
-					break;
-				}
-				default:
-				{
-					if (config.debugUnhandled)
-					{
-						plugin.getLogger().warning(
-								"Unhandled getDoubleField for field " + field);
-					}
-					break;
-				}
-			}
-		}
-		else
-		{
-			plugin.getLogger().warning(
-					"Could not get field " + field.name() + " for player '"
-							+ playername + "'");
-		}
-		return out;
-	}
+   public Map<Integer, ItemStack> getPlayerItems(String playername) {
+      Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      if(id != -1) {
+         ResultSet query = null;
+         try {
+            query = query("SELECT * FROM " + Table.INVENTORY.getName() + " WHERE id='" + id + "';");
+            if(query.next()) {
+               do {
+                  int itemid = query.getInt(Field.INV_ITEM.getColumnName());
+                  int amount = query.getInt(Field.INV_AMOUNT.getColumnName());
+                  byte data = query.getByte(Field.INV_DATA.getColumnName());
+                  short dur = query.getShort(Field.INV_DURABILITY.getColumnName());
+                  ItemStack add = null;
+                  if(Item.isTool(itemid) || Item.isPotion(itemid)) {
+                     add = new ItemStack(itemid, amount, dur);
+                  } else {
+                     add = new ItemStack(itemid, amount, dur, data);
+                  }
+                  String enchantments = query.getString(Field.INV_ENCHANT.getColumnName());
+                  if(add != null) {
+                     if(!query.wasNull()) {
+                        if(enchantments.contains("i") || enchantments.contains("v")) {
+                           try {
+                              String[] cut = enchantments.split("i");
+                              for(int s = 0; s < cut.length; s++) {
+                                 String[] cutter = cut[s].split("v");
+                                 EnchantmentWrapper e = new EnchantmentWrapper(Integer.parseInt(cutter[0]));
+                                 add.addUnsafeEnchantment(e.getEnchantment(), Integer.parseInt(cutter[1]));
+                              }
+                           } catch(ArrayIndexOutOfBoundsException a) {
+                              // something went wrong
+                           }
+                        }
+                     }
+                     items.put(new Integer(query.getInt(Field.INV_SLOT.getColumnName())), add);
+                  }
+               } while(query.next());
+            }
+         } catch(SQLException e) {
+            plugin.getLogger().log(Level.SEVERE, "SQL Exception on getting inventory for '" + playername + "'", e);
+         } finally {
+            cleanup(query, null);
+         }
+      }
+      return items;
+   }
 
-	public boolean setPlayerItems(String playername,
-			Map<Integer, ItemStack> items)
-	{
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			try
-			{
-				// Remove old items
-				standardQuery("DELETE FROM " + Table.INVENTORY.getName()
-						+ " WHERE id='" + id + "';");
-				// Add in items
-				PreparedStatement statement = prepare("INSERT INTO "
-						+ Table.INVENTORY.getName()
-						+ " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
-				for (Map.Entry<Integer, ItemStack> item : items.entrySet())
-				{
-					statement.setInt(1, id);
-					statement.setInt(2, item.getKey().intValue());
-					statement.setInt(3, item.getValue().getTypeId());
-					statement.setInt(4, item.getValue().getAmount());
-					statement.setString(5, ""
-							+ item.getValue().getData().getData());
-					statement
-							.setString(6, "" + item.getValue().getDurability());
-					if (!item.getValue().getEnchantments().isEmpty())
-					{
-						StringBuilder sb = new StringBuilder();
-						for (Map.Entry<Enchantment, Integer> e : item
-								.getValue().getEnchantments().entrySet())
-						{
-							sb.append(e.getKey().getId() + "v"
-									+ e.getValue().intValue() + "i");
-						}
-						// Remove trailing comma
-						sb.deleteCharAt(sb.length() - 1);
-						statement.setString(7, sb.toString());
-					}
-					else
-					{
-						statement.setString(7, "");
-					}
-					statement.executeUpdate();
-				}
-				statement.close();
-			}
-			catch (SQLException e)
-			{
-				plugin.getLogger().warning(
-						"SQL Exception on setting inventory for '" + playername
-								+ "'");
-				e.printStackTrace();
-				return false;
-			}
-			return true;
-		}
-		else
-		{
-			plugin.getLogger().warning(
-					"Could not set items for player '" + playername + "'");
-		}
-		return false;
-	}
+   public boolean setItem(String playername, int slot, ItemStack item) {
+      return setItem(playername, slot, item, item.getAmount());
+   }
 
-	public Map<Integer, ItemStack> getPlayerItems(String playername)
-	{
-		Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			try
-			{
-				Query query = select("SELECT * FROM "
-						+ Table.INVENTORY.getName() + " WHERE id='" + id + "';");
-				if (query.getResult().next())
-				{
-					do
-					{
-						int itemid = query.getResult().getInt(
-								Field.INV_ITEM.getColumnName());
-						int amount = query.getResult().getInt(
-								Field.INV_AMOUNT.getColumnName());
-						byte data = query.getResult().getByte(
-								Field.INV_DATA.getColumnName());
-						short dur = query.getResult().getShort(
-								Field.INV_DURABILITY.getColumnName());
-						ItemStack add = null;
-						if (Item.isTool(itemid) || Item.isPotion(itemid))
-						{
-							add = new ItemStack(itemid, amount, dur);
-						} else {
-							add = new ItemStack(itemid, amount, dur, data);
-						}
-						String enchantments = query.getResult().getString(
-								Field.INV_ENCHANT.getColumnName());
-						if (add != null)
-						{
-							if (!query.getResult().wasNull())
-							{
-								if (enchantments.contains("i")
-										|| enchantments.contains("v"))
-								{
-									try
-									{
-										String[] cut = enchantments.split("i");
-										for (int s = 0; s < cut.length; s++)
-										{
-											String[] cutter = cut[s].split("v");
-											EnchantmentWrapper e = new EnchantmentWrapper(
-													Integer.parseInt(cutter[0]));
-											add.addUnsafeEnchantment(
-													e.getEnchantment(),
-													Integer.parseInt(cutter[1]));
-										}
-									}
-									catch (ArrayIndexOutOfBoundsException a)
-									{
-										// something went wrong
-									}
-								}
-							}
-							items.put(
-									new Integer(query.getResult().getInt(
-											Field.INV_SLOT.getColumnName())),
-									add);
-						}
-					} while (query.getResult().next());
-				}
-				query.closeQuery();
-			}
-			catch (SQLException e)
-			{
-				plugin.getLogger().warning(
-						"SQL Exception on getting inventory for '" + playername
-								+ "'");
-				e.printStackTrace();
-			}
-		}
-		return items;
-	}
+   public boolean setItem(String playername, int slot, ItemStack item, int amount) {
+      boolean valid = false;
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      if(id != -1) {
+         ResultSet rs = null;
+         PreparedStatement statement = null;
+         try {
+            statement = prepare("INSERT INTO " + Table.INVENTORY.getName()
+                  + " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
+            statement.setInt(1, id);
+            statement.setInt(2, slot);
+            statement.setInt(3, item.getTypeId());
+            statement.setInt(4, amount);
+            statement.setString(5, "" + item.getData().getData());
+            statement.setString(6, "" + item.getDurability());
+            if(!item.getEnchantments().isEmpty()) {
+               // TODO fix this to be ordered
+               StringBuilder sb = new StringBuilder();
+               for(Map.Entry<Enchantment, Integer> e : item.getEnchantments().entrySet()) {
+                  sb.append(e.getKey().getId() + "v" + e.getValue().intValue() + "i");
+               }
+               // Remove trailing comma
+               sb.deleteCharAt(sb.length() - 1);
+               statement.setString(7, sb.toString());
+            } else {
+               statement.setString(7, "");
+            }
+            rs = query(statement);
+            valid = true;
+         } catch(SQLException e) {
+            plugin.getLogger().warning("SQL Exception on setting inventory for '" + playername + "'");
+            e.printStackTrace();
+         } finally {
+            cleanup(rs, statement);
+         }
+      }
+      return valid;
+   }
 
-	public boolean setItem(String playername, int slot, ItemStack item)
-	{
-		return setItem(playername, slot, item, item.getAmount());
-	}
+   public void removeItem(String playername, int slot) {
+      int id = getPlayerId(playername);
+      if(id == -1) {
+         // Unknown player?
+         plugin.getLogic().addPlayerToDatabase(playername);
+         id = getPlayerId(playername);
+      }
+      if(id != -1) {
+         ResultSet query = null;
+         try {
+            query = query("DELETE FROM " + Table.INVENTORY.getName() + " WHERE id='" + id + "' AND slot='" + slot + "';");
+         } catch(SQLException e) {
 
-	public boolean setItem(String playername, int slot, ItemStack item,
-			int amount)
-	{
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			try
-			{
-				PreparedStatement statement = prepare("INSERT INTO "
-						+ Table.INVENTORY.getName()
-						+ " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
-				statement.setInt(1, id);
-				statement.setInt(2, slot);
-				statement.setInt(3, item.getTypeId());
-				statement.setInt(4, amount);
-				statement.setString(5, "" + item.getData().getData());
-				statement.setString(6, "" + item.getDurability());
-				if (!item.getEnchantments().isEmpty())
-				{
-					//TODO fix this to be ordered
-					StringBuilder sb = new StringBuilder();
-					for (Map.Entry<Enchantment, Integer> e : item
-							.getEnchantments().entrySet())
-					{
-						sb.append(e.getKey().getId() + "v"
-								+ e.getValue().intValue() + "i");
-					}
-					// Remove trailing comma
-					sb.deleteCharAt(sb.length() - 1);
-					statement.setString(7, sb.toString());
-				}
-				else
-				{
-					statement.setString(7, "");
-				}
-				statement.executeUpdate();
-				statement.close();
-				return true;
-			}
-			catch (SQLException e)
-			{
-				plugin.getLogger().warning(
-						"SQL Exception on setting inventory for '" + playername
-								+ "'");
-				e.printStackTrace();
-			}
-		}
-		return false;
-	}
-
-	public void removeItem(String playername, int slot)
-	{
-		int id = getPlayerId(playername);
-		if (id == -1)
-		{
-			// Unknown player?
-			JailLogic.addPlayerToDatabase(playername);
-			id = getPlayerId(playername);
-		}
-		if (id != -1)
-		{
-			standardQuery("DELETE FROM " + Table.INVENTORY.getName()
-					+ " WHERE id='" + id + "' AND slot='" + slot + "';");
-		}
-	}
+         } finally {
+            cleanup(query, null);
+         }
+      }
+   }
 }

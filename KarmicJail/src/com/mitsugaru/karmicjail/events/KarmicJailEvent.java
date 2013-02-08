@@ -6,48 +6,46 @@ import org.bukkit.event.HandlerList;
 import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 
 public class KarmicJailEvent extends Event {
-	private static final HandlerList handlers = new HandlerList();
-	private String name, date,jailer,reason;
-	private long duration;
+   private static final HandlerList handlers = new HandlerList();
+   private String name, date, jailer, reason;
+   private long duration;
 
-	public KarmicJailEvent(String event, PrisonerInfo pi)
-	{
-		super();
-		name = pi.name;
-		date = pi.date;
-		jailer = pi.jailer;
-		reason = pi.reason;
-		duration = pi.time;
-	}
+   public KarmicJailEvent(String event, PrisonerInfo pi) {
+      super();
+      name = pi.name;
+      date = pi.date;
+      jailer = pi.jailer;
+      reason = pi.reason;
+      duration = pi.time;
+   }
 
-	public String getName() {
-		return name;
-	}
+   public String getName() {
+      return name;
+   }
 
-	public String getDate() {
-		return date;
-	}
+   public String getDate() {
+      return date;
+   }
 
-	public String getJailer() {
-		return jailer;
-	}
+   public String getJailer() {
+      return jailer;
+   }
 
-	public String getReason() {
-		return reason;
-	}
+   public String getReason() {
+      return reason;
+   }
 
-	public long getDuration() {
-		return duration;
-	}
+   public long getDuration() {
+      return duration;
+   }
 
-	@Override
-	public HandlerList getHandlers() {
-		return handlers;
-	}
-	
-	public static HandlerList getHandlerList()
-	{
-		return handlers;
-	}
+   @Override
+   public HandlerList getHandlers() {
+      return handlers;
+   }
+
+   public static HandlerList getHandlerList() {
+      return handlers;
+   }
 
 }

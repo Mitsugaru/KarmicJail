@@ -1,62 +1,84 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>KarmicJail</artifactId>
-	<version>0.436-SNAPSHOT</version>
-	<name>KarmicJail</name>
-	<description>Jail plugin for Mine-RP</description>
-	
-	<scm>
-		<url>https://github.com/Mitsugaru/KarmicJail.git</url>
-	</scm>
-
-	<parent>
-		<groupId>com.mitsugaru</groupId>
-		<artifactId>ProjectKarma</artifactId>
-		<version>1.4.5-SNAPSHOT</version>
-	</parent>
-
-	<build>
-		<defaultGoal>compile package</defaultGoal>
-		<sourceDirectory>${basedir}/src/</sourceDirectory>
-		<resources>
-			<resource>
-				<includes>
-					<include>plugin.yml</include>
-				</includes>
-				<directory>${basedir}</directory>
-			</resource>
-		</resources>
-	</build>
-	
-	<dependencies>
-		<dependency>
-			<groupId>de.bananaco</groupId>
-			<artifactId>bPermissions</artifactId>
-			<version>2.9.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/bpermissions.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>org.anjocaido</groupId>
-			<artifactId>GroupManager</artifactId>
-			<version>2.9.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/EssentialsGroupManager.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>com.platymuus.bukkit.permissions</groupId>
-			<artifactId>PermissionsBukkit</artifactId>
-			<version>1.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/PermissionsBukkit-1.2.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>ru.tehkode.permissions.bukkit</groupId>
-			<artifactId>PermissionsEx</artifactId>
-			<version>1.17</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/PermissionsEx.jar</systemPath>
-		</dependency>
-	</dependencies>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- Project properties. -->
+    <artifactId>KarmicJail</artifactId>
+    <version>0.44-SNAPSHOT</version>
+    <name>KarmicJail</name>
+    <description>Jail plugin for Mine-RP</description>
+    <!-- Parent POM -->
+    <parent>
+        <groupId>com.mitsugaru</groupId>
+        <artifactId>ProjectKarma</artifactId>
+        <version>1.4.5-SNAPSHOT</version>
+    </parent>
+    <!-- Source code management URL. -->
+    <scm>
+        <url>https://github.com/Mitsugaru/KarmicJail.git</url>
+    </scm>
+    <!-- Developers -->
+    <developers>
+        <developer>
+            <id>Mitsugaru</id>
+            <email>mitsugaru@gmail.com</email>
+            <timezone>-7</timezone>
+        </developer>
+    </developers>
+    <!-- Properties -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.mainclass>org.black_ixx.playerPoints.PlayerPoints</project.mainclass>
+    </properties>
+    <!-- Dependencies -->
+    <dependencies>
+        <dependency>
+            <groupId>de.bananaco</groupId>
+            <artifactId>bPermissions</artifactId>
+            <version>2.10.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/bpermissions.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.anjocaido</groupId>
+            <artifactId>GroupManager</artifactId>
+            <version>2.9.6</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/EssentialsGroupManager.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.platymuus.bukkit.permissions</groupId>
+            <artifactId>PermissionsBukkit</artifactId>
+            <version>2.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/PermissionsBukkit-2.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>ru.tehkode.permissions.bukkit</groupId>
+            <artifactId>PermissionsEx</artifactId>
+            <version>1.19.5</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/PermissionsEx.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>lib.PatPeter</groupId>
+            <artifactId>SQLibrary</artifactId>
+            <version>4.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/SQLibrary.jar</systemPath>
+        </dependency>
+    </dependencies>
+    <!-- Build instructions -->
+    <build>
+        <defaultGoal>compile package</defaultGoal>
+        <sourceDirectory>${basedir}/src/</sourceDirectory>
+        <resources>
+            <resource>
+                <includes>
+                    <include>plugin.yml</include>
+                </includes>
+                <directory>${basedir}</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 </project>

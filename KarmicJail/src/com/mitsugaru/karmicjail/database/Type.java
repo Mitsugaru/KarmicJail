@@ -1,6 +1,10 @@
 package com.mitsugaru.karmicjail.database;
 
-public enum Type
-{
-	STRING, INT, DOUBLE;
+/**
+ * Possible database types.
+ */
+public enum Type {
+   STRING,
+   INT,
+   DOUBLE;
 }

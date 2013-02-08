@@ -5,17 +5,17 @@ import org.bukkit.entity.Player;
 
 public class LoginWarpTask implements Runnable {
 
-    private Player player;
-    private Location location;
+   private Player player;
+   private Location location;
 
-    public LoginWarpTask(Player player, Location location) {
-	this.player = player;
-	this.location = location;
-    }
+   public LoginWarpTask(Player player, Location location) {
+      this.player = player;
+      this.location = location;
+   }
 
-    @Override
-    public void run() {
-	player.teleport(location);
-    }
+   @Override
+   public void run() {
+      player.teleport(location);
+   }
 
 }

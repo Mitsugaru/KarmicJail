@@ -25,9 +25,9 @@ public class LoginJailTask implements Runnable {
 	// Get name
 	final String playerName = player.getName();
 	// Add to cache
-	JailLogic.playerCache.add(playerName);
-	if (JailLogic.playerIsTempJailed(playerName)) {
-	    final long time = JailLogic.getPlayerTime(playerName);
+	JailLogic.PLAYER_CACHE.add(playerName);
+	if (plugin.getLogic().playerIsTempJailed(playerName)) {
+	    final long time = plugin.getLogic().getPlayerTime(playerName);
 	    if (time > 0) {
 		final int minutes = (int) ((time / minutesToTicks));
 		player.sendMessage(ChatColor.RED + KarmicJail.TAG
@@ -53,11 +53,11 @@ public class LoginJailTask implements Runnable {
 	    player.getInventory().clear();
 	}
 	if (config.jailTeleport) {
-	    player.teleport(JailLogic.getJailLocation());
+	    player.teleport(plugin.getLogic().getJailLocation());
 	}
 	if (config.broadcastJoin) {
 	    final StringBuilder sb = new StringBuilder();
-	    final String reason = JailLogic.getJailReason(player.getName());
+	    final String reason = plugin.getLogic().getJailReason(player.getName());
 	    sb.append(ChatColor.RED + KarmicJail.TAG + ChatColor.AQUA + " "
 		    + playerName + ChatColor.RED + " jailed");
 	    if (!reason.equals("")) {

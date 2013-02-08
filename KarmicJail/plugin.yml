@@ -1,7 +1,7 @@
-name: KarmicJail
-main: com.mitsugaru.karmicjail.KarmicJail
-description: Jail plugin for Mine-RP
-version: 0.436
+name: ${project.artifactId}
+description: ${project.description}
+main: ${project.mainclass}
+version: ${project.version}
 author: Original - imjake9 ... Fork - Mitsugaru
 depend: [Vault]
 softdepend: [Multiverse-Core]
