@@ -12,6 +12,7 @@ import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.commands.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 import com.mitsugaru.karmicjail.tasks.LoginJailTask;
 import com.mitsugaru.karmicjail.tasks.LoginWarpTask;
@@ -68,6 +69,7 @@ public class PlayerListener implements Listener {
    public void onPlayerJoin(final PlayerJoinEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       JailLogic logic = plugin.getModuleForClass(JailLogic.class);
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       // Attempt to add player to database
       logic.addPlayerToDatabase(event.getPlayer().getName());
 
@@ -107,7 +109,7 @@ public class PlayerListener implements Listener {
       }
       default: {
          if(config.warpAllOnJoin) {
-            if(!plugin.getPermissions().has(player, PermissionNode.WARP_JOINIGNORE)) {
+            if(!perm.has(player, PermissionNode.WARP_JOINIGNORE)) {
                // Warp them to jail location
                int id = plugin.getServer().getScheduler()
                      .scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, logic.getJailLocation()), 30);

@@ -11,6 +11,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.jail.JailLogic;
+import com.mitsugaru.karmicjail.services.JailModule;
 
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
@@ -21,8 +22,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
  * Class to handle permission node checks. Mostly only to support PEX natively,
  * due to SuperPerm compatibility with PEX issues.
  */
-public class PermCheck {
-   private KarmicJail plugin;
+public class PermCheck extends JailModule {
    private Permission perm;
    private boolean hasVault;
    private String pluginName;
@@ -31,18 +31,7 @@ public class PermCheck {
     * Constructor
     */
    public PermCheck(KarmicJail kj) {
-      plugin = kj;
-      if(kj.getServer().getPluginManager().getPlugin("Vault") != null) {
-         hasVault = true;
-         RegisteredServiceProvider<Permission> permissionProvider = kj.getServer().getServicesManager()
-               .getRegistration(net.milkbowl.vault.permission.Permission.class);
-         if(permissionProvider != null) {
-            perm = permissionProvider.getProvider();
-            pluginName = perm.getName();
-         }
-      } else {
-         hasVault = false;
-      }
+      super(kj);
 
    }
 
@@ -183,5 +172,24 @@ public class PermCheck {
 
    public String getName() {
       return perm.getName();
+   }
+
+   @Override
+   public void starting() {
+      if(plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
+         hasVault = true;
+         RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager()
+               .getRegistration(net.milkbowl.vault.permission.Permission.class);
+         if(permissionProvider != null) {
+            perm = permissionProvider.getProvider();
+            pluginName = perm.getName();
+         }
+      } else {
+         hasVault = false;
+      }
+   }
+
+   @Override
+   public void closing() {
    }
 }

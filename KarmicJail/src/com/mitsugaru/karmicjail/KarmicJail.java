@@ -35,7 +35,6 @@ public class KarmicJail extends JavaPlugin {
     * Minutes to ticks ratio.
     */
    public static final long minutesToTicks = 1200;
-   private PermCheck perm;
    private Commander commander;
    private static final Map<String, JailTask> threads = new HashMap<String, JailTask>();
    /**
@@ -60,13 +59,12 @@ public class KarmicJail extends JavaPlugin {
       registerModule(DBHandler.class, new DBHandler(this));
       // Initialize logic
       registerModule(JailLogic.class, new JailLogic(this));
+      // Register permissions
+      registerModule(PermCheck.class, new PermCheck(this));
 
       // Check if any updates are necessary
       Update.init(this);
       Update.checkUpdate();
-
-      // Get permissions plugin:
-      perm = new PermCheck(this);
 
       // Get commander
       commander = new Commander(this);
@@ -76,10 +74,6 @@ public class KarmicJail extends JavaPlugin {
       pm.registerEvents(new PlayerListener(this), this);
       pm.registerEvents(new JailedInventoryListener(this), this);
       pm.registerEvents(new JailedPlayerListener(this), this);
-   }
-
-   public PermCheck getPermissions() {
-      return perm;
    }
 
    /**

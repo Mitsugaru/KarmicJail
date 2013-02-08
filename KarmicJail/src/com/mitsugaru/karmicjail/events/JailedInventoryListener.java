@@ -13,6 +13,7 @@ import com.mitsugaru.karmicjail.commands.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
+import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
 public class JailedInventoryListener implements Listener {
@@ -43,11 +44,12 @@ public class JailedInventoryListener implements Listener {
    public void handleInventory(final InventoryClickEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       try {
          // Check if its our holder
          if(!event.isCancelled() && event.getInventory().getHolder() instanceof JailInventoryHolder) {
             final Player player = (Player) event.getWhoClicked();
-            if(!config.modifyInventory || !plugin.getPermissions().has(player, PermissionNode.INVENTORY_MODIFY)) {
+            if(!config.modifyInventory || !perm.has(player, PermissionNode.INVENTORY_MODIFY)) {
                event.setCancelled(true);
                return;
             }

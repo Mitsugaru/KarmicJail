@@ -44,7 +44,6 @@ import com.platymuus.bukkit.permissions.PermissionsPlugin;
  * Logic handler for KarmicJail.
  */
 public class JailLogic extends JailModule {
-   private PermCheck perm;
    private final static DateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm z");
    public final static Set<String> PLAYER_CACHE = new HashSet<String>();
 
@@ -54,7 +53,6 @@ public class JailLogic extends JailModule {
    
    @Override
    public void starting() {
-      this.perm = plugin.getPermissions();
    }
 
    @Override
@@ -77,6 +75,7 @@ public class JailLogic extends JailModule {
    public void jailPlayer(CommandSender sender, String inName, String reason, int minutes, boolean timedCom) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       // Check if player is already jailed:
       if(playerIsJailed(inName) || playerIsPendingJail(inName)) {
          sender.sendMessage(ChatColor.RED + "That player is already in jail!");
@@ -221,6 +220,7 @@ public class JailLogic extends JailModule {
     */
    public void unjailPlayer(CommandSender sender, String inName, boolean fromTempJail) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -717,6 +717,7 @@ public class JailLogic extends JailModule {
     *           of player
     */
    private void removePlayerGroups(String name) {
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       if(perm.getName().equals("PermissionsBukkit")) {
          final PermissionsPlugin permission = (PermissionsPlugin) plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
          for(Group group : permission.getGroups(name)) {
@@ -740,6 +741,7 @@ public class JailLogic extends JailModule {
     * @return List of groups with associated world
     */
    public List<String> getGroups(String player) {
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       List<String> list = new ArrayList<String>();
       if(perm.getName().equals("PermissionsBukkit")) {
          final PermissionsPlugin permission = (PermissionsPlugin) plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
@@ -769,6 +771,7 @@ public class JailLogic extends JailModule {
     *           of player
     */
    private void returnGroups(String name) {
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String groups = database.getStringField(Field.GROUPS, name);
       if(!groups.equals("")) {

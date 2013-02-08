@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -28,10 +27,10 @@ import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
+import com.mitsugaru.karmicjail.services.CommandHandler;
 
-public class Commander implements CommandExecutor {
+public class Commander extends CommandHandler {
    private KarmicJail plugin;
-   private PermCheck perm;
    private static final String bar = "======================";
    private final Map<String, Integer> page = new HashMap<String, Integer>();
    private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
@@ -40,8 +39,7 @@ public class Commander implements CommandExecutor {
    public static final Map<String, JailInventoryHolder> inv = new HashMap<String, JailInventoryHolder>();
 
    public Commander(KarmicJail plugin) {
-      this.plugin = plugin;
-      this.perm = plugin.getPermissions();
+      super(plugin, "kj");
       // Register commands
       plugin.getCommand("jail").setExecutor(this);
       plugin.getCommand("j").setExecutor(this);
@@ -83,6 +81,7 @@ public class Commander implements CommandExecutor {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       JailLogic logic = plugin.getModuleForClass(JailLogic.class);
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       boolean com = false;
       long dTime = 0;
       if(config.debugTime) {
@@ -586,6 +585,7 @@ public class Commander implements CommandExecutor {
    }
 
    public void showHelp(CommandSender sender) {
+      PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN + "KarmicJail" + ChatColor.BLUE + "=====");
       if(perm.has(sender, PermissionNode.JAIL)) {
          sender.sendMessage(ChatColor.GREEN + "/jail " + ChatColor.AQUA + "<player> " + ChatColor.LIGHT_PURPLE + "[player2]... [time] [reason]"
@@ -831,5 +831,17 @@ public class Commander implements CommandExecutor {
             }
          }
       }
+   }
+
+   @Override
+   public boolean noArgs(CommandSender sender, Command command, String label) {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public boolean unknownCommand(CommandSender sender, Command command, String label, String[] args) {
+      // TODO Auto-generated method stub
+      return false;
    }
 }
