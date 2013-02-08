@@ -10,7 +10,8 @@ package com.mitsugaru.karmicjail.events;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.jail.JailStatus;
-import com.mitsugaru.karmicjail.commands.Commander;
+import com.mitsugaru.karmicjail.command.Commander;
+import com.mitsugaru.karmicjail.command.history.HistoryCommander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
@@ -151,7 +152,7 @@ public class PlayerListener implements Listener {
       // Remove viewer
       Commander.inv.remove(event.getPlayer().getName());
       // Remove history viewer
-      Commander.historyCache.remove(event.getPlayer().getName());
+      plugin.getCommandHandlerForClass(HistoryCommander.class).getCache().remove(event.getPlayer().getName());
       plugin.stopTask(event.getPlayer().getName());
    }
 

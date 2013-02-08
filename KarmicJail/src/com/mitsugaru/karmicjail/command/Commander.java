@@ -1,11 +1,10 @@
-package com.mitsugaru.karmicjail.commands;
+package com.mitsugaru.karmicjail.command;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -34,8 +33,6 @@ public class Commander extends CommandHandler {
    private static final String bar = "======================";
    private final Map<String, Integer> page = new HashMap<String, Integer>();
    private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
-   private final Map<String, Integer> historyPage = new HashMap<String, Integer>();
-   public static final Map<String, String> historyCache = new HashMap<String, String>();
    public static final Map<String, JailInventoryHolder> inv = new HashMap<String, JailInventoryHolder>();
 
    public Commander(KarmicJail plugin) {
@@ -66,8 +63,6 @@ public class Commander extends CommandHandler {
       plugin.getCommand("jaillast").setExecutor(this);
       plugin.getCommand("jinv").setExecutor(this);
       plugin.getCommand("jailinv").setExecutor(this);
-      plugin.getCommand("jhistory").setExecutor(this);
-      plugin.getCommand("jailhistory").setExecutor(this);
       plugin.getCommand("jwarp").setExecutor(this);
       plugin.getCommand("jailwarp").setExecutor(this);
       plugin.getCommand("jailversion").setExecutor(this);
@@ -79,7 +74,6 @@ public class Commander extends CommandHandler {
    @Override
    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
-      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       PermCheck perm = plugin.getModuleForClass(PermCheck.class);
       boolean com = false;
@@ -349,100 +343,6 @@ public class Commander extends CommandHandler {
             }
          }
          com = true;
-      } else if(commandLabel.equals("jailhistory") || commandLabel.equals("jhistory")) {
-         if(!perm.has(sender, PermissionNode.HISTORY_VIEW)) {
-            sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.HISTORY_VIEW.getNode());
-         } else {
-            if(args.length > 0) {
-               String hcom = args[0];
-               if(hcom.equalsIgnoreCase("next")) {
-                  if(historyCache.containsKey(sender.getName())) {
-                     listHistory(sender, 1);
-                  } else {
-                     sender.sendMessage(ChatColor.RED + "No previous record open");
-                     sender.sendMessage(ChatColor.RED + "/jhistory <player>");
-                  }
-               } else if(hcom.equalsIgnoreCase("prev")) {
-                  if(historyCache.containsKey(sender.getName())) {
-                     listHistory(sender, -1);
-                  } else {
-                     sender.sendMessage(ChatColor.RED + "No previous record open");
-                     sender.sendMessage(ChatColor.RED + "/jhistory <player>");
-                  }
-               } else if(hcom.equalsIgnoreCase("view")) {
-                  // TODO catch array index our of bounds
-                  // IF exception, show current
-                  String temp = plugin.expandName(args[1]);
-                  String name = logic.getPlayerInDatabase(temp);
-                  if(name == null) {
-                     name = temp;
-                  }
-                  historyCache.put(sender.getName(), name);
-                  listHistory(sender, 0);
-               } else if(hcom.equalsIgnoreCase("add")) {
-                  if(!perm.has(sender, PermissionNode.HISTORY_ADD)) {
-                     sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.HISTORY_ADD.getNode());
-                  } else {
-                     String temp = plugin.expandName(args[1]);
-                     String name = logic.getPlayerInDatabase(temp);
-                     if(name == null) {
-                        name = temp;
-                     }
-                     final StringBuilder sb = new StringBuilder();
-                     for(int i = 2; i < args.length; i++) {
-                        sb.append(args[i] + " ");
-                     }
-                     String reason = "";
-                     if(sb.length() > 0) {
-                        // Remove all trailing whitespace
-                        reason = sb.toString().replaceAll("\\s+$", "");
-                        reason = ChatColor.GOLD + sender.getName() + ChatColor.BLUE + " - " + ChatColor.GRAY + reason;
-                     }
-                     if(!reason.equals("")) {
-                        database.addToHistory(name, reason);
-                        sender.sendMessage(ChatColor.GREEN + "Added comment '" + reason + ChatColor.GREEN + "' to " + ChatColor.AQUA + name);
-                     } else {
-                        sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " Comment cannot be empty.");
-                        sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " /jhistory add <player> <comment...>");
-                     }
-                  }
-               } else if(hcom.equalsIgnoreCase("page")) {
-                  if(historyCache.containsKey(sender.getName())) {
-                     try {
-                        int page = (Integer.parseInt(args[1]) - 1);
-                        historyPage.put(sender.getName(), page);
-                        listHistory(sender, 0);
-                     } catch(NumberFormatException n) {
-                        sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " Invalid page number given");
-                     }
-                     listHistory(sender, 0);
-                  } else {
-                     sender.sendMessage(ChatColor.RED + "No previous record open, try /jhistory help");
-                  }
-               } else if(hcom.equalsIgnoreCase("help")) {
-                  sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.YELLOW + " : Show currently open history");
-                  sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " <prev | next>" + ChatColor.YELLOW
-                        + " : Go to previous or next page of history");
-                  sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " view <player>" + ChatColor.YELLOW
-                        + " : View history of given player");
-                  sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " page <#>" + ChatColor.YELLOW
-                        + " : Go to given page number of history");
-                  sender.sendMessage(ChatColor.GREEN + "/jhistory" + ChatColor.AQUA + " add <player> <comment...>" + ChatColor.YELLOW
-                        + " : Add a comment to the history of a given player");
-               } else {
-
-                  sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Invalid history command, use /jhistory help.");
-               }
-
-            } else {
-               if(historyCache.containsKey(sender.getName())) {
-                  listHistory(sender, 0);
-               } else {
-                  sender.sendMessage(ChatColor.RED + "No previous record open, try /jhistory help");
-               }
-            }
-         }
-         com = true;
       } else if(commandLabel.equals("jailtime") || commandLabel.equals("jtime")) {
          boolean hasPerm = true;
          if(!perm.has(sender, PermissionNode.JAIL)) {
@@ -634,68 +534,6 @@ public class Commander extends CommandHandler {
       sender.sendMessage(ChatColor.GREEN + "/jailversion" + ChatColor.YELLOW + " : Plugin version and config info. Alias: /jversion");
    }
 
-   private void listHistory(CommandSender sender, int pageAdjust) {
-      RootConfig config = plugin.getModuleForClass(RootConfig.class);
-      DBHandler database = plugin.getModuleForClass(DBHandler.class);
-      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
-      final String temp = historyCache.get(sender.getName());
-      String name = logic.getPlayerInDatabase(temp);
-      if(name == null) {
-         name = temp;
-      }
-      final List<String> list = database.getPlayerHistory(name);
-      if(list.isEmpty()) {
-         sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " No history for " + ChatColor.AQUA + name);
-         historyCache.remove(sender.getName());
-         return;
-      }
-      if(!historyPage.containsKey(sender.getName())) {
-         historyPage.put(sender.getName(), 0);
-      } else {
-         if(pageAdjust != 0) {
-            int adj = page.get(sender.getName()).intValue() + pageAdjust;
-            page.put(sender.getName(), adj);
-         }
-      }
-      final String[] array = list.toArray(new String[0]);
-      boolean valid = true;
-      // Caluclate amount of pages
-      int num = array.length / 8;
-      double rem = (double) array.length % (double) config.limit;
-      if(rem != 0) {
-         num++;
-      }
-      if(historyPage.get(sender.getName()).intValue() < 0) {
-         // They tried to use /ks prev when they're on page 0
-         sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Page does not exist");
-         // reset their current page back to 0
-         historyPage.put(sender.getName(), 0);
-         valid = false;
-      } else if((historyPage.get(sender.getName()).intValue()) * config.limit > array.length) {
-         // They tried to use /ks next at the end of the list
-         sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Page does not exist");
-         // Revert to last page
-         historyPage.put(sender.getName(), num - 1);
-         valid = false;
-      }
-      if(valid) {
-         // Header with amount of pages
-         sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.AQUA + name + ChatColor.BLUE + "===" + ChatColor.GRAY + "Page: "
-               + ((historyPage.get(sender.getName()).intValue()) + 1) + ChatColor.BLUE + " of " + ChatColor.GRAY + num + ChatColor.BLUE + "===");
-         // list
-         for(int i = ((historyPage.get(sender.getName()).intValue()) * config.limit); i < ((historyPage.get(sender.getName()).intValue()) * config.limit)
-               + config.limit; i++) {
-            // Don't try to pull something beyond the bounds
-            if(i < array.length) {
-
-               sender.sendMessage(ChatColor.translateAlternateColorCodes('&', array[i]));
-            } else {
-               break;
-            }
-         }
-      }
-   }
-
    /**
     * Lists the players in jail
     * 
@@ -835,8 +673,8 @@ public class Commander extends CommandHandler {
 
    @Override
    public boolean noArgs(CommandSender sender, Command command, String label) {
-      // TODO Auto-generated method stub
-      return false;
+      showHelp(sender);
+      return true;
    }
 
    @Override

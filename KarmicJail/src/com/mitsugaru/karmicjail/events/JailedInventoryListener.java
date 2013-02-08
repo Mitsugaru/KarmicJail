@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.commands.Commander;
+import com.mitsugaru.karmicjail.command.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;

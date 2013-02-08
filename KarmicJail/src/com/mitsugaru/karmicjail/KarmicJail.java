@@ -14,7 +14,8 @@ import java.util.Map;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.mitsugaru.karmicjail.commands.Commander;
+import com.mitsugaru.karmicjail.command.Commander;
+import com.mitsugaru.karmicjail.command.history.HistoryCommander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.events.JailedInventoryListener;
@@ -22,6 +23,7 @@ import com.mitsugaru.karmicjail.events.JailedPlayerListener;
 import com.mitsugaru.karmicjail.events.PlayerListener;
 import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
+import com.mitsugaru.karmicjail.services.CommandHandler;
 import com.mitsugaru.karmicjail.services.JailModule;
 import com.mitsugaru.karmicjail.tasks.JailTask;
 import com.mitsugaru.karmicjail.update.Update;
@@ -35,12 +37,13 @@ public class KarmicJail extends JavaPlugin {
     * Minutes to ticks ratio.
     */
    public static final long minutesToTicks = 1200;
-   private Commander commander;
    private static final Map<String, JailTask> threads = new HashMap<String, JailTask>();
    /**
     * Modules.
     */
    private final Map<Class<? extends JailModule>, JailModule> modules = new HashMap<Class<? extends JailModule>, JailModule>();
+
+   private final Map<Class<? extends CommandHandler>, CommandHandler> handlers = new HashMap<Class<? extends CommandHandler>, CommandHandler>();
 
    @Override
    public void onDisable() {
@@ -66,8 +69,13 @@ public class KarmicJail extends JavaPlugin {
       Update.init(this);
       Update.checkUpdate();
 
-      // Get commander
-      commander = new Commander(this);
+      // Generate commanders.
+      Commander commander = new Commander(this);
+      HistoryCommander history = new HistoryCommander(this);
+      commander.registerHandler(history);
+      // Register commanders.
+      handlers.put(CommandHandler.class, commander);
+      handlers.put(HistoryCommander.class, history);
 
       // Setup listeners
       final PluginManager pm = this.getServer().getPluginManager();
@@ -128,10 +136,6 @@ public class KarmicJail extends JavaPlugin {
          return null;
       }
       return Name;
-   }
-
-   public Commander getCommander() {
-      return commander;
    }
 
    /**
@@ -242,6 +246,17 @@ public class KarmicJail extends JavaPlugin {
     */
    public <T extends JailModule> T getModuleForClass(Class<T> clazz) {
       return clazz.cast(modules.get(clazz));
+   }
+
+   /**
+    * Get the command handler.
+    * 
+    * @param clazz
+    *           - Class identifier.
+    * @return CommandHandler instance.
+    */
+   public <T extends CommandHandler> T getCommandHandlerForClass(Class<T> clazz) {
+      return clazz.cast(handlers.get(clazz));
    }
 
 }

@@ -29,7 +29,7 @@ import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.database.Field;
 import com.mitsugaru.karmicjail.database.Table;
-import com.mitsugaru.karmicjail.commands.Commander;
+import com.mitsugaru.karmicjail.command.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.events.KarmicJailEvent;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
@@ -179,7 +179,7 @@ public class JailLogic extends JailModule {
             // Notify
             sender.sendMessage(ChatColor.RED + name + ChatColor.AQUA + " sent to jail.");
             final PrisonerInfo pi = new PrisonerInfo(name, sender.getName(), date, reason, duration, false);
-            plugin.getCommander().addToCache(name, pi);
+            plugin.getCommandHandlerForClass(Commander.class).addToCache(name, pi);
             // Throw jail event
             plugin.getServer().getPluginManager().callEvent(new KarmicJailEvent(pi));
             // Broadcast if necessary
@@ -262,7 +262,7 @@ public class JailLogic extends JailModule {
       }
       // Remove from cache
       PLAYER_CACHE.remove(name);
-      plugin.getCommander().removeFromCache(name);
+      plugin.getCommandHandlerForClass(Commander.class).removeFromCache(name);
       // Check if player is offline:
       if(player == null) {
          setPlayerStatus(JailStatus.PENDINGFREE, name);
