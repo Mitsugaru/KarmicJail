@@ -36,23 +36,30 @@ import com.mitsugaru.karmicjail.events.KarmicJailEvent;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
+import com.mitsugaru.karmicjail.services.JailModule;
 import com.mitsugaru.karmicjail.tasks.JailTask;
 import com.platymuus.bukkit.permissions.Group;
 import com.platymuus.bukkit.permissions.PermissionsPlugin;
 
-public class JailLogic {
-   private KarmicJail plugin;
-   private RootConfig config;
+/**
+ * Logic handler for KarmicJail.
+ */
+public class JailLogic extends JailModule {
    private PermCheck perm;
-   private DBHandler database;
    private final static DateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm z");
    public final static Set<String> PLAYER_CACHE = new HashSet<String>();
 
    public JailLogic(KarmicJail plugin) {
-      this.plugin = plugin;
+      super(plugin);
+   }
+   
+   @Override
+   public void starting() {
       this.perm = plugin.getPermissions();
-      this.config = plugin.getPluginConfig();
-      this.database = plugin.getDatabaseHandler();
+   }
+
+   @Override
+   public void closing() {
    }
 
    /**
@@ -69,6 +76,8 @@ public class JailLogic {
     * @param boolean to determine of player has a timed release
     */
    public void jailPlayer(CommandSender sender, String inName, String reason, int minutes, boolean timedCom) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       // Check if player is already jailed:
       if(playerIsJailed(inName) || playerIsPendingJail(inName)) {
          sender.sendMessage(ChatColor.RED + "That player is already in jail!");
@@ -174,7 +183,7 @@ public class JailLogic {
             final PrisonerInfo pi = new PrisonerInfo(name, sender.getName(), date, reason, duration, false);
             plugin.getCommander().addToCache(name, pi);
             // Throw jail event
-            plugin.getServer().getPluginManager().callEvent(new KarmicJailEvent("JailEvent", pi));
+            plugin.getServer().getPluginManager().callEvent(new KarmicJailEvent(pi));
             // Broadcast if necessary
             if(config.broadcastJail) {
                // Setup broadcast string
@@ -212,6 +221,7 @@ public class JailLogic {
     *           , if the jailed player's time ran out
     */
    public void unjailPlayer(CommandSender sender, String inName, boolean fromTempJail) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -273,6 +283,8 @@ public class JailLogic {
    }
 
    public void freePlayer(CommandSender sender, String inName, boolean fromTempJail) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -398,6 +410,7 @@ public class JailLogic {
     * @return long of time left to serve
     */
    public long getPlayerTime(String player) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -414,6 +427,7 @@ public class JailLogic {
     *           of time
     */
    public void updatePlayerTime(String player, long duration) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -436,6 +450,7 @@ public class JailLogic {
     * @return Name of player in database, else null
     */
    public String getPlayerInDatabase(String name) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String has = null;
       ResultSet rs = null;
       try {
@@ -463,6 +478,7 @@ public class JailLogic {
     *           of player
     */
    public void addPlayerToDatabase(String name) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       ResultSet first = null;
       ResultSet second = null;
       try {
@@ -497,6 +513,7 @@ public class JailLogic {
     * @return true if player has a valid time, else false
     */
    public boolean playerIsTempJailed(String player) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -551,6 +568,8 @@ public class JailLogic {
    }
 
    public void setPlayerReason(String inName, String reason) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -580,6 +599,7 @@ public class JailLogic {
     * @return String of jailer's reason
     */
    public String getJailReason(String player) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -592,6 +612,7 @@ public class JailLogic {
    }
 
    public boolean playerIsMuted(String player) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       boolean mute = false;
       String name = getPlayerInDatabase(player);
       if(name == null) {
@@ -605,6 +626,7 @@ public class JailLogic {
    }
 
    public void mutePlayer(CommandSender sender, String player) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(player);
       if(name == null) {
          name = player;
@@ -631,6 +653,7 @@ public class JailLogic {
     * @return String of the player's JailStatus
     */
    public JailStatus getPlayerStatus(String inName) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -656,6 +679,7 @@ public class JailLogic {
     *           of player
     */
    public void setPlayerStatus(JailStatus status, String inName) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(inName);
       if(name == null) {
          name = inName;
@@ -670,6 +694,8 @@ public class JailLogic {
     *           of player
     */
    private void savePlayerGroups(String name) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       StringBuilder sb = new StringBuilder();
       boolean append = false;
       for(String s : getGroups(name)) {
@@ -744,7 +770,7 @@ public class JailLogic {
     *           of player
     */
    private void returnGroups(String name) {
-
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String groups = database.getStringField(Field.GROUPS, name);
       if(!groups.equals("")) {
          try {
@@ -837,6 +863,7 @@ public class JailLogic {
     * @return name of jailer
     */
    private String getJailer(String name) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String jailer = database.getStringField(Field.JAILER, name);
       if(jailer.equals("")) {
          jailer = "UNKOWN";
@@ -852,6 +879,7 @@ public class JailLogic {
     * @return String of the date when player was jailed
     */
    private String getJailDate(String name) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String date = database.getStringField(Field.DATE, name);
       if(date.equals("")) {
          date = "UNKOWN";
@@ -868,6 +896,7 @@ public class JailLogic {
     *           of command
     */
    public void setJail(CommandSender sender, String[] args) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       if(!(sender instanceof Player) && args.length != 4) {
          sender.sendMessage(ChatColor.RED + "Only players can use that.");
          return;
@@ -903,6 +932,7 @@ public class JailLogic {
     *           of command
     */
    public void setUnjail(CommandSender sender, String[] args) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       if(!(sender instanceof Player) && args.length != 4) {
          sender.sendMessage(ChatColor.RED + "Only players can use that.");
          return;
@@ -934,6 +964,7 @@ public class JailLogic {
     * @return location of jail
     */
    public Location getJailLocation() {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       return config.jailLoc;
    }
 
@@ -942,6 +973,7 @@ public class JailLogic {
     * @return location of unjail
     */
    public Location getUnjailLocation() {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       return config.unjailLoc;
    }
 
@@ -952,6 +984,7 @@ public class JailLogic {
     *           of player to be teleported
     */
    public void teleportOut(String name) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       final Player player = plugin.getServer().getPlayer(name);
       if(player != null) {
          player.teleport(config.unjailLoc);
@@ -959,6 +992,7 @@ public class JailLogic {
    }
 
    public void setPlayerLastLocation(String playername, Location location) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       String name = getPlayerInDatabase(playername);
       if(name == null) {
          name = playername;
@@ -969,6 +1003,7 @@ public class JailLogic {
    }
 
    public Location getPlayerLastLocation(String playername) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       Location location = null;
       String name = getPlayerInDatabase(playername);
       if(name == null) {
@@ -993,6 +1028,7 @@ public class JailLogic {
    }
 
    public void setPlayerInventory(String playername, Inventory inventory, boolean clear) {
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
       if(inventory instanceof PlayerInventory) {
          PlayerInventory inv = (PlayerInventory) inventory;
@@ -1037,4 +1073,5 @@ public class JailLogic {
       }
 
    }
+
 }

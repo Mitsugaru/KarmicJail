@@ -22,216 +22,156 @@ import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.config.RootConfig;
 
-public class KJPlayerListener implements Listener
-{
-	//private KarmicJail plugin;
-	private RootConfig config;
+public class KJPlayerListener implements Listener {
+   private KarmicJail plugin;
 
-	public KJPlayerListener(KarmicJail plugin)
-	{
-		//this.plugin = plugin;
-		this.config = plugin.getPluginConfig();
-	}
+   public KJPlayerListener(KarmicJail plugin) {
+      this.plugin = plugin;
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void chatValid(final AsyncPlayerChatEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyChat
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void chatValid(final AsyncPlayerChatEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyChat && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void commandValid(final PlayerCommandPreprocessEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyCommands
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void commandValid(final PlayerCommandPreprocessEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyCommands && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void interactValid(final PlayerInteractEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyInteract
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void interactValid(final PlayerInteractEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyInteract && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void interactEntityValid(final PlayerInteractEntityEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyInteract
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void interactEntityValid(final PlayerInteractEntityEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyInteract && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void moveValid(final PlayerMoveEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyMove
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void moveValid(final PlayerMoveEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyMove && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void blockPlaceValid(final BlockPlaceEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyBlockPlace
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void blockPlaceValid(final BlockPlaceEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyBlockPlace && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void blockDestroyValid(final BlockBreakEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyBlockBreak
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void blockDestroyValid(final BlockBreakEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyBlockBreak && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void craftItemValid(final CraftItemEvent event)
-	{
-		if (!event.isCancelled() && event.getWhoClicked() != null)
-		{
-			if (config.denyItemCraft
-					&& event.getWhoClicked() instanceof Player
-					&& JailLogic.PLAYER_CACHE.contains(event.getWhoClicked()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage((Player) event.getWhoClicked());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void craftItemValid(final CraftItemEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getWhoClicked() != null) {
+         if(config.denyItemCraft && event.getWhoClicked() instanceof Player && JailLogic.PLAYER_CACHE.contains(event.getWhoClicked().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage((Player) event.getWhoClicked());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void enchantItemValid(final EnchantItemEvent event)
-	{
-		if (!event.isCancelled() && event.getEnchanter() != null)
-		{
-			if (config.denyItemEnchant
-					&& event.getEnchanter() instanceof Player
-					&& JailLogic.PLAYER_CACHE.contains(event.getEnchanter()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage((Player) event.getEnchanter());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void enchantItemValid(final EnchantItemEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getEnchanter() != null) {
+         if(config.denyItemEnchant && event.getEnchanter() instanceof Player && JailLogic.PLAYER_CACHE.contains(event.getEnchanter().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage((Player) event.getEnchanter());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void itemPickupValid(final PlayerPickupItemEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyItemPickup
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void itemPickupValid(final PlayerPickupItemEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyItemPickup && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void itemDropValid(final PlayerDropItemEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (config.denyItemDrop
-					&& JailLogic.PLAYER_CACHE.contains(event.getPlayer()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage(event.getPlayer());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void itemDropValid(final PlayerDropItemEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(config.denyItemDrop && JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage(event.getPlayer());
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void itemDrop(final PlayerDropItemEvent event)
-	{
-		if (!event.isCancelled() && event.getPlayer() != null)
-		{
-			if (JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName()))
-			{
-				// They are jailed and dropped an item
-				// TODO update thier inventory in the database
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.MONITOR)
+   public void itemDrop(final PlayerDropItemEvent event) {
+      if(!event.isCancelled() && event.getPlayer() != null) {
+         if(JailLogic.PLAYER_CACHE.contains(event.getPlayer().getName())) {
+            // They are jailed and dropped an item
+            // TODO update thier inventory in the database
+         }
+      }
+   }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void inventoryClickValid(final InventoryClickEvent event)
-	{
-		if (!event.isCancelled() && event.getWhoClicked() != null)
-		{
-			if (config.denyInventory
-					&& event.getWhoClicked() instanceof Player
-					&& JailLogic.PLAYER_CACHE.contains(event.getWhoClicked()
-							.getName()))
-			{
-				event.setCancelled(true);
-				sendDenyJailMessage((Player) event.getWhoClicked());
-			}
-		}
-	}
+   @EventHandler(priority = EventPriority.LOWEST)
+   public void inventoryClickValid(final InventoryClickEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      if(!event.isCancelled() && event.getWhoClicked() != null) {
+         if(config.denyInventory && event.getWhoClicked() instanceof Player && JailLogic.PLAYER_CACHE.contains(event.getWhoClicked().getName())) {
+            event.setCancelled(true);
+            sendDenyJailMessage((Player) event.getWhoClicked());
+         }
+      }
+   }
 
-	private void sendDenyJailMessage(Player player)
-	{
-		player.sendMessage(ChatColor.RED + KarmicJail.TAG
-				+ " Cannot do that while jailed.");
-	}
+   private void sendDenyJailMessage(Player player) {
+      player.sendMessage(ChatColor.RED + KarmicJail.TAG + " Cannot do that while jailed.");
+   }
 }

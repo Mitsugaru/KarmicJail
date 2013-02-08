@@ -18,7 +18,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
+import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.database.Table;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.jail.PrisonerInfo;
@@ -30,7 +32,6 @@ import com.mitsugaru.karmicjail.permissions.PermissionNode;
 public class Commander implements CommandExecutor {
    private KarmicJail plugin;
    private PermCheck perm;
-   private RootConfig config;
    private static final String bar = "======================";
    private final Map<String, Integer> page = new HashMap<String, Integer>();
    private final Map<String, PrisonerInfo> cache = new HashMap<String, PrisonerInfo>();
@@ -41,7 +42,6 @@ public class Commander implements CommandExecutor {
    public Commander(KarmicJail plugin) {
       this.plugin = plugin;
       this.perm = plugin.getPermissions();
-      this.config = plugin.getPluginConfig();
       // Register commands
       plugin.getCommand("jail").setExecutor(this);
       plugin.getCommand("j").setExecutor(this);
@@ -80,6 +80,9 @@ public class Commander implements CommandExecutor {
 
    @Override
    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       boolean com = false;
       long dTime = 0;
       if(config.debugTime) {
@@ -134,7 +137,7 @@ public class Commander implements CommandExecutor {
                   reason = sb.toString().replaceAll("\\s+$", "");
                }
                for(String name : players) {
-                  plugin.getLogic().jailPlayer(sender, name, reason, time, timed);
+                  logic.jailPlayer(sender, name, reason, time, timed);
                }
             } catch(ArrayIndexOutOfBoundsException e) {
                // no player name given, error
@@ -162,7 +165,7 @@ public class Commander implements CommandExecutor {
                sender.sendMessage(ChatColor.RED + "/unjail <player> [player2]");
             }
             for(String name : players) {
-               plugin.getLogic().unjailPlayer(sender, name);
+               logic.unjailPlayer(sender, name);
             }
          }
          com = true;
@@ -170,14 +173,14 @@ public class Commander implements CommandExecutor {
          if(!perm.has(sender, PermissionNode.SETJAIL)) {
             sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.SETJAIL.getNode());
          } else {
-            plugin.getLogic().setJail(sender, args);
+            logic.setJail(sender, args);
          }
          com = true;
       } else if(commandLabel.equalsIgnoreCase("setunjail") && (args.length == 0 || args.length == 4)) {
          if(!perm.has(sender, PermissionNode.SETJAIL)) {
             sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.SETJAIL.getNode());
          } else {
-            plugin.getLogic().setUnjail(sender, args);
+            logic.setUnjail(sender, args);
          }
          com = true;
       } else if((commandLabel.equalsIgnoreCase("jailstatus") || commandLabel.equalsIgnoreCase("jstatus")
@@ -186,7 +189,7 @@ public class Commander implements CommandExecutor {
          if(!perm.has(sender, PermissionNode.JAILSTATUS)) {
             sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.JAILSTATUS.getNode());
          } else {
-            plugin.getLogic().jailStatus(sender, args);
+            logic.jailStatus(sender, args);
          }
          com = true;
       } else if(commandLabel.equalsIgnoreCase("jailversion") || commandLabel.equalsIgnoreCase("jversion")) {
@@ -255,7 +258,7 @@ public class Commander implements CommandExecutor {
                sender.sendMessage(ChatColor.RED + "/jmute <player> [player2] ...");
             }
             for(String name : players) {
-               plugin.getLogic().mutePlayer(sender, name);
+               logic.mutePlayer(sender, name);
             }
          }
          com = true;
@@ -267,7 +270,7 @@ public class Commander implements CommandExecutor {
                final Player player = (Player) sender;
                if(args.length > 0) {
                   String name = plugin.expandName(args[0]);
-                  final Location last = plugin.getLogic().getPlayerLastLocation(name);
+                  final Location last = logic.getPlayerLastLocation(name);
                   if(last != null) {
                      player.teleport(last);
                      sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG + " Warp to last location of " + ChatColor.AQUA + name);
@@ -292,7 +295,7 @@ public class Commander implements CommandExecutor {
                boolean warped = false;
                if(target != null) {
                   if(target.isOnline()) {
-                     target.teleport(plugin.getLogic().getJailLocation());
+                     target.teleport(logic.getJailLocation());
                      warped = true;
                      sender.sendMessage(ChatColor.GREEN + "Warped " + ChatColor.AQUA + target.getName() + ChatColor.GREEN + " to jail location.");
                   }
@@ -302,7 +305,7 @@ public class Commander implements CommandExecutor {
                }
             } else if(sender instanceof Player) {
                final Player player = (Player) sender;
-               player.teleport(plugin.getLogic().getJailLocation());
+               player.teleport(logic.getJailLocation());
             } else {
                sender.sendMessage(ChatColor.RED + "Cannot use command as console without giving name.");
             }
@@ -316,11 +319,11 @@ public class Commander implements CommandExecutor {
                final Player player = (Player) sender;
                if(args.length > 0) {
                   String temp = plugin.expandName(args[0]);
-                  String name = plugin.getLogic().getPlayerInDatabase(temp);
+                  String name = logic.getPlayerInDatabase(temp);
                   if(name == null) {
                      name = temp;
                   }
-                  if(plugin.getLogic().playerIsJailed(name) || plugin.getLogic().playerIsPendingJail(name)) {
+                  if(logic.playerIsJailed(name) || logic.playerIsPendingJail(name)) {
                      JailInventoryHolder holder = null;
                      for(JailInventoryHolder h : inv.values()) {
                         if(h.getTarget().equals(name)) {
@@ -371,7 +374,7 @@ public class Commander implements CommandExecutor {
                   // TODO catch array index our of bounds
                   // IF exception, show current
                   String temp = plugin.expandName(args[1]);
-                  String name = plugin.getLogic().getPlayerInDatabase(temp);
+                  String name = logic.getPlayerInDatabase(temp);
                   if(name == null) {
                      name = temp;
                   }
@@ -382,7 +385,7 @@ public class Commander implements CommandExecutor {
                      sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.HISTORY_ADD.getNode());
                   } else {
                      String temp = plugin.expandName(args[1]);
-                     String name = plugin.getLogic().getPlayerInDatabase(temp);
+                     String name = logic.getPlayerInDatabase(temp);
                      if(name == null) {
                         name = temp;
                      }
@@ -397,7 +400,7 @@ public class Commander implements CommandExecutor {
                         reason = ChatColor.GOLD + sender.getName() + ChatColor.BLUE + " - " + ChatColor.GRAY + reason;
                      }
                      if(!reason.equals("")) {
-                        plugin.getDatabaseHandler().addToHistory(name, reason);
+                        database.addToHistory(name, reason);
                         sender.sendMessage(ChatColor.GREEN + "Added comment '" + reason + ChatColor.GREEN + "' to " + ChatColor.AQUA + name);
                      } else {
                         sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " Comment cannot be empty.");
@@ -479,7 +482,7 @@ public class Commander implements CommandExecutor {
                sender.sendMessage(ChatColor.RED + "/jtime <player> [player2] ... <time>");
             }
             for(String name : players) {
-               plugin.getLogic().setJailTime(sender, name, time);
+               logic.setJailTime(sender, name, time);
             }
          }
          com = true;
@@ -506,8 +509,8 @@ public class Commander implements CommandExecutor {
                   // Remove all trailing whitespace
                   reason = sb.toString().replaceAll("\\s+$", "");
                }
-               if(plugin.getLogic().playerIsJailed(name) || plugin.getLogic().playerIsPendingJail(name)) {
-                  plugin.getLogic().setPlayerReason(name, reason);
+               if(logic.playerIsJailed(name) || logic.playerIsPendingJail(name)) {
+                  logic.setPlayerReason(name, reason);
                   sender.sendMessage(ChatColor.GREEN + KarmicJail.TAG + " Set reason for " + ChatColor.AQUA + name + ChatColor.GREEN + " to: "
                         + ChatColor.GRAY + reason);
                } else {
@@ -563,6 +566,7 @@ public class Commander implements CommandExecutor {
    }
 
    public void showVersion(CommandSender sender) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       // Version
       sender.sendMessage(ChatColor.BLUE + "==================" + ChatColor.GREEN + "KarmicJail v" + plugin.getDescription().getVersion()
             + ChatColor.BLUE + "=================");
@@ -631,12 +635,15 @@ public class Commander implements CommandExecutor {
    }
 
    private void listHistory(CommandSender sender, int pageAdjust) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       final String temp = historyCache.get(sender.getName());
-      String name = plugin.getLogic().getPlayerInDatabase(temp);
+      String name = logic.getPlayerInDatabase(temp);
       if(name == null) {
          name = temp;
       }
-      final List<String> list = plugin.getDatabaseHandler().getPlayerHistory(name);
+      final List<String> list = database.getPlayerHistory(name);
       if(list.isEmpty()) {
          sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " No history for " + ChatColor.AQUA + name);
          historyCache.remove(sender.getName());
@@ -698,12 +705,14 @@ public class Commander implements CommandExecutor {
     *           adjustment
     */
    private void listJailed(CommandSender sender, int pageAdjust) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       // Update cache of jailed players
       ResultSet rs = null;
       try {
          // TODO order by date
-         rs = plugin.getDatabaseHandler().query(
-               "SELECT * FROM " + Table.JAILED.getName() + " WHERE status='" + JailStatus.JAILED + "' OR status='" + JailStatus.PENDINGJAIL + "';");
+         rs = database.query("SELECT * FROM " + Table.JAILED.getName() + " WHERE status='" + JailStatus.JAILED + "' OR status='"
+               + JailStatus.PENDINGJAIL + "';");
          if(rs.next()) {
             do {
                String name = rs.getString("playername");
@@ -742,7 +751,7 @@ public class Commander implements CommandExecutor {
          plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQL Exception", e);
          e.printStackTrace();
       } finally {
-         plugin.getDatabaseHandler().cleanup(rs, null);
+         database.cleanup(rs, null);
       }
       if(cache.isEmpty()) {
          sender.sendMessage(ChatColor.RED + KarmicJail.TAG + " No jailed players");

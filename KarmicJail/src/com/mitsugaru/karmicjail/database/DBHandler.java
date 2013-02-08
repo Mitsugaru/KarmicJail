@@ -16,22 +16,26 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemStack;
 
+import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailStatus;
+import com.mitsugaru.karmicjail.services.JailModule;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.inventory.Item;
 
-public class DBHandler {
+public class DBHandler extends JailModule {
    // Class Variables
-   private KarmicJail plugin;
-   private RootConfig config;
    private SQLite sqlite;
    private MySQL mysql;
    private boolean useMySQL;
 
-   public DBHandler(KarmicJail ks, RootConfig conf) {
-      plugin = ks;
-      config = conf;
+   public DBHandler(KarmicJail ks) {
+      super(ks);
+   }
+
+   @Override
+   public void starting() {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       useMySQL = config.useMySQL;
       if(config.importSQL) {
          if(useMySQL) {
@@ -41,7 +45,18 @@ public class DBHandler {
       }
    }
 
+   @Override
+   public void closing() {
+      // Disconnect from sql database
+      if(checkConnection()) {
+         // Close connection
+         close();
+         plugin.getLogger().info("Disconnected from database.");
+      }
+   }
+
    public boolean checkTables() {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       boolean valid = true;
       if(useMySQL) {
          // Connect to mysql database
@@ -291,11 +306,12 @@ public class DBHandler {
    }
 
    public List<String> getPlayerHistory(String name) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       List<String> list = new ArrayList<String>();
       int id = getPlayerId(name);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(name);
+         logic.addPlayerToDatabase(name);
          id = getPlayerId(name);
       }
       ResultSet query = null;
@@ -318,10 +334,11 @@ public class DBHandler {
    }
 
    public void addToHistory(String name, String reason) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       int id = getPlayerId(name);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(name);
+         logic.addPlayerToDatabase(name);
          id = getPlayerId(name);
       }
       if(id != -1) {
@@ -340,10 +357,11 @@ public class DBHandler {
    }
 
    public void resetPlayer(String name) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       int id = getPlayerId(name);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(name);
+         logic.addPlayerToDatabase(name);
          id = getPlayerId(name);
       }
       ResultSet first = null;
@@ -370,10 +388,12 @@ public class DBHandler {
    }
 
    public void setField(Field field, String playername, String entry, int i, double d) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       PreparedStatement statement = null;
@@ -425,11 +445,13 @@ public class DBHandler {
    }
 
    public String getStringField(Field field, String playername) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       String out = "";
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       if(id != -1) {
@@ -466,11 +488,13 @@ public class DBHandler {
    }
 
    public int getIntField(Field field, String playername) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       int out = -1;
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       if(id != -1) {
@@ -507,11 +531,13 @@ public class DBHandler {
    }
 
    public double getDoubleField(Field field, String playername) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       double out = -1;
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       if(id != -1) {
@@ -548,11 +574,12 @@ public class DBHandler {
    }
 
    public boolean setPlayerItems(String playername, Map<Integer, ItemStack> items) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       boolean valid = false;
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       if(id != -1) {
@@ -602,11 +629,12 @@ public class DBHandler {
    }
 
    public Map<Integer, ItemStack> getPlayerItems(String playername) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       Map<Integer, ItemStack> items = new HashMap<Integer, ItemStack>();
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       if(id != -1) {
@@ -659,11 +687,12 @@ public class DBHandler {
    }
 
    public boolean setItem(String playername, int slot, ItemStack item, int amount) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       boolean valid = false;
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       if(id != -1) {
@@ -703,10 +732,11 @@ public class DBHandler {
    }
 
    public void removeItem(String playername, int slot) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       int id = getPlayerId(playername);
       if(id == -1) {
          // Unknown player?
-         plugin.getLogic().addPlayerToDatabase(playername);
+         logic.addPlayerToDatabase(playername);
          id = getPlayerId(playername);
       }
       if(id != -1) {
@@ -720,4 +750,5 @@ public class DBHandler {
          }
       }
    }
+
 }

@@ -29,18 +29,18 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 public class KarmicJailListener implements Listener {
    // Class variables
    private final KarmicJail plugin;
-   private final RootConfig config;
 
    public KarmicJailListener(KarmicJail plugin) {
       this.plugin = plugin;
-      this.config = plugin.getPluginConfig();
    }
 
    @EventHandler(priority = EventPriority.LOWEST)
    public void onPlayerChat(final AsyncPlayerChatEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       final String name = event.getPlayer().getName();
       if(JailLogic.PLAYER_CACHE.contains(name)) {
-         if(plugin.getLogic().playerIsMuted(name)) {
+         if(logic.playerIsMuted(name)) {
             if(config.debugLog && config.debugEvents) {
                plugin.getLogger().info("Muted '" + name + "' with message: " + event.getMessage());
             }
@@ -51,11 +51,13 @@ public class KarmicJailListener implements Listener {
 
    @EventHandler(priority = EventPriority.HIGHEST)
    public void onPlayerRespawn(final PlayerRespawnEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       // Grab name
       final String name = event.getPlayer().getName();
       // Check if they're in the cache
       if(config.jailTeleportRespawn && JailLogic.PLAYER_CACHE.contains(name)) {
-         event.setRespawnLocation(plugin.getLogic().getJailLocation());
+         event.setRespawnLocation(logic.getJailLocation());
          if(config.debugLog && config.debugEvents) {
             plugin.getLogger().info("Respawned '" + name + "' to jail.");
          }
@@ -64,16 +66,17 @@ public class KarmicJailListener implements Listener {
 
    @EventHandler(priority = EventPriority.HIGHEST)
    public void onPlayerJoin(final PlayerJoinEvent event) {
-
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       // Attempt to add player to database
-      plugin.getLogic().addPlayerToDatabase(event.getPlayer().getName());
+      logic.addPlayerToDatabase(event.getPlayer().getName());
 
       final Player player = event.getPlayer();
-      final JailStatus status = plugin.getLogic().getPlayerStatus(player.getName());
+      final JailStatus status = logic.getPlayerStatus(player.getName());
       // Check status
       switch(status) {
       case PENDINGJAIL: {
-         plugin.getLogic().setPlayerStatus(JailStatus.JAILED, player.getName());
+         logic.setPlayerStatus(JailStatus.JAILED, player.getName());
          int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginJailTask(plugin, player), 30);
          if(id == -1) {
             plugin.getLogger().severe("Could not jail player '" + player.getName() + "' on login!");
@@ -88,10 +91,10 @@ public class KarmicJailListener implements Listener {
          break;
       }
       case PENDINGFREE: {
-         plugin.getLogic().freePlayer(plugin.console, player.getName());
+         logic.freePlayer(plugin.getServer().getConsoleSender(), player.getName());
          // Warp them to unjail location
          int id = plugin.getServer().getScheduler()
-               .scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, plugin.getLogic().getUnjailLocation()), 30);
+               .scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, logic.getUnjailLocation()), 30);
          if(id == -1) {
             plugin.getLogger().severe("Could not warp player '" + player.getName() + "' out jail on login!");
          } else {
@@ -107,7 +110,7 @@ public class KarmicJailListener implements Listener {
             if(!plugin.getPermissions().has(player, PermissionNode.WARP_JOINIGNORE)) {
                // Warp them to jail location
                int id = plugin.getServer().getScheduler()
-                     .scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, plugin.getLogic().getJailLocation()), 30);
+                     .scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, logic.getJailLocation()), 30);
                if(id == -1) {
                   plugin.getLogger().severe("Could not warp player '" + player.getName() + "' to jail on login!");
                }
@@ -120,6 +123,8 @@ public class KarmicJailListener implements Listener {
 
    @EventHandler(priority = EventPriority.MONITOR)
    public void onPlayerQuit(final PlayerQuitEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(config.debugLog && config.debugEvents) {
          plugin.getLogger().info("Quit Event for: " + event.getPlayer().getName());
       }
@@ -127,12 +132,12 @@ public class KarmicJailListener implements Listener {
       if(event.getPlayer() != null) {
          final String name = event.getPlayer().getName();
          if(name != null && event.getPlayer().getLocation() != null) {
-            if(!plugin.getLogic().playerIsJailed(name)) {
-               plugin.getLogic().setPlayerLastLocation(name, event.getPlayer().getLocation());
+            if(!logic.playerIsJailed(name)) {
+               logic.setPlayerLastLocation(name, event.getPlayer().getLocation());
             }
          }
          if(event.getPlayer().getInventory() != null) {
-            plugin.getLogic().setPlayerInventory(name, event.getPlayer().getInventory(), false);
+            logic.setPlayerInventory(name, event.getPlayer().getInventory(), false);
          }
          // Remove from cache
          try {

@@ -11,7 +11,6 @@ package com.mitsugaru.karmicjail;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,20 +21,26 @@ import com.mitsugaru.karmicjail.events.KJInventoryListener;
 import com.mitsugaru.karmicjail.events.KJPlayerListener;
 import com.mitsugaru.karmicjail.events.KarmicJailListener;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
+import com.mitsugaru.karmicjail.services.JailModule;
 import com.mitsugaru.karmicjail.tasks.JailTask;
 import com.mitsugaru.karmicjail.update.Update;
 
 public class KarmicJail extends JavaPlugin {
-   // Class Variables
+   /**
+    * Plugin tag.
+    */
    public static final String TAG = "[KarmicJail]";
+   /**
+    * Minutes to ticks ratio.
+    */
    public static final long minutesToTicks = 1200;
-   private JailLogic logic;
-   private RootConfig config;
-   public ConsoleCommandSender console;
    private PermCheck perm;
-   private DBHandler database;
    private Commander commander;
    private static final Map<String, JailTask> threads = new HashMap<String, JailTask>();
+   /**
+    * Modules.
+    */
+   private final Map<Class<? extends JailModule>, JailModule> modules = new HashMap<Class<? extends JailModule>, JailModule>();
 
    @Override
    public void onDisable() {
@@ -44,23 +49,16 @@ public class KarmicJail extends JavaPlugin {
       for(JailTask task : threads.values()) {
          task.stop();
       }
-      // Disconnect from sql database
-      if(database.checkConnection()) {
-         // Close connection
-         database.close();
-         getLogger().info("Disconnected from database.");
-      }
    }
 
    @Override
    public void onEnable() {
-      // Get console:
-      console = this.getServer().getConsoleSender();
-
-      // Grab config
-      config = new RootConfig(this);
-      // Grab database
-      database = new DBHandler(this, config);
+      // Register config
+      registerModule(RootConfig.class, new RootConfig(this));
+      // Register database
+      registerModule(DBHandler.class, new DBHandler(this));
+      // Initialize logic
+      registerModule(JailLogic.class, new JailLogic(this));
 
       // Check if any updates are necessary
       Update.init(this);
@@ -72,9 +70,6 @@ public class KarmicJail extends JavaPlugin {
       // Get commander
       commander = new Commander(this);
 
-      // Initialize logic
-      logic = new JailLogic(this);
-
       // Setup listeners
       final PluginManager pm = this.getServer().getPluginManager();
       pm.registerEvents(new KarmicJailListener(this), this);
@@ -84,10 +79,6 @@ public class KarmicJail extends JavaPlugin {
 
    public PermCheck getPermissions() {
       return perm;
-   }
-
-   public JailLogic getLogic() {
-      return logic;
    }
 
    /**
@@ -113,10 +104,6 @@ public class KarmicJail extends JavaPlugin {
       int m = minutes % 60;
       int h = (minutes - m) / 60;
       return "about " + h + "h" + m + "m";
-   }
-
-   public DBHandler getDatabaseHandler() {
-      return database;
    }
 
    /**
@@ -146,10 +133,6 @@ public class KarmicJail extends JavaPlugin {
          return null;
       }
       return Name;
-   }
-
-   public RootConfig getPluginConfig() {
-      return config;
    }
 
    public Commander getCommander() {
@@ -184,6 +167,7 @@ public class KarmicJail extends JavaPlugin {
     *         did not have a timed task, then it returns false.
     */
    public boolean stopTask(String name) {
+      RootConfig config = getModuleForClass(RootConfig.class);
       if(threads.containsKey(name)) {
          if(config.debugLog && config.debugEvents) {
             this.getLogger().info("Thread found for: " + name);
@@ -208,4 +192,61 @@ public class KarmicJail extends JavaPlugin {
    public static Map<String, JailTask> getJailThreads() {
       return threads;
    }
+
+   /**
+    * Register a CCModule to the API.
+    * 
+    * @param clazz
+    *           - Class of the instance.
+    * @param module
+    *           - Module instance.
+    * @throws IllegalArgumentException
+    *            - Thrown if an argument is null.
+    */
+   public <T extends JailModule> void registerModule(Class<T> clazz, T module) {
+      // Check arguments.
+      if(clazz == null) {
+         throw new IllegalArgumentException("Class cannot be null");
+      } else if(module == null) {
+         throw new IllegalArgumentException("Module cannot be null");
+      }
+      // Add module.
+      modules.put(clazz, module);
+      // Tell module to start.
+      module.starting();
+   }
+
+   /**
+    * Unregister a CCModule from the API.
+    * 
+    * @param clazz
+    *           - Class of the instance.
+    * @return Module that was removed from the API. Returns null if no instance
+    *         of the module is registered with the API.
+    */
+   public <T extends JailModule> T deregisterModuleForClass(Class<T> clazz) {
+      // Check arguments.
+      if(clazz == null) {
+         throw new IllegalArgumentException("Class cannot be null");
+      }
+      // Grab module and tell it its closing.
+      T module = clazz.cast(modules.get(clazz));
+      if(module != null) {
+         module.closing();
+      }
+      return module;
+   }
+
+   /**
+    * Retrieve a registered CCModule.
+    * 
+    * @param clazz
+    *           - Class identifier.
+    * @return CCModule instance. Returns null is an instance of the given class
+    *         has not been registered with the API.
+    */
+   public <T extends JailModule> T getModuleForClass(Class<T> clazz) {
+      return clazz.cast(modules.get(clazz));
+   }
+
 }

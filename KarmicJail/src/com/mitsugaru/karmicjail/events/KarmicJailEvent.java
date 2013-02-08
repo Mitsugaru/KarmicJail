@@ -5,12 +5,42 @@ import org.bukkit.event.HandlerList;
 
 import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 
+/**
+ * Event called when player is jailed.
+ */
 public class KarmicJailEvent extends Event {
+   /**
+    * Handler list.
+    */
    private static final HandlerList handlers = new HandlerList();
-   private String name, date, jailer, reason;
-   private long duration;
+   /**
+    * Name of player jailed.
+    */
+   private final String name;
+   /**
+    * Date that it occurred.
+    */
+   private final String date;
+   /**
+    * Player that issued the jail order.
+    */
+   private final String jailer;
+   /**
+    * Reason the player was jailed.
+    */
+   private final String reason;
+   /**
+    * Duration of jail time.
+    */
+   private final long duration;
 
-   public KarmicJailEvent(String event, PrisonerInfo pi) {
+   /**
+    * Constructor.
+    * 
+    * @param pi
+    *           - PrisonerInfo.
+    */
+   public KarmicJailEvent(PrisonerInfo pi) {
       super();
       name = pi.name;
       date = pi.date;

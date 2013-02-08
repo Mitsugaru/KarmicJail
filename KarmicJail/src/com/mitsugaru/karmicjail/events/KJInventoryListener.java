@@ -10,23 +10,26 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.commands.Commander;
+import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
 public class KJInventoryListener implements Listener {
-   private static KarmicJail plugin;
+   private KarmicJail plugin;
 
    public KJInventoryListener(KarmicJail plugin) {
-      KJInventoryListener.plugin = plugin;
+      this.plugin = plugin;
    }
 
    @EventHandler(priority = EventPriority.LOWEST)
    public void onPlayerCloseJailInventory(final InventoryCloseEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       try {
          if(event.getInventory().getHolder() != null) {
             if(event.getInventory().getHolder() instanceof JailInventoryHolder) {
                Commander.inv.remove(event.getPlayer().getName());
-               if(plugin.getPluginConfig().debugLog && plugin.getPluginConfig().debugEvents) {
+               if(config.debugLog && config.debugEvents) {
                   plugin.getLogger().info("'" + event.getPlayer().getName() + "' closed JailInventory view");
                }
             }
@@ -38,11 +41,13 @@ public class KJInventoryListener implements Listener {
 
    @EventHandler(priority = EventPriority.NORMAL)
    public void handleInventory(final InventoryClickEvent event) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
+      DBHandler database = plugin.getModuleForClass(DBHandler.class);
       try {
          // Check if its our holder
          if(!event.isCancelled() && event.getInventory().getHolder() instanceof JailInventoryHolder) {
             final Player player = (Player) event.getWhoClicked();
-            if(!plugin.getPluginConfig().modifyInventory || !plugin.getPermissions().has(player, PermissionNode.INVENTORY_MODIFY)) {
+            if(!config.modifyInventory || !plugin.getPermissions().has(player, PermissionNode.INVENTORY_MODIFY)) {
                event.setCancelled(true);
                return;
             }
@@ -83,7 +88,7 @@ public class KJInventoryListener implements Listener {
                             */
                            // Handle shift left click from inventory
                            if(!event.getCurrentItem().getType().equals(Material.AIR)) {
-                              plugin.getDatabaseHandler().removeItem(target, rawSlot);
+                              database.removeItem(target, rawSlot);
                            }
                         } else {
                            // Handle regular left click from inventory
@@ -98,22 +103,22 @@ public class KJInventoryListener implements Listener {
                                  if(newAmount > event.getCurrentItem().getMaxStackSize()) {
                                     newAmount = event.getCurrentItem().getMaxStackSize();
                                  }
-                                 plugin.getDatabaseHandler().setItem(target, rawSlot, event.getCurrentItem(), newAmount);
+                                 database.setItem(target, rawSlot, event.getCurrentItem(), newAmount);
                               } else {
                                  /*
                                   * Switching items from chest to cursor When
                                   * switching, put item first, then attempt to
                                   * take item
                                   */
-                                 plugin.getDatabaseHandler().removeItem(target, rawSlot);
-                                 plugin.getDatabaseHandler().setItem(target, rawSlot, event.getCursor());
+                                 database.removeItem(target, rawSlot);
+                                 database.setItem(target, rawSlot, event.getCursor());
                               }
                            } else if(!event.getCurrentItem().getType().equals(Material.AIR)) {
                               // Attempting to take item
-                              plugin.getDatabaseHandler().removeItem(target, rawSlot);
+                              database.removeItem(target, rawSlot);
                            } else if(!event.getCursor().getType().equals(Material.AIR)) {
                               // putting item into empty slot in chest
-                              plugin.getDatabaseHandler().setItem(target, rawSlot, event.getCursor());
+                              database.setItem(target, rawSlot, event.getCursor());
                            }
                         }
                      } else if(event.isRightClick()) {
@@ -121,7 +126,7 @@ public class KJInventoryListener implements Listener {
                         if(event.isShiftClick()) {
                            // Handle right shift click from inventory
                            if(!event.getCurrentItem().getType().equals(Material.AIR)) {
-                              plugin.getDatabaseHandler().removeItem(target, rawSlot);
+                              database.removeItem(target, rawSlot);
                            }
                         } else {
                            // handle regular right click from inventory
@@ -136,14 +141,14 @@ public class KJInventoryListener implements Listener {
                                  if(newAmount > event.getCurrentItem().getMaxStackSize()) {
                                     newAmount = event.getCurrentItem().getMaxStackSize();
                                  }
-                                 plugin.getDatabaseHandler().setItem(target, rawSlot, event.getCurrentItem(), newAmount);
+                                 database.setItem(target, rawSlot, event.getCurrentItem(), newAmount);
                               } else {
                                  /*
                                   * Switching Put item first, then attempt to
                                   * take item
                                   */
-                                 plugin.getDatabaseHandler().removeItem(target, rawSlot);
-                                 plugin.getDatabaseHandler().setItem(target, rawSlot, event.getCursor());
+                                 database.removeItem(target, rawSlot);
+                                 database.setItem(target, rawSlot, event.getCursor());
                               }
                            } else if(!event.getCurrentItem().getType().equals(Material.AIR)) {
                               /*
@@ -157,7 +162,7 @@ public class KJInventoryListener implements Listener {
                               if(rem != 0) {
                                  half++;
                               }
-                              plugin.getDatabaseHandler().setItem(target, rawSlot, event.getCurrentItem(), half);
+                              database.setItem(target, rawSlot, event.getCurrentItem(), half);
                            } else if(!event.getCursor().getType().equals(Material.AIR)) {
                               // Only give one
                               final int itemAmount = event.getCurrentItem().getAmount();
@@ -165,7 +170,7 @@ public class KJInventoryListener implements Listener {
                               if(newAmount > event.getCurrentItem().getMaxStackSize()) {
                                  newAmount = event.getCurrentItem().getMaxStackSize();
                               }
-                              plugin.getDatabaseHandler().setItem(target, rawSlot, event.getCurrentItem(), newAmount);
+                              database.setItem(target, rawSlot, event.getCurrentItem(), newAmount);
                            }
                         }
                      }

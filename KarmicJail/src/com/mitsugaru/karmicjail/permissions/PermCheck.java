@@ -10,6 +10,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
+import com.mitsugaru.karmicjail.config.RootConfig;
 
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
@@ -19,9 +20,6 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 /**
  * Class to handle permission node checks. Mostly only to support PEX natively,
  * due to SuperPerm compatibility with PEX issues.
- * 
- * @author Mitsugaru
- * 
  */
 public class PermCheck {
    private KarmicJail plugin;
@@ -53,8 +51,9 @@ public class PermCheck {
    }
 
    public boolean has(String name, PermissionNode permission) {
+      JailLogic logic = plugin.getModuleForClass(JailLogic.class);
       if(hasVault) {
-         return perm.has(plugin.getLogic().getJailLocation().getWorld(), name, permission.getNode());
+         return perm.has(logic.getJailLocation().getWorld(), name, permission.getNode());
       }
       return false;
    }
@@ -120,6 +119,7 @@ public class PermCheck {
    }
 
    public void playerRemoveGroup(World w, String name, String group) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       if(hasVault) {
          if(pluginName.equals("PermissionsBukkit")) {
             // Handle PermissionsBukkit
@@ -127,7 +127,7 @@ public class PermCheck {
             final boolean check = plugin.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
             if(!check) {
                plugin.getLogger().warning("Could not remove group '" + group + "' from '" + name + "'... Permissions error.");
-            } else if(plugin.getPluginConfig().debugGroups) {
+            } else if(config.debugGroups) {
                plugin.getLogger().info("Removed group '" + group + "' of '" + w + "' from '" + name + "'");
             }
          } else if(pluginName.equals("PermissionsEX")) {
@@ -135,7 +135,7 @@ public class PermCheck {
             final PermissionUser user = pm.getUser(name);
             final PermissionGroup permGroup = PermissionsEx.getPermissionManager().getGroup(group);
             user.removeGroup(permGroup, w.getName());
-            if(plugin.getPluginConfig().debugGroups) {
+            if(config.debugGroups) {
                plugin.getLogger().info("Removed group '" + group + "' of '" + w + "' from '" + name + "'");
             }
          } else {
@@ -143,7 +143,7 @@ public class PermCheck {
             if(!check) {
                plugin.getLogger().warning(
                      "Could not remove group '" + group + "' of world '" + w.getName() + "' from '" + name + "'... Permissions error.");
-            } else if(plugin.getPluginConfig().debugGroups) {
+            } else if(config.debugGroups) {
                plugin.getLogger().info("Removed group '" + group + "' of '" + w + "' from '" + name + "'");
             }
          }
@@ -151,6 +151,7 @@ public class PermCheck {
    }
 
    public void playerAddGroup(String world, String name, String group) {
+      RootConfig config = plugin.getModuleForClass(RootConfig.class);
       if(hasVault) {
          if(pluginName.equals("PermissionsBukkit")) {
             // Handle PermissionsBukkit
@@ -158,7 +159,7 @@ public class PermCheck {
             final boolean check = plugin.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
             if(!check) {
                plugin.getLogger().warning("Could not add group '" + group + "' to '" + name + "' = Permissions error.");
-            } else if(plugin.getPluginConfig().debugGroups) {
+            } else if(config.debugGroups) {
                plugin.getLogger().info("Added group '" + group + "' of '" + world + "' to '" + name + "'");
             }
          } else if(pluginName.equals("PermissionsEX")) {
@@ -166,14 +167,14 @@ public class PermCheck {
             final PermissionUser user = pm.getUser(name);
             final PermissionGroup permGroup = PermissionsEx.getPermissionManager().getGroup(group);
             user.addGroup(permGroup);
-            if(plugin.getPluginConfig().debugGroups) {
+            if(config.debugGroups) {
                plugin.getLogger().info("Added group '" + group + "' of '" + world + "' to '" + name + "'");
             }
          } else {
             final boolean check = perm.playerAddGroup(world, name, group);
             if(!check) {
                plugin.getLogger().warning("Could not add group '" + group + "' of world '" + world + "' to '" + name + "' = Permissions error.");
-            } else if(plugin.getPluginConfig().debugGroups) {
+            } else if(config.debugGroups) {
                plugin.getLogger().info("Added group '" + group + "' of '" + world + "' to '" + name + "'");
             }
          }
