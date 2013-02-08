@@ -18,14 +18,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
-import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.jail.JailLogic;
 
-public class KJPlayerListener implements Listener {
+public class JailedPlayerListener implements Listener {
    private KarmicJail plugin;
 
-   public KJPlayerListener(KarmicJail plugin) {
+   public JailedPlayerListener(KarmicJail plugin) {
       this.plugin = plugin;
    }
 

@@ -15,10 +15,10 @@ import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
-public class KJInventoryListener implements Listener {
+public class JailedInventoryListener implements Listener {
    private KarmicJail plugin;
 
-   public KJInventoryListener(KarmicJail plugin) {
+   public JailedInventoryListener(KarmicJail plugin) {
       this.plugin = plugin;
    }
 

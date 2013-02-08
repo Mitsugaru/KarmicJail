@@ -1,7 +1,7 @@
 package com.mitsugaru.karmicjail.tasks;
 
-import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
+import com.mitsugaru.karmicjail.jail.JailLogic;
 
 public class JailTask implements Runnable {
    private KarmicJail plugin;

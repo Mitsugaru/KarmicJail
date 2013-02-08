@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail;
+package com.mitsugaru.karmicjail.jail;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,11 +25,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.database.Field;
 import com.mitsugaru.karmicjail.database.Table;
-import com.mitsugaru.karmicjail.jail.JailStatus;
-import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 import com.mitsugaru.karmicjail.commands.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.events.KarmicJailEvent;

@@ -3,9 +3,9 @@ package com.mitsugaru.karmicjail.tasks;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 
 public class LoginJailTask implements Runnable {

@@ -7,8 +7,8 @@
  */
 package com.mitsugaru.karmicjail.events;
 
-import com.mitsugaru.karmicjail.JailLogic;
 import com.mitsugaru.karmicjail.KarmicJail;
+import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.commands.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
@@ -26,11 +26,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
-public class KarmicJailListener implements Listener {
+public class PlayerListener implements Listener {
    // Class variables
    private final KarmicJail plugin;
 
-   public KarmicJailListener(KarmicJail plugin) {
+   public PlayerListener(KarmicJail plugin) {
       this.plugin = plugin;
    }
 
