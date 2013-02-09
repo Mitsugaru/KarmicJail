@@ -103,7 +103,7 @@ public class DBHandler extends JailModule {
          }
       } else {
          // Connect to sql database
-         sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail", plugin.getDataFolder().getAbsolutePath());
+         sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, plugin.getDataFolder().getAbsolutePath(),"jail");
          sqlite.open();
          // Check if jailed table exists
          if(!sqlite.isTable(Table.JAILED.getName())) {
