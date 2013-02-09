@@ -3,8 +3,8 @@ description: ${project.description}
 main: ${project.mainclass}
 version: ${project.version}
 author: Original - imjake9 ... Fork - Mitsugaru
-depend: [Vault, SQLibrary]
-softdepend: [Multiverse-Core]
+depend: [Vault]
+softdepend: [Multiverse-Core, SQLibrary]
 
 commands:
   kj:
