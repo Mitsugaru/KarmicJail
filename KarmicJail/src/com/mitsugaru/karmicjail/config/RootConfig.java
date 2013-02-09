@@ -44,7 +44,6 @@ public class RootConfig extends JailModule {
       // Load variables from config
       jailLoc = new Location(plugin.getServer().getWorld(config.getString("jail.world", plugin.getServer().getWorlds().get(0).getName())),
             config.getInt("jail.x", 0), config.getInt("jail.y", 0), config.getInt("jail.z", 0));
-      plugin.getLogger().info("jailLoc world: " + (jailLoc.getWorld() == null));
       unjailLoc = new Location(plugin.getServer().getWorld(config.getString("unjail.world", plugin.getServer().getWorlds().get(0).getName())),
             config.getInt("unjail.x", 0), config.getInt("unjail.y", 0), config.getInt("unjail.z", 0));
       jailGroup = config.getString("group.jail.group", "Jailed");
