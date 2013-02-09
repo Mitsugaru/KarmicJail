@@ -35,6 +35,7 @@ public class HistoryCommander extends CommandHandler {
 
    @Override
    public boolean noArgs(CommandSender sender, Command command, String label) {
+      sender.sendMessage(ChatColor.BLUE + "=====" + ChatColor.GREEN + "/kj history" + ChatColor.BLUE + "=====");
       sender.sendMessage(ChatColor.GREEN + "/kj history view" + ChatColor.YELLOW + " : Show currently open history");
       sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.AQUA + " <prev | next>" + ChatColor.YELLOW
             + " : Go to previous or next page of history");

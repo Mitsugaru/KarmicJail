@@ -50,7 +50,7 @@ public class InventoryCommand implements JailCommand {
                }
             } else {
                sender.sendMessage(ChatColor.RED + "Missing name");
-               sender.sendMessage(ChatColor.RED + "/jinv <player>");
+               sender.sendMessage(ChatColor.RED + "/kj inv <player>");
             }
          } else {
             sender.sendMessage(ChatColor.RED + "Cannot use command as console.");

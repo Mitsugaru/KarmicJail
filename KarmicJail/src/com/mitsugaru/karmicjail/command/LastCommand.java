@@ -34,7 +34,7 @@ public class LastCommand implements JailCommand {
                }
             } else {
                sender.sendMessage(ChatColor.RED + "Missing name");
-               sender.sendMessage(ChatColor.RED + "/jlast <player>");
+               sender.sendMessage(ChatColor.RED + "/kj last <player>");
             }
          } else {
             sender.sendMessage(ChatColor.RED + "Cannot use command as console.");

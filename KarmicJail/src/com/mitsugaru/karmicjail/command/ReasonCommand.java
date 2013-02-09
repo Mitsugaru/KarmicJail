@@ -39,7 +39,7 @@ public class ReasonCommand implements JailCommand {
             }
          } else {
             sender.sendMessage(ChatColor.RED + "Missing name");
-            sender.sendMessage(ChatColor.RED + "/jtime <player> <reason>");
+            sender.sendMessage(ChatColor.RED + "/kj reason <player> <reason>");
          }
       }
       return true;

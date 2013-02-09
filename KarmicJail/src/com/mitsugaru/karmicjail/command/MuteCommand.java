@@ -33,7 +33,7 @@ public class MuteCommand implements JailCommand {
          }
          if(players.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Missing paramters");
-            sender.sendMessage(ChatColor.RED + "/jmute <player> [player2] ...");
+            sender.sendMessage(ChatColor.RED + "/kj mute <player> [player2] ...");
          }
          for(String name : players) {
             logic.toggleMutePlayer(sender, name);

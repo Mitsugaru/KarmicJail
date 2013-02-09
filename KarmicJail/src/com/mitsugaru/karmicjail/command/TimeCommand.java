@@ -54,7 +54,7 @@ public class TimeCommand implements JailCommand {
          }
          if(players.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Missing paramters");
-            sender.sendMessage(ChatColor.RED + "/jtime <player> [player2] ... <time>");
+            sender.sendMessage(ChatColor.RED + "/kj time <player> [player2] ... <time>");
          }
          for(String name : players) {
             logic.setJailTime(sender, name, time);

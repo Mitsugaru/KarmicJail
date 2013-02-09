@@ -33,7 +33,7 @@ public class UnjailCommand implements JailCommand {
          }
          if(players.isEmpty()) {
             sender.sendMessage(ChatColor.RED + "Missing paramters");
-            sender.sendMessage(ChatColor.RED + "/unjail <player> [player2]");
+            sender.sendMessage(ChatColor.RED + "/kj unjail <player> [player2]");
          }
          for(String name : players) {
             logic.unjailPlayer(sender, name);

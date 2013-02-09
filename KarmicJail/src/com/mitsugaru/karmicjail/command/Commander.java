@@ -31,7 +31,9 @@ public class Commander extends CommandHandler {
    public Commander(KarmicJail plugin) {
       super(plugin, "kj");
       // Register commands
-      registerCommand("jail", new JailPlayerCommand());
+      JailPlayerCommand jail = new JailPlayerCommand();
+      registerCommand("jail", jail);
+      registerCommand("j", jail);
       registerCommand("unjail", new UnjailCommand());
       registerCommand("setjail", new SetJailCommand());
       registerCommand("setunjail", new SetUnjailCommand());

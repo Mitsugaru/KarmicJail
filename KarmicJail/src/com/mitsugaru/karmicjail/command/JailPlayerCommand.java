@@ -71,7 +71,7 @@ public class JailPlayerCommand implements JailCommand {
          } catch(ArrayIndexOutOfBoundsException e) {
             // no player name given, error
             sender.sendMessage(ChatColor.RED + "Missing paramters");
-            sender.sendMessage(ChatColor.RED + "/j <player> [player2] ... [time] [reason]");
+            sender.sendMessage(ChatColor.RED + "/kj jail <player> [player2] ... [time] [reason]");
          }
       }
       return true;
