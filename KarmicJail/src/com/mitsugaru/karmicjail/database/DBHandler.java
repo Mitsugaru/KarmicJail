@@ -593,9 +593,8 @@ public class DBHandler extends JailModule {
             rs = query("DELETE FROM " + Table.INVENTORY.getName() + " WHERE id='" + id + "';");
             cleanup(rs, null);
             // Add in items
-            statement = prepare("INSERT INTO " + Table.INVENTORY.getName()
-                  + " (id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
             for(Map.Entry<Integer, ItemStack> item : items.entrySet()) {
+               statement = prepare("INSERT INTO " + Table.INVENTORY.getName() + " (id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?)");
                statement.setInt(1, id);
                statement.setInt(2, item.getKey().intValue());
                statement.setInt(3, item.getValue().getTypeId());
@@ -613,14 +612,12 @@ public class DBHandler extends JailModule {
                   statement.setString(6, "");
                }
                second = query(statement);
-               cleanup(second, null);
+               cleanup(second, statement);
             }
             valid = true;
          } catch(SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "SQL Exception on setting inventory for '" + playername + "'", e);
             valid = false;
-         } finally {
-            cleanup(null, statement);
          }
          return valid;
       } else {
@@ -694,14 +691,12 @@ public class DBHandler extends JailModule {
          ResultSet rs = null;
          PreparedStatement statement = null;
          try {
-            statement = prepare("INSERT INTO " + Table.INVENTORY.getName()
-                  + " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
+            statement = prepare("INSERT INTO " + Table.INVENTORY.getName() + " (id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?)");
             statement.setInt(1, id);
             statement.setInt(2, slot);
             statement.setInt(3, item.getTypeId());
             statement.setInt(4, amount);
-            statement.setString(5, "" + item.getData().getData());
-            statement.setString(6, "" + item.getDurability());
+            statement.setString(5, "" + item.getDurability());
             if(!item.getEnchantments().isEmpty()) {
                // TODO fix this to be ordered
                StringBuilder sb = new StringBuilder();
@@ -710,9 +705,9 @@ public class DBHandler extends JailModule {
                }
                // Remove trailing comma
                sb.deleteCharAt(sb.length() - 1);
-               statement.setString(7, sb.toString());
+               statement.setString(6, sb.toString());
             } else {
-               statement.setString(7, "");
+               statement.setString(6, "");
             }
             rs = query(statement);
             valid = true;

@@ -5,7 +5,7 @@
  * @author imjake9
  * @author Mitsugaru
  */
-package com.mitsugaru.karmicjail.events;
+package com.mitsugaru.karmicjail.listener;
 
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailLogic;
@@ -16,6 +16,7 @@ import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.permissions.PermissionNode;
 import com.mitsugaru.karmicjail.tasks.LoginJailTask;
+import com.mitsugaru.karmicjail.tasks.LoginReturnItemsTask;
 import com.mitsugaru.karmicjail.tasks.LoginWarpTask;
 
 import org.bukkit.ChatColor;
@@ -96,12 +97,15 @@ public class PlayerListener implements Listener {
       case PENDINGFREE: {
          logic.freePlayer(plugin.getServer().getConsoleSender(), player.getName());
          // Warp them to unjail location
-         int id = plugin.getServer().getScheduler()
-               .scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, logic.getUnjailLocation()), 30);
+         int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, logic.getUnjailLocation()), 30);
          if(id == -1) {
             plugin.getLogger().severe("Could not warp player '" + player.getName() + "' out jail on login!");
          } else {
             player.sendMessage(ChatColor.GREEN + KarmicJail.TAG + ChatColor.AQUA + "You have been removed from jail.");
+         }
+         int id2 = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginReturnItemsTask(plugin, player), 35);
+         if(id2 == -1) {
+            plugin.getLogger().severe("Could not return items to player '" + player.getName() + "' out jail on login!");
          }
          if(config.debugLog && config.debugEvents) {
             plugin.getLogger().info("Unjailed '" + player.getName() + "' on login.");
@@ -112,8 +116,7 @@ public class PlayerListener implements Listener {
          if(config.warpAllOnJoin) {
             if(!perm.has(player, PermissionNode.WARP_JOINIGNORE)) {
                // Warp them to jail location
-               int id = plugin.getServer().getScheduler()
-                     .scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, logic.getJailLocation()), 30);
+               int id = plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new LoginWarpTask(player, logic.getJailLocation()), 30);
                if(id == -1) {
                   plugin.getLogger().severe("Could not warp player '" + player.getName() + "' to jail on login!");
                }

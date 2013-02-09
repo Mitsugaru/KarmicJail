@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail.events;
+package com.mitsugaru.karmicjail.listener;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
