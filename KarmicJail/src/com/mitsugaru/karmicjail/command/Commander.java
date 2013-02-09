@@ -79,7 +79,7 @@ public class Commander extends CommandHandler {
                + ChatColor.YELLOW + " : Jails player(s)");
          sender.sendMessage(ChatColor.YELLOW + "Note - Names auto-complete if player is online.");
          sender.sendMessage(ChatColor.GREEN + "/kj time" + ChatColor.AQUA + " <player> <time>" + ChatColor.YELLOW
-               + " : Sets time for jailed player.");
+               + " : View and set time for jailed player.");
          sender.sendMessage(ChatColor.GREEN + "/kj reason" + ChatColor.AQUA + " <player> " + ChatColor.LIGHT_PURPLE + "[reason]" + ChatColor.YELLOW
                + " : Sets jail reason for player.");
       }
@@ -278,7 +278,7 @@ public class Commander extends CommandHandler {
 
    @Override
    public boolean unknownCommand(CommandSender sender, Command command, String label, String[] args) {
-      sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Invalid command '" + args[0] + "', use /ks help.");
+      sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Invalid command '" + args[0] + "', use /kj help.");
       return true;
    }
 

@@ -20,7 +20,7 @@ public class ViewHistoryCommand implements JailCommand {
       } else {
          HistoryCommander commander = plugin.getCommandHandlerForClass(HistoryCommander.class);
          try {
-            String temp = plugin.expandName(args[1]);
+            String temp = plugin.expandName(args[0]);
             String name = plugin.getModuleForClass(JailLogic.class).getPlayerInDatabase(temp);
             if(name == null) {
                name = temp;

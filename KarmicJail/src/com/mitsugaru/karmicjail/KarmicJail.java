@@ -71,10 +71,11 @@ public class KarmicJail extends JavaPlugin {
 
       // Generate commanders.
       Commander commander = new Commander(this);
+      getCommand("kj").setExecutor(commander);
       HistoryCommander history = new HistoryCommander(this);
       commander.registerHandler(history);
       // Register commanders.
-      handlers.put(CommandHandler.class, commander);
+      handlers.put(Commander.class, commander);
       handlers.put(HistoryCommander.class, history);
 
       // Setup listeners

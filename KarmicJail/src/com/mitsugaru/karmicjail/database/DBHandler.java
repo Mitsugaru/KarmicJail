@@ -21,7 +21,6 @@ import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.services.JailModule;
 import com.mitsugaru.karmicjail.config.RootConfig;
-import com.mitsugaru.karmicjail.inventory.Item;
 
 public class DBHandler extends JailModule {
    // Class Variables
@@ -43,6 +42,7 @@ public class DBHandler extends JailModule {
          }
          config.set("mysql.import", false);
       }
+      checkTables();
    }
 
    @Override
@@ -62,6 +62,7 @@ public class DBHandler extends JailModule {
          // Connect to mysql database
          mysql = new MySQL(plugin.getLogger(), KarmicJail.TAG, config.host, Integer.parseInt(config.port), config.database, config.user,
                config.password);
+         mysql.open();
          // Check if jailed table exists
          if(!mysql.isTable(Table.JAILED.getName())) {
             plugin.getLogger().info(KarmicJail.TAG + " Created jailed table");
@@ -94,7 +95,7 @@ public class DBHandler extends JailModule {
             try {
                mysql.query("CREATE TABLE "
                      + Table.INVENTORY.getName()
-                     + " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, slot INT NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, data TINYTEXT NOT NULL, durability TINYTEXT NOT NULL, enchantments TEXT, PRIMARY KEY(row));");
+                     + " (row INT UNSIGNED NOT NULL AUTO_INCREMENT, id INT UNSIGNED NOT NULL, slot INT NOT NULL, itemid SMALLINT UNSIGNED NOT NULL, amount INT NOT NULL, durability TINYTEXT NOT NULL, enchantments TEXT, PRIMARY KEY(row));");
             } catch(SQLException e) {
                plugin.getLogger().log(Level.SEVERE, "SQLException on creating inventory table.", e);
                valid = false;
@@ -103,6 +104,7 @@ public class DBHandler extends JailModule {
       } else {
          // Connect to sql database
          sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail", plugin.getDataFolder().getAbsolutePath());
+         sqlite.open();
          // Check if jailed table exists
          if(!sqlite.isTable(Table.JAILED.getName())) {
             plugin.getLogger().info(KarmicJail.TAG + " Created jailed table");
@@ -134,7 +136,7 @@ public class DBHandler extends JailModule {
             try {
                sqlite.query("CREATE TABLE "
                      + Table.INVENTORY.getName()
-                     + " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, data TEXT NOT NULL, durability TEXT NOT NULL, enchantments TEXT);");
+                     + " (row INTEGER PRIMARY KEY, id INTEGER NOT NULL, slot INTEGER NOT NULL, itemid INTEGER NOT NULL, amount INTEGER NOT NULL, durability TEXT NOT NULL, enchantments TEXT);");
             } catch(SQLException e) {
                plugin.getLogger().log(Level.SEVERE, "SQLException on creating inventory table.", e);
                valid = false;
@@ -592,14 +594,13 @@ public class DBHandler extends JailModule {
             cleanup(rs, null);
             // Add in items
             statement = prepare("INSERT INTO " + Table.INVENTORY.getName()
-                  + " (id,slot,itemid,amount,data,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
+                  + " (id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
             for(Map.Entry<Integer, ItemStack> item : items.entrySet()) {
                statement.setInt(1, id);
                statement.setInt(2, item.getKey().intValue());
                statement.setInt(3, item.getValue().getTypeId());
                statement.setInt(4, item.getValue().getAmount());
-               statement.setString(5, "" + item.getValue().getData().getData());
-               statement.setString(6, "" + item.getValue().getDurability());
+               statement.setString(5, "" + item.getValue().getDurability());
                if(!item.getValue().getEnchantments().isEmpty()) {
                   StringBuilder sb = new StringBuilder();
                   for(Map.Entry<Enchantment, Integer> e : item.getValue().getEnchantments().entrySet()) {
@@ -607,9 +608,9 @@ public class DBHandler extends JailModule {
                   }
                   // Remove trailing comma
                   sb.deleteCharAt(sb.length() - 1);
-                  statement.setString(7, sb.toString());
+                  statement.setString(6, sb.toString());
                } else {
-                  statement.setString(7, "");
+                  statement.setString(6, "");
                }
                second = query(statement);
                cleanup(second, null);
@@ -645,14 +646,8 @@ public class DBHandler extends JailModule {
                do {
                   int itemid = query.getInt(Field.INV_ITEM.getColumnName());
                   int amount = query.getInt(Field.INV_AMOUNT.getColumnName());
-                  byte data = query.getByte(Field.INV_DATA.getColumnName());
                   short dur = query.getShort(Field.INV_DURABILITY.getColumnName());
-                  ItemStack add = null;
-                  if(Item.isTool(itemid) || Item.isPotion(itemid)) {
-                     add = new ItemStack(itemid, amount, dur);
-                  } else {
-                     add = new ItemStack(itemid, amount, dur, data);
-                  }
+                  ItemStack add = new ItemStack(itemid, amount, dur);
                   String enchantments = query.getString(Field.INV_ENCHANT.getColumnName());
                   if(add != null) {
                      if(!query.wasNull()) {

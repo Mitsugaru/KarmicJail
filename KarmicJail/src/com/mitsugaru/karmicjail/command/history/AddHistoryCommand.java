@@ -21,13 +21,13 @@ public class AddHistoryCommand implements JailCommand {
       if(!perm.has(sender, PermissionNode.HISTORY_ADD)) {
          sender.sendMessage(ChatColor.RED + "Lack Permission: " + PermissionNode.HISTORY_ADD.getNode());
       } else {
-         String temp = plugin.expandName(args[1]);
+         String temp = plugin.expandName(args[0]);
          String name = logic.getPlayerInDatabase(temp);
          if(name == null) {
             name = temp;
          }
          final StringBuilder sb = new StringBuilder();
-         for(int i = 2; i < args.length; i++) {
+         for(int i = 1; i < args.length; i++) {
             sb.append(args[i] + " ");
          }
          String reason = "";
