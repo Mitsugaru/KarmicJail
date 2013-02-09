@@ -89,22 +89,18 @@ public class Commander extends CommandHandler {
          sender.sendMessage(ChatColor.GREEN + "/kj unjail" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW + " : Unjail player");
       }
       if(perm.has(sender, PermissionNode.MUTE)) {
-         sender.sendMessage(ChatColor.GREEN + "/kj mute" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
-               + " : Toggle mute for a player.");
+         sender.sendMessage(ChatColor.GREEN + "/kj mute" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW + " : Toggle mute for a player.");
       }
       if(perm.has(sender, PermissionNode.LIST)) {
-         sender.sendMessage(ChatColor.GREEN + "/kj list" + ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW
-               + " : List jailed players.");
+         sender.sendMessage(ChatColor.GREEN + "/kj list" + ChatColor.LIGHT_PURPLE + " [page]" + ChatColor.YELLOW + " : List jailed players.");
          sender.sendMessage(ChatColor.GREEN + "/kj prev" + ChatColor.YELLOW + " : Previous page. Alias: /jprev");
          sender.sendMessage(ChatColor.GREEN + "/kj next" + ChatColor.YELLOW + " : Next page. Alias: /jnext");
       }
       if(perm.has(sender, PermissionNode.HISTORY_VIEW)) {
-         sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.LIGHT_PURPLE + " [args]" + ChatColor.YELLOW
-               + " : Jail history command.");
+         sender.sendMessage(ChatColor.GREEN + "/kj history" + ChatColor.LIGHT_PURPLE + " [args]" + ChatColor.YELLOW + " : Jail history command.");
       }
       if(perm.has(sender, PermissionNode.INVENTORY_VIEW)) {
-         sender.sendMessage(ChatColor.GREEN + "/kj inv" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
-               + " : Open inventory of jailed player.");
+         sender.sendMessage(ChatColor.GREEN + "/kj inv" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW + " : Open inventory of jailed player.");
       }
       if(perm.has(sender, PermissionNode.WARP_LAST)) {
          sender.sendMessage(ChatColor.GREEN + "/kj last" + ChatColor.AQUA + " <player>" + ChatColor.YELLOW
@@ -117,8 +113,7 @@ public class Commander extends CommandHandler {
                + " : Set unjail teleport to current pos or given pos");
       }
       if(perm.has(sender, PermissionNode.JAILSTATUS)) {
-         sender.sendMessage(ChatColor.GREEN + "/kj status" + ChatColor.LIGHT_PURPLE + " [player]" + ChatColor.YELLOW
-               + " : Get jail status.");
+         sender.sendMessage(ChatColor.GREEN + "/kj status" + ChatColor.LIGHT_PURPLE + " [player]" + ChatColor.YELLOW + " : Get jail status.");
       }
       sender.sendMessage(ChatColor.GREEN + "/kj version" + ChatColor.YELLOW + " : Plugin version and config info. Alias: /jversion");
    }
@@ -193,7 +188,6 @@ public class Commander extends CommandHandler {
          }
       }
       PrisonerInfo[] array = cache.values().toArray(new PrisonerInfo[0]);
-      boolean valid = true;
       // Caluclate amount of pages
       int num = array.length / 8;
       double rem = (double) array.length % (double) config.limit;
@@ -205,57 +199,53 @@ public class Commander extends CommandHandler {
          sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Page does not exist");
          // reset their current page back to 0
          page.put(sender.getName(), 0);
-         valid = false;
       } else if((page.get(sender.getName()).intValue()) * config.limit > array.length) {
          // They tried to use /ks next at the end of the list
          sender.sendMessage(ChatColor.YELLOW + KarmicJail.TAG + " Page does not exist");
          // Revert to last page
          page.put(sender.getName(), num - 1);
-         valid = false;
       }
-      if(valid) {
-         // Header with amount of pages
-         sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.GRAY + "Jailed" + ChatColor.BLUE + "===" + ChatColor.GRAY + "Page: "
-               + ((page.get(sender.getName()).intValue()) + 1) + ChatColor.BLUE + " of " + ChatColor.GRAY + num + ChatColor.BLUE + "===");
-         // list
-         for(int i = ((page.get(sender.getName()).intValue()) * config.limit); i < ((page.get(sender.getName()).intValue()) * config.limit)
-               + config.limit; i++) {
-            // Don't try to pull something beyond the bounds
-            if(i < array.length) {
-               StringBuilder sb = new StringBuilder();
-               Player player = plugin.getServer().getPlayer(array[i].name);
-               // Grab player and colorize name if they're online or not
-               if(player == null) {
-                  sb.append(ChatColor.RED + array[i].name + ChatColor.GRAY + " - ");
-               } else {
-                  sb.append(ChatColor.GREEN + array[i].name + ChatColor.GRAY + " - ");
-               }
-               // Grab date
-               try {
-                  sb.append(ChatColor.GOLD + array[i].date.substring(0, 10) + ChatColor.GRAY + " - ");
-               } catch(StringIndexOutOfBoundsException e) {
-                  // Incorrect format stored, so just give the date as is
-                  sb.append(ChatColor.GOLD + array[i].date + ChatColor.GRAY + " - ");
-               }
-               // Give jailer name
-               sb.append(ChatColor.AQUA + array[i].jailer);
-               // Grab time if applicable
-               if(array[i].time > 0) {
-                  double temp = Math.floor(((double) array[i].time / (double) KarmicJail.minutesToTicks) + 0.5f);
-                  sb.append(ChatColor.GRAY + " - " + ChatColor.BLUE + "" + plugin.prettifyMinutes((int) temp));
-               }
-               // Grab reason if there was one given
-               if(!array[i].reason.equals("")) {
-                  sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY + ChatColor.translateAlternateColorCodes('&', array[i].reason));
-               }
-               // Grab if muted
-               if(array[i].mute) {
-                  sb.append(ChatColor.GRAY + " - " + ChatColor.DARK_RED + "MUTED");
-               }
-               sender.sendMessage(sb.toString());
+      // Header with amount of pages
+      sender.sendMessage(ChatColor.BLUE + "===" + ChatColor.GRAY + "Jailed" + ChatColor.BLUE + "===" + ChatColor.GRAY + "Page: "
+            + ((page.get(sender.getName()).intValue()) + 1) + ChatColor.BLUE + " of " + ChatColor.GRAY + num + ChatColor.BLUE + "===");
+      // list
+      for(int i = ((page.get(sender.getName()).intValue()) * config.limit); i < ((page.get(sender.getName()).intValue()) * config.limit)
+            + config.limit; i++) {
+         // Don't try to pull something beyond the bounds
+         if(i < array.length) {
+            StringBuilder sb = new StringBuilder();
+            Player player = plugin.getServer().getPlayer(array[i].name);
+            // Grab player and colorize name if they're online or not
+            if(player == null) {
+               sb.append(ChatColor.RED + array[i].name + ChatColor.GRAY + " - ");
             } else {
-               break;
+               sb.append(ChatColor.GREEN + array[i].name + ChatColor.GRAY + " - ");
             }
+            // Grab date
+            try {
+               sb.append(ChatColor.GOLD + array[i].date.substring(0, 10) + ChatColor.GRAY + " - ");
+            } catch(StringIndexOutOfBoundsException e) {
+               // Incorrect format stored, so just give the date as is
+               sb.append(ChatColor.GOLD + array[i].date + ChatColor.GRAY + " - ");
+            }
+            // Give jailer name
+            sb.append(ChatColor.AQUA + array[i].jailer);
+            // Grab time if applicable
+            if(array[i].time > 0) {
+               double temp = Math.floor(((double) array[i].time / (double) KarmicJail.minutesToTicks) + 0.5f);
+               sb.append(ChatColor.GRAY + " - " + ChatColor.BLUE + "" + plugin.prettifyMinutes((int) temp));
+            }
+            // Grab reason if there was one given
+            if(!array[i].reason.equals("")) {
+               sb.append(ChatColor.GRAY + " - " + ChatColor.GRAY + ChatColor.translateAlternateColorCodes('&', array[i].reason));
+            }
+            // Grab if muted
+            if(array[i].mute) {
+               sb.append(ChatColor.GRAY + " - " + ChatColor.DARK_RED + "MUTED");
+            }
+            sender.sendMessage(sb.toString());
+         } else {
+            break;
          }
       }
    }
