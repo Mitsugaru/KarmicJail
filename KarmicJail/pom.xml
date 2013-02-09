@@ -80,6 +80,12 @@
                 <directory>${basedir}</directory>
                 <filtering>true</filtering>
             </resource>
+            <resource>
+                <includes>
+                    <include>LICENSE.txt</include>
+                </includes>
+                <directory>${basedir}</directory>
+            </resource>
         </resources>
     </build>
 </project>
