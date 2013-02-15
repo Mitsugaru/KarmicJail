@@ -103,7 +103,7 @@ public class DBHandler extends JailModule {
          }
       } else {
          // Connect to sql database
-         sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, plugin.getDataFolder().getAbsolutePath(),"jail");
+         sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, plugin.getDataFolder().getAbsolutePath(), "jail");
          sqlite.open();
          // Check if jailed table exists
          if(!sqlite.isTable(Table.JAILED.getName())) {
@@ -267,25 +267,56 @@ public class DBHandler extends JailModule {
 
    public ResultSet query(String query) throws SQLException {
       if(useMySQL) {
-         return mysql.query(query);
+         try {
+            return mysql.query(query);
+         } catch(SQLException e) {
+            // Try and reopen
+            mysql.open();
+            return mysql.query(query);
+         }
       } else {
-         return sqlite.query(query);
+         try {
+            return sqlite.query(query);
+         } catch(SQLException e) {
+            sqlite.open();
+            return sqlite.query(query);
+         }
       }
    }
 
    public ResultSet query(PreparedStatement statement) throws SQLException {
       if(useMySQL) {
-         return mysql.query(statement);
+         try {
+            return mysql.query(statement);
+         } catch(SQLException e) {
+            mysql.open();
+            return mysql.query(statement);
+         }
       } else {
-         return sqlite.query(statement);
+         try {
+            return sqlite.query(statement);
+         } catch(SQLException e) {
+            sqlite.open();
+            return sqlite.query(statement);
+         }
       }
    }
 
    public PreparedStatement prepare(String statement) throws SQLException {
       if(useMySQL) {
-         return mysql.prepare(statement);
+         try {
+            return mysql.prepare(statement);
+         } catch(SQLException e) {
+            mysql.open();
+            return mysql.prepare(statement);
+         }
       } else {
-         return sqlite.prepare(statement);
+         try {
+            return sqlite.prepare(statement);
+         } catch(SQLException e) {
+            sqlite.open();
+            return sqlite.prepare(statement);
+         }
       }
    }
 
@@ -594,7 +625,8 @@ public class DBHandler extends JailModule {
             cleanup(rs, null);
             // Add in items
             for(Map.Entry<Integer, ItemStack> item : items.entrySet()) {
-               statement = prepare("INSERT INTO " + Table.INVENTORY.getName() + " (id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?)");
+               statement = prepare("INSERT INTO " + Table.INVENTORY.getName()
+                     + " (id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?)");
                statement.setInt(1, id);
                statement.setInt(2, item.getKey().intValue());
                statement.setInt(3, item.getValue().getTypeId());

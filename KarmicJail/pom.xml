@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <!-- Project properties. -->
     <artifactId>KarmicJail</artifactId>
-    <version>0.44</version>
+    <version>0.441</version>
     <name>KarmicJail</name>
     <description>Jail plugin for Mine-RP</description>
     <!-- Parent POM -->
