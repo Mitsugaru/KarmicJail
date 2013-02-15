@@ -222,9 +222,9 @@ public class Update {
             // Add back entries
             try {
                if(!entries.isEmpty()) {
-                  PreparedStatement statement = database.prepare("INSERT INTO " + Table.INVENTORY.getName()
-                        + " (row,id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
                   for(PointFourFourObject entry : entries) {
+                     PreparedStatement statement = database.prepare("INSERT INTO " + Table.INVENTORY.getName()
+                           + " (row,id,slot,itemid,amount,durability,enchantments) VALUES(?,?,?,?,?,?,?)");
                      statement.setInt(1, entry.row);
                      statement.setInt(2, entry.id);
                      statement.setInt(3, entry.slot);
@@ -238,10 +238,9 @@ public class Update {
                      } catch(SQLException e) {
                         plugin.getLogger().log(Level.SEVERE, KarmicJail.TAG + " SQLException", e);
                      } finally {
-                        database.cleanup(fourth, null);
+                        database.cleanup(fourth, statement);
                      }
                   }
-                  database.cleanup(null, statement);
                }
             } catch(SQLException e) {
                plugin.getLogger().warning(KarmicJail.TAG + " SQL Exception on 0.44 update");
