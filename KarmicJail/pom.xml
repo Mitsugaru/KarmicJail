@@ -62,7 +62,7 @@
         <dependency>
             <groupId>lib.PatPeter</groupId>
             <artifactId>SQLibrary</artifactId>
-            <version>4.0</version>
+            <version>4.1</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/SQLibrary.jar</systemPath>
         </dependency>

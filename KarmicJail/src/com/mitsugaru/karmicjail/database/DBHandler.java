@@ -250,9 +250,9 @@ public class DBHandler extends JailModule {
    public boolean checkConnection() {
       boolean connected = false;
       if(useMySQL) {
-         connected = mysql.checkConnection();
+         connected = mysql.isOpen();
       } else {
-         connected = sqlite.checkConnection();
+         connected = sqlite.isOpen();
       }
       return connected;
    }
