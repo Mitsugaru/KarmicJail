@@ -30,9 +30,9 @@ public class Update {
    public static void checkUpdate() {
       // Check if need to update
       ConfigurationSection config = plugin.getConfig();
-      if(Double.parseDouble(plugin.getDescription().getVersion()) > Double.parseDouble(config.getString("version"))) {
+      if(Double.parseDouble(plugin.getDescription().getVersion().replace("-SNAPSHOT", "")) > Double.parseDouble(config.getString("version").replace("-SNAPSHOT", ""))) {
          // Update to latest version
-         plugin.getLogger().info("Updating to v" + plugin.getDescription().getVersion());
+         plugin.getLogger().info("Updating to v" + plugin.getDescription().getVersion().replace("-SNAPSHOT", ""));
          update();
       }
    }
