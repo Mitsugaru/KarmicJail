@@ -45,7 +45,7 @@ public class Update {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
       // Grab current version
-      double ver = Double.parseDouble(plugin.getConfig().getString("version"));
+      double ver = Double.parseDouble(plugin.getConfig().getString("version").replace("-SNAPSHOT", ""));
       String query = "";
       // Update to 0.2
       if(ver < 0.2) {
