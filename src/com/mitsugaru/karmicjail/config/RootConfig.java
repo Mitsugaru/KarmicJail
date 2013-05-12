@@ -14,7 +14,7 @@ public class RootConfig extends JailModule {
    // Class variables
    public String host, port, database, user, password;
    public static String tablePrefix;
-   public boolean useMySQL, debugLog, debugEvents, debugTime, debugGroups, importSQL, unjailTeleport, jailTeleport, jailTeleportRespawn,
+   public boolean useMySQL, debugLog, debugEvents, debugTime, debugGroups, debugLogic, importSQL, unjailTeleport, jailTeleport, jailTeleportRespawn,
          removeGroups, returnGroups, broadcastJail, broadcastUnjail, broadcastReason, broadcastPerms, broadcastJoin, debugUnhandled, clearInventory,
          returnInventory, modifyInventory, timePerm, warpAllOnJoin, useJailGroup, useUnjailGroup, denyBlockPlace, denyBlockBreak, denyInteract,
          denyInventory, denyItemPickup, denyItemDrop, denyItemCraft, denyItemEnchant, denyChat, denyCommands, denyMove;
@@ -56,6 +56,7 @@ public class RootConfig extends JailModule {
       debugGroups = config.getBoolean("debug.groups", false);
       debugTime = config.getBoolean("debug.time", false);
       debugUnhandled = config.getBoolean("debug.unhandled", false);
+      debugLogic = config.getBoolean("debug.logic", false);
       limit = config.getInt("entrylimit", 10);
       jailTeleport = config.getBoolean("unjail.teleport", true);
       jailTeleportRespawn = config.getBoolean("jail.teleportRespawn", true);
@@ -161,6 +162,7 @@ public class RootConfig extends JailModule {
       defaults.put("debug.database", false);
       defaults.put("debug.events", false);
       defaults.put("debug.groups", false);
+      defaults.put("debug.logic", false);
       defaults.put("debug.time", false);
       defaults.put("debug.unhandled", false);
       defaults.put("version", plugin.getDescription().getVersion());

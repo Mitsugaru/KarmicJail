@@ -56,7 +56,11 @@ public class LoginJailTask implements Runnable {
             sb.append(" for " + ChatColor.GRAY + ChatColor.translateAlternateColorCodes('&', reason));
          }
          if(config.broadcastPerms) {
-            plugin.getServer().broadcast(sb.toString(), PermissionNode.BROADCAST.getNode());
+            for(Player online : plugin.getServer().getOnlinePlayers()) {
+               if(online.hasPermission(PermissionNode.BROADCAST.getNode())) {
+                  online.sendMessage(sb.toString());
+               }
+            }
          } else {
             plugin.getServer().broadcastMessage(sb.toString());
          }

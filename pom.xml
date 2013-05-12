@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <!-- Project properties. -->
     <artifactId>KarmicJail</artifactId>
-    <version>0.442-SNAPSHOT</version>
+    <version>0.443</version>
     <name>KarmicJail</name>
     <description>Jail plugin for Mine-RP</description>
     <!-- Parent POM -->
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>lib.PatPeter</groupId>
             <artifactId>SQLibrary</artifactId>
-            <version>4.1</version>
+            <version>4.2</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/SQLibrary.jar</systemPath>
         </dependency>

@@ -194,6 +194,9 @@ public class JailLogic extends JailModule {
             // Throw jail event
             plugin.getServer().getPluginManager().callEvent(new KarmicJailEvent(pi));
             // Broadcast if necessary
+            if(config.debugLogic) {
+               plugin.getLogger().info("Broadcast: " + config.broadcastJail);
+            }
             if(config.broadcastJail) {
                // Setup broadcast string
                sb = new StringBuilder();
@@ -205,11 +208,20 @@ public class JailLogic extends JailModule {
                if(pi.mute) {
                   sb.append(ChatColor.GRAY + " - " + ChatColor.DARK_RED + "MUTED");
                }
+               int receivers = 0;
                // Broadcast
                if(config.broadcastPerms) {
-                  plugin.getServer().broadcast(sb.toString(), "KarmicJail.broadcast");
+                  for(Player online : plugin.getServer().getOnlinePlayers()) {
+                     if(online.hasPermission(PermissionNode.BROADCAST.getNode())) {
+                        online.sendMessage(sb.toString());
+                        receivers++;
+                     }
+                  }
                } else {
-                  plugin.getServer().broadcastMessage(sb.toString());
+                  receivers = plugin.getServer().broadcastMessage(sb.toString());
+               }
+               if(config.debugLogic) {
+                  plugin.getLogger().info("Number of broadcast receivers: " + receivers);
                }
             }
          } catch(SQLException e) {
@@ -275,6 +287,27 @@ public class JailLogic extends JailModule {
       // Remove from cache
       PLAYER_CACHE.remove(name);
       plugin.getCommandHandlerForClass(Commander.class).getCache().remove(name);
+
+      // Broadcast
+      if(config.broadcastUnjail) {
+         StringBuilder sb = new StringBuilder();
+
+         sb.append(ChatColor.GOLD + sender.getName());
+         sb.append(ChatColor.AQUA + " has released ");
+         sb.append(ChatColor.WHITE + name);
+         sb.append(ChatColor.AQUA + " from jail.");
+
+         if(config.broadcastPerms) {
+            for(Player online : plugin.getServer().getOnlinePlayers()) {
+               if(online.hasPermission(PermissionNode.BROADCAST.getNode())) {
+                  online.sendMessage(sb.toString());
+               }
+            }
+         } else {
+            plugin.getServer().broadcastMessage(sb.toString());
+         }
+      }
+
       // Check if player is offline:
       if(player == null) {
          setPlayerStatus(JailStatus.PENDINGFREE, name);
@@ -624,7 +657,11 @@ public class JailLogic extends JailModule {
       if(config.broadcastReason) {
          final String out = ChatColor.AQUA + name + ChatColor.RED + " for " + ChatColor.GRAY + ChatColor.translateAlternateColorCodes('&', reason);
          if(config.broadcastPerms) {
-            plugin.getServer().broadcast(out, "KarmicJail.broadcast");
+            for(Player online : plugin.getServer().getOnlinePlayers()) {
+               if(online.hasPermission(PermissionNode.BROADCAST.getNode())) {
+                  online.sendMessage(out);
+               }
+            }
          } else {
             plugin.getServer().broadcastMessage(out);
          }
