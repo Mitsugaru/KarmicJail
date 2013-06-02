@@ -60,7 +60,7 @@ public class DBHandler extends JailModule {
         boolean valid = true;
         if(useMySQL) {
             // Connect to mysql database
-            mysql = new MySQL(plugin.getLogger(), KarmicJail.TAG, config.host,
+            mysql = new MySQL(plugin.getLogger(), "", config.host,
                     Integer.parseInt(config.port), config.database,
                     config.user, config.password);
             mysql.open();
@@ -111,7 +111,7 @@ public class DBHandler extends JailModule {
             }
         } else {
             // Connect to sql database
-            sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, plugin
+            sqlite = new SQLite(plugin.getLogger(), "", plugin
                     .getDataFolder().getAbsolutePath(), "jail");
             sqlite.open();
             // Check if jailed table exists
