@@ -143,7 +143,7 @@ public class PlayerListener implements Listener {
                logic.setPlayerLastLocation(name, event.getPlayer().getLocation());
             }
          }
-         if(event.getPlayer().getInventory() != null) {
+         if(event.getPlayer().getInventory() != null && !config.clearInventory && !logic.playerIsJailed(name)) {
             logic.setPlayerInventory(name, event.getPlayer().getInventory(), false);
          }
          // Remove from cache

@@ -309,7 +309,11 @@ public class JailLogic extends JailModule {
       }
 
       // Check if player is offline:
-      if(player == null) {
+      boolean pending = player == null;
+      if(player != null && !player.isOnline()) {
+          pending = true;
+      }
+      if(pending) {
          setPlayerStatus(JailStatus.PENDINGFREE, name);
          sender.sendMessage(ChatColor.GOLD + name + ChatColor.AQUA + " will be released from jail on login.");
          return;
@@ -346,7 +350,7 @@ public class JailLogic extends JailModule {
       }
       // Grab player if on server
       Player player = plugin.getServer().getPlayer(name);
-      if(player != null) {
+      if(player != null && player.isOnline()) {
          // Return items if any
          if(config.returnInventory) {
             Map<Integer, ItemStack> items = database.getPlayerItems(name);
