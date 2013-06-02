@@ -31,6 +31,7 @@ public class DotFourFourUpdate extends UpdateModule {
     public DotFourFourUpdate(KarmicJail plugin) {
         super(plugin);
         targetVersion = new Version("0.44");
+        targetVersion.setIgnorePatch(true);
     }
 
     @Override
