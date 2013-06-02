@@ -26,7 +26,7 @@ import com.mitsugaru.karmicjail.permissions.PermCheck;
 import com.mitsugaru.karmicjail.services.CommandHandler;
 import com.mitsugaru.karmicjail.services.JailModule;
 import com.mitsugaru.karmicjail.tasks.JailTask;
-import com.mitsugaru.karmicjail.update.Update;
+import com.mitsugaru.karmicjail.update.UpdateManager;
 
 public class KarmicJail extends JavaPlugin {
    /**
@@ -66,8 +66,8 @@ public class KarmicJail extends JavaPlugin {
       registerModule(PermCheck.class, new PermCheck(this));
 
       // Check if any updates are necessary
-      Update.init(this);
-      Update.checkUpdate();
+      UpdateManager update = new UpdateManager(this);
+      update.checkUpdate();
 
       // Generate commanders.
       Commander commander = new Commander(this);
