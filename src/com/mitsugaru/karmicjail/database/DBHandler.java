@@ -170,8 +170,8 @@ public class DBHandler extends JailModule {
         PreparedStatement statement = null;
         try {
             // Grab local SQLite database
-            sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG, "jail",
-                    plugin.getDataFolder().getAbsolutePath());
+            sqlite = new SQLite(plugin.getLogger(), KarmicJail.TAG,
+                    plugin.getDataFolder().getAbsolutePath(), "jail");
             // Copy items
             rs = sqlite.query("SELECT * FROM " + Table.JAILED.getName() + ";");
             if(rs.next()) {
