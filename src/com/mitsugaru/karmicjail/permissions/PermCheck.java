@@ -146,7 +146,11 @@ public class PermCheck extends JailModule {
                             "Removed group '" + group + "' of '" + w
                                     + "' from '" + name + "'");
                 }
-            } else {
+            } else if(pluginName.equals("DroxPerms") && group.equals("default")) {
+                //Skip removing default group
+                return;
+            }
+            else {
                 final boolean check = perm.playerRemoveGroup(w, name, group);
                 if(!check) {
                     plugin.getLogger().warning(
