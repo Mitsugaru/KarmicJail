@@ -6,7 +6,8 @@ import org.bukkit.entity.Player;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.jail.JailLogic;
-import com.mitsugaru.karmicjail.permissions.PermissionNode;
+import com.mitsugaru.karmicjail.modules.TaskModule;
+import com.mitsugaru.karmicjail.services.PermissionNode;
 
 public class LoginJailTask implements Runnable {
    private KarmicJail plugin;
@@ -22,6 +23,7 @@ public class LoginJailTask implements Runnable {
    public void run() {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       JailLogic logic = plugin.getModuleForClass(JailLogic.class);
+      TaskModule tasker = plugin.getModuleForClass(TaskModule.class);
       // Get name
       final String playerName = player.getName();
       // Add to cache
@@ -31,7 +33,7 @@ public class LoginJailTask implements Runnable {
          if(time > 0) {
             final int minutes = (int) ((time / minutesToTicks));
             player.sendMessage(ChatColor.RED + KarmicJail.TAG + ChatColor.AQUA + " You are jailed for " + plugin.prettifyMinutes(minutes) + ".");
-            plugin.addThread(playerName, time);
+            tasker.addTask(playerName, time);
             if(config.debugLog && config.debugEvents) {
                plugin.getLogger().info("Jailed '" + player.getName() + "' on login with time: " + plugin.prettifyMinutes(minutes));
             }

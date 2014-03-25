@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail.permissions;
+package com.mitsugaru.karmicjail.services;
 
 /**
  * Represents all possible permission nodes for the plugin.

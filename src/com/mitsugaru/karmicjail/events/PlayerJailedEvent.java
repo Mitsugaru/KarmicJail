@@ -8,7 +8,7 @@ import com.mitsugaru.karmicjail.jail.PrisonerInfo;
 /**
  * Event called when player is jailed.
  */
-public class KarmicJailEvent extends Event {
+public class PlayerJailedEvent extends Event {
    /**
     * Handler list.
     */
@@ -40,7 +40,7 @@ public class KarmicJailEvent extends Event {
     * @param pi
     *           - PrisonerInfo.
     */
-   public KarmicJailEvent(PrisonerInfo pi) {
+   public PlayerJailedEvent(PrisonerInfo pi) {
       super();
       name = pi.name;
       date = pi.date;

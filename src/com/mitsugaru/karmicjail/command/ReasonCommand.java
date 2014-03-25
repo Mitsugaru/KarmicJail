@@ -6,9 +6,9 @@ import org.bukkit.command.CommandSender;
 
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailLogic;
-import com.mitsugaru.karmicjail.permissions.PermCheck;
-import com.mitsugaru.karmicjail.permissions.PermissionNode;
+import com.mitsugaru.karmicjail.modules.PermCheck;
 import com.mitsugaru.karmicjail.services.JailCommand;
+import com.mitsugaru.karmicjail.services.PermissionNode;
 
 public class ReasonCommand implements JailCommand {
 

@@ -10,11 +10,12 @@ package com.mitsugaru.karmicjail.listener;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.jail.JailStatus;
+import com.mitsugaru.karmicjail.modules.PermCheck;
+import com.mitsugaru.karmicjail.modules.TaskModule;
 import com.mitsugaru.karmicjail.command.Commander;
 import com.mitsugaru.karmicjail.command.history.HistoryCommander;
 import com.mitsugaru.karmicjail.config.RootConfig;
-import com.mitsugaru.karmicjail.permissions.PermCheck;
-import com.mitsugaru.karmicjail.permissions.PermissionNode;
+import com.mitsugaru.karmicjail.services.PermissionNode;
 import com.mitsugaru.karmicjail.tasks.LoginJailTask;
 import com.mitsugaru.karmicjail.tasks.LoginReturnItemsTask;
 import com.mitsugaru.karmicjail.tasks.LoginWarpTask;
@@ -131,6 +132,7 @@ public class PlayerListener implements Listener {
    public void onPlayerQuit(final PlayerQuitEvent event) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       JailLogic logic = plugin.getModuleForClass(JailLogic.class);
+      TaskModule tasker = plugin.getModuleForClass(TaskModule.class);
       Commander commander = plugin.getCommandHandlerForClass(Commander.class);
       if(config.debugLog && config.debugEvents) {
          plugin.getLogger().info("Quit Event for: " + event.getPlayer().getName());
@@ -157,7 +159,7 @@ public class PlayerListener implements Listener {
       commander.getInventoryHolders().remove(event.getPlayer().getName());
       // Remove history viewer
       plugin.getCommandHandlerForClass(HistoryCommander.class).getCache().remove(event.getPlayer().getName());
-      plugin.stopTask(event.getPlayer().getName());
+      tasker.stopTask(event.getPlayer().getName());
    }
 
 }

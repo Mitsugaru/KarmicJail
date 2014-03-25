@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail.update;
+package com.mitsugaru.karmicjail.modules;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -6,7 +6,12 @@ import java.util.TreeSet;
 import org.bukkit.configuration.ConfigurationSection;
 
 import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.services.Version;
+import com.mitsugaru.karmicjail.interfaces.IUpdateModule;
+import com.mitsugaru.karmicjail.services.AbstractModule;
+import com.mitsugaru.karmicjail.services.Order;
+import com.mitsugaru.karmicjail.services.Service;
+import com.mitsugaru.karmicjail.services.UpdateSubmodule;
+import com.mitsugaru.karmicjail.services.version.Version;
 import com.mitsugaru.karmicjail.update.modules.DotFourFourUpdate;
 import com.mitsugaru.karmicjail.update.modules.DotFourThreeUpdate;
 import com.mitsugaru.karmicjail.update.modules.DotFourUpdate;
@@ -18,17 +23,13 @@ import com.mitsugaru.karmicjail.update.modules.DotTwoUpdate;
  * 
  * @author Mitsugaru
  */
-public class UpdateManager {
-
-    /**
-     * Plugin instance.
-     */
-    private KarmicJail plugin;
+@Service(order = Order.HIGHEST)
+public class UpdateModule extends AbstractModule implements IUpdateModule {
 
     /**
      * Update modules.
      */
-    private final SortedSet<UpdateModule> modules = new TreeSet<UpdateModule>();
+    private final SortedSet<UpdateSubmodule> modules = new TreeSet<UpdateSubmodule>();
 
     /**
      * Constructor.
@@ -36,8 +37,8 @@ public class UpdateManager {
      * @param plugin
      *            - Plugin instance.
      */
-    public UpdateManager(KarmicJail plugin) {
-        this.plugin = plugin;
+    public UpdateModule(KarmicJail plugin) {
+        super(plugin);
 
         modules.add(new DotTwoUpdate(plugin));
         modules.add(new DotThreeUpdate(plugin));
@@ -45,11 +46,9 @@ public class UpdateManager {
         modules.add(new DotFourThreeUpdate(plugin));
         modules.add(new DotFourFourUpdate(plugin));
     }
-
-    /**
-     * Check if updates are necessary
-     */
-    public void checkUpdate() {
+    
+    @Override
+    public void doUpdates() {
         // Check if need to update
         ConfigurationSection config = plugin.getConfig();
         Version version = new Version(plugin.getDescription().getVersion());
@@ -76,7 +75,7 @@ public class UpdateManager {
      */
     private void update(Version current) {
         // Iterate over modules.
-        for(UpdateModule module : modules) {
+        for(UpdateSubmodule module : modules) {
             if(module.shouldApplyUpdate(current)) {
                 module.update();
             }
@@ -85,5 +84,14 @@ public class UpdateManager {
         // Update version number in config.yml
         plugin.getConfig().set("version", plugin.getDescription().getVersion());
         plugin.saveConfig();
+    }
+
+    @Override
+    public void starting() {
+        doUpdates();
+    }
+
+    @Override
+    public void closing() {
     }
 }

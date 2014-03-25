@@ -2,13 +2,14 @@ package com.mitsugaru.karmicjail.tasks;
 
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailLogic;
+import com.mitsugaru.karmicjail.modules.TaskModule;
 
 public class JailTask implements Runnable {
-   private KarmicJail plugin;
-   private long start;
-   private long duration;
-   private String name;
-   private int id;
+   protected KarmicJail plugin;
+   protected long start;
+   protected long duration;
+   protected String name;
+   protected int id;
 
    public JailTask() {
       duration = 0;
@@ -42,7 +43,7 @@ public class JailTask implements Runnable {
          final long early = System.nanoTime() - start;
          duration -= (long) (Math.floor((early * 0.000000001) + 0.5f) * 20);
          plugin.getModuleForClass(JailLogic.class).updatePlayerTime(name, duration);
-         KarmicJail.removeTask(name);
+         plugin.getModuleForClass(TaskModule.class).removeTask(name);
          return true;
       }
       return false;

@@ -2,15 +2,15 @@ package com.mitsugaru.karmicjail.update.modules;
 
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.config.RootConfig;
-import com.mitsugaru.karmicjail.services.Version;
-import com.mitsugaru.karmicjail.update.UpdateModule;
+import com.mitsugaru.karmicjail.services.UpdateSubmodule;
+import com.mitsugaru.karmicjail.services.version.Version;
 
 /**
  * Handles the 0.43 update.
  * 
  * @author Mitsugaru
  */
-public class DotFourThreeUpdate extends UpdateModule {
+public class DotFourThreeUpdate extends UpdateSubmodule {
 
     /**
      * Constructor.

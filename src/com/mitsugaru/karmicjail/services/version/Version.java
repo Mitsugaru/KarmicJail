@@ -1,4 +1,4 @@
-package com.mitsugaru.karmicjail.services;
+package com.mitsugaru.karmicjail.services.version;
 
 import org.apache.commons.lang.StringUtils;
 

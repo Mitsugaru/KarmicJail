@@ -12,8 +12,8 @@ import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.database.Table;
 import com.mitsugaru.karmicjail.jail.JailStatus;
-import com.mitsugaru.karmicjail.services.Version;
-import com.mitsugaru.karmicjail.update.UpdateModule;
+import com.mitsugaru.karmicjail.services.UpdateSubmodule;
+import com.mitsugaru.karmicjail.services.version.Version;
 import com.mitsugaru.karmicjail.update.holders.PointThreeObject;
 
 /**
@@ -21,7 +21,7 @@ import com.mitsugaru.karmicjail.update.holders.PointThreeObject;
  * 
  * @author Mitsugaru
  */
-public class DotFourUpdate extends UpdateModule {
+public class DotFourUpdate extends UpdateSubmodule {
 
     /**
      * Constructor.

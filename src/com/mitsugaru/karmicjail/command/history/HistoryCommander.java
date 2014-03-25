@@ -113,7 +113,7 @@ public class HistoryCommander extends CommandHandler {
                + config.limit; i++) {
             // Don't try to pull something beyond the bounds
             if(i < array.length) {
-
+                //TODO something with color codes is making weird symbols on transition?
                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', array[i]));
             } else {
                break;

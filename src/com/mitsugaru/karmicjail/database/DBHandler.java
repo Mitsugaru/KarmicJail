@@ -19,10 +19,10 @@ import org.bukkit.inventory.ItemStack;
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.jail.JailStatus;
-import com.mitsugaru.karmicjail.services.JailModule;
+import com.mitsugaru.karmicjail.services.AbstractModule;
 import com.mitsugaru.karmicjail.config.RootConfig;
 
-public class DBHandler extends JailModule {
+public class DBHandler extends AbstractModule {
     // Class Variables
     private SQLite sqlite;
     private MySQL mysql;
@@ -810,10 +810,6 @@ public class DBHandler extends JailModule {
             }
         }
         return items;
-    }
-
-    public boolean setItem(String playername, int slot, ItemStack item) {
-        return setItem(playername, slot, item, item.getAmount());
     }
 
     public boolean setItem(String playername, int slot, ItemStack item,

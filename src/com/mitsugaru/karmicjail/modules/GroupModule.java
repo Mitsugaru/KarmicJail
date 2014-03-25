@@ -1,73 +1,79 @@
-package com.mitsugaru.karmicjail.permissions;
+package com.mitsugaru.karmicjail.modules;
 
 import net.milkbowl.vault.permission.Permission;
 
 import org.anjocaido.groupmanager.GroupManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.RegisteredServiceProvider;
-
-import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.config.RootConfig;
-import com.mitsugaru.karmicjail.jail.JailLogic;
-import com.mitsugaru.karmicjail.services.JailModule;
 
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionManager;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
-/**
- * Class to handle permission node checks. Mostly only to support PEX natively,
- * due to SuperPerm compatibility with PEX issues.
- */
-public class PermCheck extends JailModule {
+import com.mitsugaru.karmicjail.KarmicJail;
+import com.mitsugaru.karmicjail.config.RootConfig;
+import com.mitsugaru.karmicjail.interfaces.IGroupModule;
+import com.mitsugaru.karmicjail.services.AbstractModule;
+import com.mitsugaru.karmicjail.services.Service;
+
+@Service
+public class GroupModule extends AbstractModule implements IGroupModule {
+    /**
+     * Permission reference.
+     */
     private Permission perm;
+    /**
+     * Whether we have Vault or not... although, not really necessary anymore
+     * since its still a hard dependency.
+     */
     private boolean hasVault;
+    /**
+     * Permission plugin name
+     */
     private String pluginName;
 
     /**
-     * Constructor
+     * Constructor.
+     * @param plugin - Plugin reference.
      */
-    public PermCheck(KarmicJail kj) {
-        super(kj);
+    public GroupModule(KarmicJail plugin) {
+        super(plugin);
     }
 
-    public boolean has(CommandSender sender, PermissionNode permission) {
-        return has(sender, permission.getNode());
+    @Override
+    public void starting() {
+        if(plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
+            hasVault = true;
+            RegisteredServiceProvider<Permission> permissionProvider = plugin
+                    .getServer()
+                    .getServicesManager()
+                    .getRegistration(
+                            net.milkbowl.vault.permission.Permission.class);
+            if(permissionProvider != null) {
+                perm = permissionProvider.getProvider();
+                pluginName = perm.getName();
+            }
+        } else {
+            hasVault = false;
+        }
     }
 
-    public boolean has(String name, PermissionNode permission) {
-        JailLogic logic = plugin.getModuleForClass(JailLogic.class);
-        if(hasVault) {
-            return perm.has(logic.getJailLocation().getWorld(), name,
-                    permission.getNode());
-        }
-        return false;
+    @Override
+    public void closing() {
     }
 
-    /**
-     * 
-     * @param CommandSender
-     *            that sent command
-     * @param PermissionNode
-     *            node to check, as String
-     * @return true if sender has the node, else false
-     */
-    public boolean has(CommandSender sender, String node) {
-        // Use vault if we have it
-        if(hasVault) {
-            return perm.has(sender, node);
-        }
-        // If not using PEX / Vault, OR if sender is not a player (in PEX only
-        // case)
-        // Attempt to use SuperPerms or check if they're op
-        if(sender.isOp() || sender.hasPermission(node)) {
-            return true;
-        }
-        // Else, they don't have permission
-        return false;
+    @Override
+    public boolean removeGroups(String playerName) {
+        throw new UnsupportedOperationException(
+                "No default implementation for removeGroups()");
+    }
+
+    @Override
+    public boolean restoreGroups(String playerName) {
+        throw new UnsupportedOperationException(
+                "No default implementation for restore()");
     }
 
     public String getDefaultGroup() {
@@ -212,29 +218,4 @@ public class PermCheck extends JailModule {
         return perm.getName();
     }
 
-    @Override
-    public void starting() {
-        RootConfig config = plugin.getModuleForClass(RootConfig.class);
-        if(plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
-            hasVault = true;
-            RegisteredServiceProvider<Permission> permissionProvider = plugin
-                    .getServer()
-                    .getServicesManager()
-                    .getRegistration(
-                            net.milkbowl.vault.permission.Permission.class);
-            if(permissionProvider != null) {
-                perm = permissionProvider.getProvider();
-                pluginName = perm.getName();
-                if(config.debugGroups) {
-                    plugin.getLogger().info("Using permissions: " + pluginName);
-                }
-            }
-        } else {
-            hasVault = false;
-        }
-    }
-
-    @Override
-    public void closing() {
-    }
 }

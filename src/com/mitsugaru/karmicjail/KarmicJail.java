@@ -8,7 +8,10 @@
 
 package com.mitsugaru.karmicjail;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.plugin.PluginManager;
@@ -22,11 +25,13 @@ import com.mitsugaru.karmicjail.jail.JailLogic;
 import com.mitsugaru.karmicjail.listener.JailedInventoryListener;
 import com.mitsugaru.karmicjail.listener.JailedPlayerListener;
 import com.mitsugaru.karmicjail.listener.PlayerListener;
-import com.mitsugaru.karmicjail.permissions.PermCheck;
+import com.mitsugaru.karmicjail.modules.PermCheck;
+import com.mitsugaru.karmicjail.modules.TaskModule;
+import com.mitsugaru.karmicjail.modules.UpdateModule;
+import com.mitsugaru.karmicjail.modules.UtilityModule;
 import com.mitsugaru.karmicjail.services.CommandHandler;
-import com.mitsugaru.karmicjail.services.JailModule;
-import com.mitsugaru.karmicjail.tasks.JailTask;
-import com.mitsugaru.karmicjail.update.UpdateManager;
+import com.mitsugaru.karmicjail.services.Module;
+import com.mitsugaru.karmicjail.services.ServiceComparator;
 
 public class KarmicJail extends JavaPlugin {
    /**
@@ -37,21 +42,22 @@ public class KarmicJail extends JavaPlugin {
     * Minutes to ticks ratio.
     */
    public static final long minutesToTicks = 1200;
-   private static final Map<String, JailTask> threads = new HashMap<String, JailTask>();
    /**
     * Modules.
     */
-   private final Map<Class<? extends JailModule>, JailModule> modules = new HashMap<Class<? extends JailModule>, JailModule>();
+   private final Map<Class<? extends Module>, Module> modules = new HashMap<Class<? extends Module>, Module>();
 
    private final Map<Class<? extends CommandHandler>, CommandHandler> handlers = new HashMap<Class<? extends CommandHandler>, CommandHandler>();
 
    @Override
    public void onDisable() {
-      // Stop all running threads
-      getLogger().info("Stopping all jail threads...");
-      for(JailTask task : threads.values()) {
-         task.stop();
-      }
+    // Deregister all modules.
+       List<Class<? extends Module>> clazzez = new ArrayList<Class<? extends Module>>();
+       clazzez.addAll(modules.keySet());
+       Collections.sort(clazzez, new ServiceComparator<Object>());
+       for(Class<? extends Module> clazz : clazzez) {
+           this.deregisterModuleForClass(clazz);
+       }
    }
 
    @Override
@@ -60,18 +66,27 @@ public class KarmicJail extends JavaPlugin {
       registerModule(RootConfig.class, new RootConfig(this));
       // Register database
       registerModule(DBHandler.class, new DBHandler(this));
+      // Register tasker
+      registerModule(TaskModule.class, new TaskModule(this));
+      // Register utility
+      registerModule(UtilityModule.class, new UtilityModule(this));
       // Initialize logic
       registerModule(JailLogic.class, new JailLogic(this));
       // Register permissions
       registerModule(PermCheck.class, new PermCheck(this));
 
       // Check if any updates are necessary
-      UpdateManager update = new UpdateManager(this);
-      update.checkUpdate();
+      registerModule(UpdateModule.class, new UpdateModule(this));
 
       // Generate commanders.
       Commander commander = new Commander(this);
       getCommand("kj").setExecutor(commander);
+      if(getDescription().getCommands().containsKey("jail")) {
+          //TODO add in jail shortcut command
+      }
+      if(getDescription().getCommands().containsKey("unjail")) {
+          //TODO add in unjail shortcut command
+      }
       HistoryCommander history = new HistoryCommander(this);
       commander.registerHandler(history);
       // Register commanders.
@@ -140,60 +155,6 @@ public class KarmicJail extends JavaPlugin {
    }
 
    /**
-    * Creates a new thread for a player to get auto-released
-    * 
-    * @param name
-    *           of player
-    */
-   public void addThread(String name, long time) {
-      threads.put(name, new JailTask(this, name, time));
-   }
-
-   /**
-    * Removes a task
-    * 
-    * @param name
-    */
-   public static void removeTask(String name) {
-      threads.remove(name);
-   }
-
-   /**
-    * Stops a player's timed task
-    * 
-    * @param name
-    *           of player
-    * @return true if the player's task was stopped. If unsucessful or if player
-    *         did not have a timed task, then it returns false.
-    */
-   public boolean stopTask(String name) {
-      RootConfig config = getModuleForClass(RootConfig.class);
-      if(threads.containsKey(name)) {
-         if(config.debugLog && config.debugEvents) {
-            this.getLogger().info("Thread found for: " + name);
-         }
-         final boolean stop = threads.get(name).stop();
-         if(config.debugLog && config.debugEvents) {
-            if(stop) {
-               this.getLogger().info("Thread stopped for: " + name);
-            } else {
-               this.getLogger().warning("Thread NOT stopped for: " + name);
-            }
-         }
-         return stop;
-      } else {
-         if(config.debugLog && config.debugEvents) {
-            this.getLogger().warning("Thread NOT found for: " + name);
-         }
-      }
-      return false;
-   }
-
-   public static Map<String, JailTask> getJailThreads() {
-      return threads;
-   }
-
-   /**
     * Register a CCModule to the API.
     * 
     * @param clazz
@@ -203,7 +164,7 @@ public class KarmicJail extends JavaPlugin {
     * @throws IllegalArgumentException
     *            - Thrown if an argument is null.
     */
-   public <T extends JailModule> void registerModule(Class<T> clazz, T module) {
+   public <T extends Module> void registerModule(Class<T> clazz, T module) {
       // Check arguments.
       if(clazz == null) {
          throw new IllegalArgumentException("Class cannot be null");
@@ -224,7 +185,7 @@ public class KarmicJail extends JavaPlugin {
     * @return Module that was removed from the API. Returns null if no instance
     *         of the module is registered with the API.
     */
-   public <T extends JailModule> T deregisterModuleForClass(Class<T> clazz) {
+   public <T extends Module> T deregisterModuleForClass(Class<T> clazz) {
       // Check arguments.
       if(clazz == null) {
          throw new IllegalArgumentException("Class cannot be null");
@@ -245,7 +206,7 @@ public class KarmicJail extends JavaPlugin {
     * @return CCModule instance. Returns null is an instance of the given class
     *         has not been registered with the API.
     */
-   public <T extends JailModule> T getModuleForClass(Class<T> clazz) {
+   public <T extends Module> T getModuleForClass(Class<T> clazz) {
       return clazz.cast(modules.get(clazz));
    }
 

@@ -1,7 +1,7 @@
-package com.mitsugaru.karmicjail.update;
+package com.mitsugaru.karmicjail.services;
 
 import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.services.Version;
+import com.mitsugaru.karmicjail.services.version.Version;
 
 /**
  * Represents an update that requires changes to data structures or
@@ -9,7 +9,7 @@ import com.mitsugaru.karmicjail.services.Version;
  * 
  * @author Mitsugaru
  */
-public abstract class UpdateModule implements Comparable<UpdateModule> {
+public abstract class UpdateSubmodule implements Comparable<UpdateSubmodule> {
 
     /**
      * Plugin reference
@@ -27,7 +27,7 @@ public abstract class UpdateModule implements Comparable<UpdateModule> {
      * @param plugin
      *            - Plugin reference
      */
-    public UpdateModule(final KarmicJail plugin) {
+    public UpdateSubmodule(final KarmicJail plugin) {
         this.plugin = plugin;
     }
 
@@ -53,7 +53,7 @@ public abstract class UpdateModule implements Comparable<UpdateModule> {
     }
 
     @Override
-    public int compareTo(UpdateModule o) {
+    public int compareTo(UpdateSubmodule o) {
         return this.targetVersion.compareTo(o.getTargetVersion());
     }
 

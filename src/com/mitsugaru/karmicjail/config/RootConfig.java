@@ -8,9 +8,9 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
 import com.mitsugaru.karmicjail.KarmicJail;
-import com.mitsugaru.karmicjail.services.JailModule;
+import com.mitsugaru.karmicjail.services.AbstractModule;
 
-public class RootConfig extends JailModule {
+public class RootConfig extends AbstractModule {
    // Class variables
    public String host, port, database, user, password;
    public static String tablePrefix;

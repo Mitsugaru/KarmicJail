@@ -13,8 +13,8 @@ import com.mitsugaru.karmicjail.command.Commander;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
-import com.mitsugaru.karmicjail.permissions.PermCheck;
-import com.mitsugaru.karmicjail.permissions.PermissionNode;
+import com.mitsugaru.karmicjail.modules.PermCheck;
+import com.mitsugaru.karmicjail.services.PermissionNode;
 
 public class JailedInventoryListener implements Listener {
    private KarmicJail plugin;
@@ -114,14 +114,14 @@ public class JailedInventoryListener implements Listener {
                                   * take item
                                   */
                                  database.removeItem(target, rawSlot);
-                                 database.setItem(target, rawSlot, event.getCursor());
+                                 database.setItem(target, rawSlot, event.getCursor(), event.getCursor().getAmount());
                               }
                            } else if(!event.getCurrentItem().getType().equals(Material.AIR)) {
                               // Attempting to take item
                               database.removeItem(target, rawSlot);
                            } else if(!event.getCursor().getType().equals(Material.AIR)) {
                               // putting item into empty slot in chest
-                              database.setItem(target, rawSlot, event.getCursor());
+                              database.setItem(target, rawSlot, event.getCursor(), event.getCursor().getAmount());
                            }
                         }
                      } else if(event.isRightClick()) {
@@ -151,7 +151,7 @@ public class JailedInventoryListener implements Listener {
                                   * take item
                                   */
                                  database.removeItem(target, rawSlot);
-                                 database.setItem(target, rawSlot, event.getCursor());
+                                 database.setItem(target, rawSlot, event.getCursor(), event.getCursor().getAmount());
                               }
                            } else if(!event.getCurrentItem().getType().equals(Material.AIR)) {
                               /*

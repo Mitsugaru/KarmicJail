@@ -6,15 +6,15 @@ import java.util.logging.Level;
 
 import com.mitsugaru.karmicjail.KarmicJail;
 import com.mitsugaru.karmicjail.database.DBHandler;
-import com.mitsugaru.karmicjail.services.Version;
-import com.mitsugaru.karmicjail.update.UpdateModule;
+import com.mitsugaru.karmicjail.services.UpdateSubmodule;
+import com.mitsugaru.karmicjail.services.version.Version;
 
 /**
  * Handles the 0.2 update.
  * 
  * @author Mitsugaru
  */
-public class DotTwoUpdate extends UpdateModule {
+public class DotTwoUpdate extends UpdateSubmodule {
 
     /**
      * Constructor.

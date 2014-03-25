@@ -16,12 +16,13 @@ import com.mitsugaru.karmicjail.database.DBHandler;
 import com.mitsugaru.karmicjail.database.Table;
 import com.mitsugaru.karmicjail.jail.JailStatus;
 import com.mitsugaru.karmicjail.jail.PrisonerInfo;
+import com.mitsugaru.karmicjail.modules.PermCheck;
+import com.mitsugaru.karmicjail.modules.TaskModule;
 import com.mitsugaru.karmicjail.config.RootConfig;
 import com.mitsugaru.karmicjail.inventory.JailInventoryHolder;
-import com.mitsugaru.karmicjail.permissions.PermCheck;
-import com.mitsugaru.karmicjail.permissions.PermissionNode;
 import com.mitsugaru.karmicjail.services.CommandHandler;
 import com.mitsugaru.karmicjail.services.JailCommand;
+import com.mitsugaru.karmicjail.services.PermissionNode;
 
 public class Commander extends CommandHandler {
    private final Map<String, Integer> page = new HashMap<String, Integer>();
@@ -129,6 +130,7 @@ public class Commander extends CommandHandler {
    public void listJailed(CommandSender sender, int pageAdjust) {
       RootConfig config = plugin.getModuleForClass(RootConfig.class);
       DBHandler database = plugin.getModuleForClass(DBHandler.class);
+      TaskModule tasker = plugin.getModuleForClass(TaskModule.class);
       // Update cache of jailed players
       ResultSet rs = null;
       try {
@@ -164,8 +166,8 @@ public class Commander extends CommandHandler {
                }
                cache.put(name, new PrisonerInfo(name, jailer, date, reason, time, muted));
                // Update the time if necessary
-               if(KarmicJail.getJailThreads().containsKey(name)) {
-                  cache.get(name).updateTime(KarmicJail.getJailThreads().get(name).remainingTime());
+               if(tasker.getJailTasks().containsKey(name)) {
+                  cache.get(name).updateTime(tasker.getJailTasks().get(name).remainingTime());
                }
             } while(rs.next());
          }
